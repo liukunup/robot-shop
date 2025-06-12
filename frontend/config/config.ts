@@ -160,6 +160,11 @@ export default defineConfig({
       schemaPath: 'https://gw.alipayobjects.com/os/antfincdn/CA1dOm%2631B/openapi.json',
       projectName: 'swagger',
     },
+    {
+      requestLibPath: "import { request } from '@umijs/max'",
+      schemaPath: 'http://127.0.0.1:8000/swagger/doc.json',
+      projectName: 'robot-shop',
+    },
   ],
   /**
    * @name 是否开启 mako
