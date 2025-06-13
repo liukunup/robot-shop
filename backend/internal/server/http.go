@@ -19,6 +19,7 @@ func NewHTTPServer(
 	conf *viper.Viper,
 	jwt *jwt.JWT,
 	userHandler *handler.UserHandler,
+	robotHandler *handler.RobotHandler,
 ) *http.Server {
 	gin.SetMode(gin.DebugMode)
 	s := http.NewServer(
@@ -68,6 +69,13 @@ func NewHTTPServer(
 		strictAuthRouter := v1.Group("/").Use(middleware.StrictAuth(jwt, logger))
 		{
 			strictAuthRouter.PUT("/user", userHandler.UpdateProfile)
+
+			// robot
+			strictAuthRouter.GET("/robot/:id", robotHandler.GetRobot)
+			strictAuthRouter.POST("/robot", robotHandler.CreateRobot)
+			strictAuthRouter.PUT("/robot/:id", robotHandler.UpdateRobot)
+			strictAuthRouter.DELETE("/robot/:id", robotHandler.DeleteRobot)
+			strictAuthRouter.GET("/robot", robotHandler.ListRobots)
 		}
 	}
 
