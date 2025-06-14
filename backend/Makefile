@@ -3,6 +3,7 @@ init:
 	go install github.com/google/wire/cmd/wire@latest
 	go install github.com/golang/mock/mockgen@latest
 	go install github.com/swaggo/swag/cmd/swag@latest
+	go install github.com/go-delve/delve/cmd/dlv@latest
 
 .PHONY: bootstrap
 bootstrap:
@@ -32,4 +33,4 @@ docker:
 
 .PHONY: swag
 swag:
-	swag init  -g cmd/server/main.go -o ./docs --parseDependency
+	swag init -g cmd/server/main.go -o docs --parseDependency

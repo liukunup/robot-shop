@@ -43,7 +43,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.LoginRequest"
+                            "$ref": "#/definitions/backend_api_v1.LoginRequest"
                         }
                     }
                 ],
@@ -51,7 +51,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.LoginResponse"
+                            "$ref": "#/definitions/backend_api_v1.LoginResponse"
                         }
                     }
                 }
@@ -77,7 +77,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.RegisterRequest"
+                            "$ref": "#/definitions/backend_api_v1.RegisterRequest"
                         }
                     }
                 ],
@@ -85,7 +85,197 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.Response"
+                            "$ref": "#/definitions/backend_api_v1.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/robot": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "机器人模块"
+                ],
+                "summary": "获取机器人列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.PageResponse-backend_api_v1_RobotResponseData"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "机器人模块"
+                ],
+                "summary": "创建机器人",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.RobotRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.RobotResponseData"
+                        }
+                    }
+                }
+            }
+        },
+        "/robot/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "机器人模块"
+                ],
+                "summary": "获取机器人",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "机器人ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.RobotResponseData"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "机器人模块"
+                ],
+                "summary": "更新机器人",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "机器人ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "params",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.RobotRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.RobotResponseData"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "机器人模块"
+                ],
+                "summary": "删除机器人",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "机器人ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.Response"
                         }
                     }
                 }
@@ -112,7 +302,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.GetProfileResponse"
+                            "$ref": "#/definitions/backend_api_v1.GetProfileResponse"
                         }
                     }
                 }
@@ -140,7 +330,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.UpdateProfileRequest"
+                            "$ref": "#/definitions/backend_api_v1.UpdateProfileRequest"
                         }
                     }
                 ],
@@ -148,7 +338,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.Response"
+                            "$ref": "#/definitions/backend_api_v1.Response"
                         }
                     }
                 }
@@ -156,21 +346,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "github_com_go-nunu_nunu-layout-advanced_api_v1.GetProfileResponse": {
+        "backend_api_v1.GetProfileResponse": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.GetProfileResponseData"
+                    "$ref": "#/definitions/backend_api_v1.GetProfileResponseData"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "github_com_go-nunu_nunu-layout-advanced_api_v1.GetProfileResponseData": {
+        "backend_api_v1.GetProfileResponseData": {
             "type": "object",
             "properties": {
                 "nickname": {
@@ -182,7 +372,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_go-nunu_nunu-layout-advanced_api_v1.LoginRequest": {
+        "backend_api_v1.LoginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -199,21 +389,21 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_go-nunu_nunu-layout-advanced_api_v1.LoginResponse": {
+        "backend_api_v1.LoginResponse": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.LoginResponseData"
+                    "$ref": "#/definitions/backend_api_v1.LoginResponseData"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "github_com_go-nunu_nunu-layout-advanced_api_v1.LoginResponseData": {
+        "backend_api_v1.LoginResponseData": {
             "type": "object",
             "properties": {
                 "accessToken": {
@@ -221,7 +411,21 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_go-nunu_nunu-layout-advanced_api_v1.RegisterRequest": {
+        "backend_api_v1.PageResponse-backend_api_v1_RobotResponseData": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_api_v1.RobotResponseData"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "backend_api_v1.RegisterRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -238,7 +442,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_go-nunu_nunu-layout-advanced_api_v1.Response": {
+        "backend_api_v1.Response": {
             "type": "object",
             "properties": {
                 "code": {
@@ -250,7 +454,85 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_go-nunu_nunu-layout-advanced_api_v1.UpdateProfileRequest": {
+        "backend_api_v1.RobotRequest": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "callback": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "webhook": {
+                    "type": "string"
+                }
+            }
+        },
+        "backend_api_v1.RobotResponseData": {
+            "type": "object",
+            "properties": {
+                "callback": {
+                    "type": "string",
+                    "example": "https://callback.example.com"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
+                },
+                "desc": {
+                    "type": "string",
+                    "example": "it's a robot"
+                },
+                "enabled": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "bot"
+                },
+                "options": {
+                    "type": "string",
+                    "example": "{\"key\": \"value\"}"
+                },
+                "owner": {
+                    "type": "string",
+                    "example": "Billy"
+                },
+                "robot_id": {
+                    "type": "string",
+                    "example": "454e7080-d105-4515-9c25-3e6fd9df176c"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
+                },
+                "webhook": {
+                    "type": "string",
+                    "example": "https://webhook.example.com"
+                }
+            }
+        },
+        "backend_api_v1.UpdateProfileRequest": {
             "type": "object",
             "required": [
                 "email"

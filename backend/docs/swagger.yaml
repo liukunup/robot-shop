@@ -1,14 +1,14 @@
 definitions:
-  github_com_go-nunu_nunu-layout-advanced_api_v1.GetProfileResponse:
+  backend_api_v1.GetProfileResponse:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.GetProfileResponseData'
+        $ref: '#/definitions/backend_api_v1.GetProfileResponseData'
       message:
         type: string
     type: object
-  github_com_go-nunu_nunu-layout-advanced_api_v1.GetProfileResponseData:
+  backend_api_v1.GetProfileResponseData:
     properties:
       nickname:
         example: alan
@@ -16,7 +16,7 @@ definitions:
       userId:
         type: string
     type: object
-  github_com_go-nunu_nunu-layout-advanced_api_v1.LoginRequest:
+  backend_api_v1.LoginRequest:
     properties:
       email:
         example: 1234@gmail.com
@@ -28,21 +28,30 @@ definitions:
     - email
     - password
     type: object
-  github_com_go-nunu_nunu-layout-advanced_api_v1.LoginResponse:
+  backend_api_v1.LoginResponse:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.LoginResponseData'
+        $ref: '#/definitions/backend_api_v1.LoginResponseData'
       message:
         type: string
     type: object
-  github_com_go-nunu_nunu-layout-advanced_api_v1.LoginResponseData:
+  backend_api_v1.LoginResponseData:
     properties:
       accessToken:
         type: string
     type: object
-  github_com_go-nunu_nunu-layout-advanced_api_v1.RegisterRequest:
+  backend_api_v1.PageResponse-backend_api_v1_RobotResponseData:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/backend_api_v1.RobotResponseData'
+        type: array
+      total:
+        type: integer
+    type: object
+  backend_api_v1.RegisterRequest:
     properties:
       email:
         example: 1234@gmail.com
@@ -54,7 +63,7 @@ definitions:
     - email
     - password
     type: object
-  github_com_go-nunu_nunu-layout-advanced_api_v1.Response:
+  backend_api_v1.Response:
     properties:
       code:
         type: integer
@@ -62,7 +71,62 @@ definitions:
       message:
         type: string
     type: object
-  github_com_go-nunu_nunu-layout-advanced_api_v1.UpdateProfileRequest:
+  backend_api_v1.RobotRequest:
+    properties:
+      callback:
+        type: string
+      desc:
+        type: string
+      enabled:
+        type: boolean
+      name:
+        type: string
+      options:
+        type: string
+      owner:
+        type: string
+      webhook:
+        type: string
+    required:
+    - name
+    type: object
+  backend_api_v1.RobotResponseData:
+    properties:
+      callback:
+        example: https://callback.example.com
+        type: string
+      createdAt:
+        example: "2006-01-02 15:04:05"
+        type: string
+      desc:
+        example: it's a robot
+        type: string
+      enabled:
+        example: true
+        type: boolean
+      id:
+        example: 1
+        type: integer
+      name:
+        example: bot
+        type: string
+      options:
+        example: '{"key": "value"}'
+        type: string
+      owner:
+        example: Billy
+        type: string
+      robot_id:
+        example: 454e7080-d105-4515-9c25-3e6fd9df176c
+        type: string
+      updatedAt:
+        example: "2006-01-02 15:04:05"
+        type: string
+      webhook:
+        example: https://webhook.example.com
+        type: string
+    type: object
+  backend_api_v1.UpdateProfileRequest:
     properties:
       email:
         example: 1234@gmail.com
@@ -97,14 +161,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.LoginRequest'
+          $ref: '#/definitions/backend_api_v1.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.LoginResponse'
+            $ref: '#/definitions/backend_api_v1.LoginResponse'
       summary: 账号登录
       tags:
       - 用户模块
@@ -119,17 +183,134 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.RegisterRequest'
+          $ref: '#/definitions/backend_api_v1.RegisterRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.Response'
+            $ref: '#/definitions/backend_api_v1.Response'
       summary: 用户注册
       tags:
       - 用户模块
+  /robot:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.PageResponse-backend_api_v1_RobotResponseData'
+      security:
+      - Bearer: []
+      summary: 获取机器人列表
+      tags:
+      - 机器人模块
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RobotRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.RobotResponseData'
+      security:
+      - Bearer: []
+      summary: 创建机器人
+      tags:
+      - 机器人模块
+  /robot/{id}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: 机器人ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 删除机器人
+      tags:
+      - 机器人模块
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 机器人ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.RobotResponseData'
+      security:
+      - Bearer: []
+      summary: 获取机器人
+      tags:
+      - 机器人模块
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 机器人ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: params
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RobotRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.RobotResponseData'
+      security:
+      - Bearer: []
+      summary: 更新机器人
+      tags:
+      - 机器人模块
   /user:
     get:
       consumes:
@@ -140,7 +321,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.GetProfileResponse'
+            $ref: '#/definitions/backend_api_v1.GetProfileResponse'
       security:
       - Bearer: []
       summary: 获取用户信息
@@ -155,14 +336,14 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.UpdateProfileRequest'
+          $ref: '#/definitions/backend_api_v1.UpdateProfileRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_go-nunu_nunu-layout-advanced_api_v1.Response'
+            $ref: '#/definitions/backend_api_v1.Response'
       security:
       - Bearer: []
       summary: 修改用户信息
