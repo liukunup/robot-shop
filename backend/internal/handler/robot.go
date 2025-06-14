@@ -4,7 +4,6 @@ import (
 	v1 "backend/api/v1"
 	"backend/internal/service"
 	"backend/pkg/time"
-	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -58,7 +57,7 @@ func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 		Desc:      robot.Desc,
 		Webhook:   robot.Webhook,
 		Callback:  robot.Callback,
-		Options:   ParseOptions(robot.Options),
+		Options:   robot.Options,
 		Enabled:   robot.Enabled,
 		Owner:     robot.Owner,
 		CreatedAt: time.FormatTime(robot.CreatedAt),
@@ -97,7 +96,7 @@ func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 		Desc:      robot.Desc,
 		Webhook:   robot.Webhook,
 		Callback:  robot.Callback,
-		Options:   ParseOptions(robot.Options),
+		Options:   robot.Options,
 		Enabled:   robot.Enabled,
 		Owner:     robot.Owner,
 		CreatedAt: time.FormatTime(robot.CreatedAt),
@@ -144,7 +143,7 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 		Desc:      robot.Desc,
 		Webhook:   robot.Webhook,
 		Callback:  robot.Callback,
-		Options:   ParseOptions(robot.Options),
+		Options:   robot.Options,
 		Enabled:   robot.Enabled,
 		Owner:     robot.Owner,
 		CreatedAt: time.FormatTime(robot.CreatedAt),
@@ -226,7 +225,7 @@ func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 			Desc:      robot.Desc,
 			Webhook:   robot.Webhook,
 			Callback:  robot.Callback,
-			Options:   ParseOptions(robot.Options),
+			Options:   robot.Options,
 			Enabled:   robot.Enabled,
 			Owner:     robot.Owner,
 			CreatedAt: time.FormatTime(robot.CreatedAt),
@@ -238,12 +237,4 @@ func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 		Items: items,
 		Total: total,
 	})
-}
-
-func ParseOptions(s string) map[string]interface{} {
-	options := make(map[string]interface{})
-	if err := json.Unmarshal([]byte(s), &options); err != nil {
-		// TODO: 打印日志
-	}
-	return options
 }
