@@ -20,6 +20,12 @@
         "GONOPROXY": "none;"
       }
     },
+    "extensions": {
+      "recommendations": [
+        "golang.go",
+        "msjsdiag.vscode-react-native",
+      ]
+    },
     "launch": {
       "version": "0.2.0",
       "configurations": [
