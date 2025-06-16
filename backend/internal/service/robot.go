@@ -57,8 +57,6 @@ func (s *robotService) CreateRobot(ctx context.Context, req *v1.RobotRequest) (*
 		Options:   string(options),
 		Enabled:   req.Enabled,
 		Owner:     req.Owner,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
 	}
 	if err := s.robotRepository.CreateRobot(ctx, robot); err != nil {
 		return nil, err

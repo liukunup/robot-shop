@@ -1,9 +1,10 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
 	"backend/pkg/jwt"
 	"backend/pkg/log"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
@@ -17,10 +18,10 @@ func NewHandler(
 		logger: logger,
 	}
 }
-func GetUserIdFromCtx(ctx *gin.Context) string {
+func GetUserIdFromCtx(ctx *gin.Context) uint {
 	v, exists := ctx.Get("claims")
 	if !exists {
-		return ""
+		return 0
 	}
 	return v.(*jwt.MyCustomClaims).UserId
 }

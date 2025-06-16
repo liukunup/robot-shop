@@ -1,23 +1,28 @@
 package repository
 
 import (
-	"context"
-	"fmt"
-	"github.com/glebarez/sqlite"
 	"backend/pkg/log"
 	"backend/pkg/zapgorm2"
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/casbin/casbin/v2"
+	"github.com/casbin/casbin/v2/model"
+	gormadapter "github.com/casbin/gorm-adapter/v3"
+	"github.com/glebarez/sqlite"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"time"
 )
 
 const ctxTxKey = "TxKey"
 
 type Repository struct {
 	db *gorm.DB
+	e  *casbin.SyncedEnforcer
 	//rdb    *redis.Client
 	logger *log.Logger
 }
@@ -25,10 +30,12 @@ type Repository struct {
 func NewRepository(
 	logger *log.Logger,
 	db *gorm.DB,
+	e *casbin.SyncedEnforcer,
 	// rdb *redis.Client,
 ) *Repository {
 	return &Repository{
 		db: db,
+		e:  e,
 		//rdb:    rdb,
 		logger: logger,
 	}
@@ -102,6 +109,41 @@ func NewDB(conf *viper.Viper, l *log.Logger) *gorm.DB {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	return db
 }
+
+func NewCasbinEnforcer(conf *viper.Viper, l *log.Logger, db *gorm.DB) *casbin.SyncedEnforcer {
+	a, _ := gormadapter.NewAdapterByDB(db)
+	m, err := model.NewModelFromString(`
+[request_definition]
+r = sub, obj, act
+
+[policy_definition]
+p = sub, obj, act
+
+[role_definition]
+g = _, _
+
+[policy_effect]
+e = some(where (p.eft == allow))
+
+[matchers]
+m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
+`)
+
+	if err != nil {
+		panic(err)
+	}
+	e, _ := casbin.NewSyncedEnforcer(m, a)
+	e.StartAutoLoadPolicy(10 * time.Second) // 每10秒自动加载策略，防止启动多服务进程策略不一致
+
+	// Enable Logger, decide whether to show it in terminal
+	//e.EnableLog(true)
+
+	// Save the policy back to DB.
+	e.EnableAutoSave(true)
+
+	return e
+}
+
 func NewRedis(conf *viper.Viper) *redis.Client {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     conf.GetString("data.redis.addr"),
