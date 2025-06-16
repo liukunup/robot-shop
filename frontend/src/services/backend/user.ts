@@ -3,8 +3,8 @@
 import { request } from '@umijs/max';
 
 /** 账号登录 POST /login */
-export async function postLogin(body: API.LoginRequest, options?: { [key: string]: any }) {
-  return request<API.LoginResponse>('/login', {
+export async function login(body: API.LoginParams, options?: { [key: string]: any }) {
+  return request<API.LoginResult>(`/v1/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -15,8 +15,8 @@ export async function postLogin(body: API.LoginRequest, options?: { [key: string
 }
 
 /** 用户注册 目前只支持邮箱登录 POST /register */
-export async function postRegister(body: API.RegisterRequest, options?: { [key: string]: any }) {
-  return request<API.Response>('/register', {
+export async function register(body: API.RegisterParams, options?: { [key: string]: any }) {
+  return request<API.Response>(`/v1/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -27,16 +27,19 @@ export async function postRegister(body: API.RegisterRequest, options?: { [key: 
 }
 
 /** 获取用户信息 GET /user */
-export async function getUser(options?: { [key: string]: any }) {
-  return request<API.GetProfileResponse>('/user', {
+export async function queryCurrentUser(options?: { [key: string]: any }) {
+  return request<API.GetProfileResponse>(`/v1/user`, {
     method: 'GET',
     ...(options || {}),
   });
 }
 
 /** 修改用户信息 PUT /user */
-export async function putUser(body: API.UpdateProfileRequest, options?: { [key: string]: any }) {
-  return request<API.Response>('/user', {
+export async function updateProfile(
+  body: API.UpdateProfileParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.Response>(`/v1/user`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

@@ -2,8 +2,9 @@ package v1
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
@@ -18,7 +19,7 @@ func HandleSuccess(ctx *gin.Context, data interface{}) {
 	}
 	resp := Response{Code: errorCodeMap[ErrSuccess], Message: ErrSuccess.Error(), Data: data}
 	if _, ok := errorCodeMap[ErrSuccess]; !ok {
-		resp = Response{Code: 0, Message: "", Data: data}
+		resp = Response{Code: 0, Message: "ok", Data: data}
 	}
 	ctx.JSON(http.StatusOK, resp)
 }

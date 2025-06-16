@@ -22,29 +22,29 @@ type UserService interface {
 	Login(ctx context.Context, req *v1.LoginRequest) (string, error)
 
 	// User
-	ListUsers(ctx context.Context, uid uint) (*v1.GetMenuResponseData, error)
-	UserUpdate(ctx context.Context, req *v1.AdminUserUpdateRequest) error
-	UserCreate(ctx context.Context, req *v1.AdminUserCreateRequest) error
+	ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersResponseData, error)
+	UserCreate(ctx context.Context, req *v1.UserCreateRequest) error
+	UserUpdate(ctx context.Context, req *v1.UserUpdateRequest) error
 	UserDelete(ctx context.Context, id uint) error
 	GetUser(ctx context.Context, uid uint) (*v1.GetUserResponseData, error)
 
 	// Menu
-	ListMenus(ctx context.Context, uid uint) (*v1.GetMenuResponseData, error)
-	MenuUpdate(ctx context.Context, req *v1.MenuUpdateRequest) error
+	ListMenus(ctx context.Context) (*v1.ListMenuResponseData, error)
 	MenuCreate(ctx context.Context, req *v1.MenuCreateRequest) error
+	MenuUpdate(ctx context.Context, req *v1.MenuUpdateRequest) error
 	MenuDelete(ctx context.Context, id uint) error
-	GetAdminMenus(ctx context.Context) (*v1.GetMenuResponseData, error)
+	GetMenusByUID(ctx context.Context, uid uint) (*v1.ListMenuResponseData, error)
 
 	// Role
-	ListRoles(ctx context.Context, req *v1.GetRoleListRequest) (*v1.GetRolesResponseData, error)
-	RoleUpdate(ctx context.Context, req *v1.RoleUpdateRequest) error
+	ListRoles(ctx context.Context, req *v1.ListRolesRequest) (*v1.ListRolesResponseData, error)
 	RoleCreate(ctx context.Context, req *v1.RoleCreateRequest) error
+	RoleUpdate(ctx context.Context, req *v1.RoleUpdateRequest) error
 	RoleDelete(ctx context.Context, id uint) error
 
 	// API
-	ListApis(ctx context.Context, req *v1.GetApisRequest) (*v1.GetApisResponseData, error)
-	ApiUpdate(ctx context.Context, req *v1.ApiUpdateRequest) error
+	ListApis(ctx context.Context, req *v1.ListApisRequest) (*v1.ListApisResponseData, error)
 	ApiCreate(ctx context.Context, req *v1.ApiCreateRequest) error
+	ApiUpdate(ctx context.Context, req *v1.ApiUpdateRequest) error
 	ApiDelete(ctx context.Context, id uint) error
 
 	// Permission
@@ -131,12 +131,12 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginRequest) (string, 
 	return token, nil
 }
 
-func (s *userService) ListUsers(ctx context.Context, req *v1.GetUsersRequest) (*v1.GetAdminUsersResponseData, error) {
+func (s *userService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersResponseData, error) {
 	list, total, err := s.userRepository.ListUsers(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	data := &v1.GetAdminUsersResponseData{
+	data := &v1.ListUsersResponseData{
 		List:  make([]v1.UserDataItem, 0),
 		Total: total,
 	}
@@ -160,34 +160,7 @@ func (s *userService) ListUsers(ctx context.Context, req *v1.GetUsersRequest) (*
 	return data, nil
 }
 
-func (s *userService) UserUpdate(ctx context.Context, req *v1.AdminUserUpdateRequest) error {
-	old, _ := s.userRepository.GetUser(ctx, req.ID)
-	if req.Password != "" {
-		hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-		if err != nil {
-			return err
-		}
-		req.Password = string(hash)
-	} else {
-		req.Password = old.Password
-	}
-	err := s.userRepository.UpdateUserRoles(ctx, req.ID, req.Roles)
-	if err != nil {
-		return err
-	}
-	return s.userRepository.UserUpdate(ctx, &model.User{
-		Model: gorm.Model{
-			ID: req.ID,
-		},
-		Email:    req.Email,
-		Nickname: req.Nickname,
-		Phone:    req.Phone,
-		Username: req.Username,
-	})
-
-}
-
-func (s *userService) UserCreate(ctx context.Context, req *v1.AdminUserCreateRequest) error {
+func (s *userService) UserCreate(ctx context.Context, req *v1.UserCreateRequest) error {
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -212,6 +185,33 @@ func (s *userService) UserCreate(ctx context.Context, req *v1.AdminUserCreateReq
 		return err
 	}
 	return err
+
+}
+
+func (s *userService) UserUpdate(ctx context.Context, req *v1.UserUpdateRequest) error {
+	old, _ := s.userRepository.GetUser(ctx, req.ID)
+	if req.Password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		req.Password = string(hash)
+	} else {
+		req.Password = old.Password
+	}
+	err := s.userRepository.UpdateUserRoles(ctx, req.ID, req.Roles)
+	if err != nil {
+		return err
+	}
+	return s.userRepository.UserUpdate(ctx, &model.User{
+		Model: gorm.Model{
+			ID: req.ID,
+		},
+		Email:    req.Email,
+		Nickname: req.Nickname,
+		Phone:    req.Phone,
+		Username: req.Username,
+	})
 
 }
 
@@ -242,13 +242,84 @@ func (s *userService) GetUser(ctx context.Context, uid uint) (*v1.GetUserRespons
 	}, nil
 }
 
-func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.GetMenuResponseData, error) {
+func (s *userService) ListMenus(ctx context.Context) (*v1.ListMenuResponseData, error) {
+	menuList, err := s.menuRepository.ListMenus(ctx)
+	if err != nil {
+		s.logger.WithContext(ctx).Error("ListMenus error", zap.Error(err))
+		return nil, err
+	}
+	data := &v1.ListMenuResponseData{
+		List: make([]v1.MenuDataItem, 0),
+	}
+	for _, menu := range menuList {
+		data.List = append(data.List, v1.MenuDataItem{
+			ID:         menu.ID,
+			Name:       menu.Name,
+			Title:      menu.Title,
+			Path:       menu.Path,
+			Component:  menu.Component,
+			Redirect:   menu.Redirect,
+			KeepAlive:  menu.KeepAlive,
+			HideInMenu: menu.HideInMenu,
+			Locale:     menu.Locale,
+			Weight:     menu.Weight,
+			Icon:       menu.Icon,
+			ParentID:   menu.ParentID,
+			UpdatedAt:  menu.UpdatedAt.Format(constant.DateTimeLayout),
+			URL:        menu.URL,
+		})
+	}
+	return data, nil
+}
+
+func (s *userService) MenuCreate(ctx context.Context, req *v1.MenuCreateRequest) error {
+	return s.menuRepository.MenuCreate(ctx, &model.Menu{
+		Component:  req.Component,
+		Icon:       req.Icon,
+		KeepAlive:  req.KeepAlive,
+		HideInMenu: req.HideInMenu,
+		Locale:     req.Locale,
+		Weight:     req.Weight,
+		Name:       req.Name,
+		ParentID:   req.ParentID,
+		Path:       req.Path,
+		Redirect:   req.Redirect,
+		Title:      req.Title,
+		URL:        req.URL,
+	})
+}
+
+func (s *userService) MenuUpdate(ctx context.Context, req *v1.MenuUpdateRequest) error {
+	return s.menuRepository.MenuUpdate(ctx, &model.Menu{
+		Component:  req.Component,
+		Icon:       req.Icon,
+		KeepAlive:  req.KeepAlive,
+		HideInMenu: req.HideInMenu,
+		Locale:     req.Locale,
+		Weight:     req.Weight,
+		Name:       req.Name,
+		ParentID:   req.ParentID,
+		Path:       req.Path,
+		Redirect:   req.Redirect,
+		Title:      req.Title,
+		URL:        req.URL,
+		Model: gorm.Model{
+			ID: req.ID,
+		},
+	})
+}
+
+func (s *userService) MenuDelete(ctx context.Context, id uint) error {
+	return s.menuRepository.MenuDelete(ctx, id)
+}
+
+func (s *userService) GetMenusByUID(ctx context.Context, uid uint) (*v1.ListMenuResponseData, error) {
 	menuList, err := s.menuRepository.ListMenus(ctx)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("GetMenuList error", zap.Error(err))
 		return nil, err
 	}
-	data := &v1.GetMenuResponseData{
+	data := &v1.ListMenuResponseData{
 		List: make([]v1.MenuDataItem, 0),
 	}
 	// 获取权限的菜单
@@ -291,83 +362,12 @@ func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.GetMenuRespon
 	return data, nil
 }
 
-func (s *userService) MenuUpdate(ctx context.Context, req *v1.MenuUpdateRequest) error {
-	return s.menuRepository.MenuUpdate(ctx, &model.Menu{
-		Component:  req.Component,
-		Icon:       req.Icon,
-		KeepAlive:  req.KeepAlive,
-		HideInMenu: req.HideInMenu,
-		Locale:     req.Locale,
-		Weight:     req.Weight,
-		Name:       req.Name,
-		ParentID:   req.ParentID,
-		Path:       req.Path,
-		Redirect:   req.Redirect,
-		Title:      req.Title,
-		URL:        req.URL,
-		Model: gorm.Model{
-			ID: req.ID,
-		},
-	})
-}
-
-func (s *userService) MenuCreate(ctx context.Context, req *v1.MenuCreateRequest) error {
-	return s.menuRepository.MenuCreate(ctx, &model.Menu{
-		Component:  req.Component,
-		Icon:       req.Icon,
-		KeepAlive:  req.KeepAlive,
-		HideInMenu: req.HideInMenu,
-		Locale:     req.Locale,
-		Weight:     req.Weight,
-		Name:       req.Name,
-		ParentID:   req.ParentID,
-		Path:       req.Path,
-		Redirect:   req.Redirect,
-		Title:      req.Title,
-		URL:        req.URL,
-	})
-}
-
-func (s *userService) MenuDelete(ctx context.Context, id uint) error {
-	return s.menuRepository.MenuDelete(ctx, id)
-}
-
-func (s *userService) GetAdminMenus(ctx context.Context) (*v1.GetMenuResponseData, error) {
-	menuList, err := s.menuRepository.ListMenus(ctx)
-	if err != nil {
-		s.logger.WithContext(ctx).Error("GetMenuList error", zap.Error(err))
-		return nil, err
-	}
-	data := &v1.GetMenuResponseData{
-		List: make([]v1.MenuDataItem, 0),
-	}
-	for _, menu := range menuList {
-		data.List = append(data.List, v1.MenuDataItem{
-			ID:         menu.ID,
-			Name:       menu.Name,
-			Title:      menu.Title,
-			Path:       menu.Path,
-			Component:  menu.Component,
-			Redirect:   menu.Redirect,
-			KeepAlive:  menu.KeepAlive,
-			HideInMenu: menu.HideInMenu,
-			Locale:     menu.Locale,
-			Weight:     menu.Weight,
-			Icon:       menu.Icon,
-			ParentID:   menu.ParentID,
-			UpdatedAt:  menu.UpdatedAt.Format(constant.DateTimeLayout),
-			URL:        menu.URL,
-		})
-	}
-	return data, nil
-}
-
-func (s *userService) ListRoles(ctx context.Context, req *v1.GetRoleListRequest) (*v1.GetRolesResponseData, error) {
+func (s *userService) ListRoles(ctx context.Context, req *v1.ListRolesRequest) (*v1.ListRolesResponseData, error) {
 	list, total, err := s.roleRepository.ListRoles(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	data := &v1.GetRolesResponseData{
+	data := &v1.ListRolesResponseData{
 		List:  make([]v1.RoleDataItem, 0),
 		Total: total,
 	}
@@ -382,16 +382,6 @@ func (s *userService) ListRoles(ctx context.Context, req *v1.GetRoleListRequest)
 
 	}
 	return data, nil
-}
-
-func (s *userService) RoleUpdate(ctx context.Context, req *v1.RoleUpdateRequest) error {
-	return s.roleRepository.RoleUpdate(ctx, &model.Role{
-		Name: req.Name,
-		Sid:  req.Sid,
-		Model: gorm.Model{
-			ID: req.ID,
-		},
-	})
 }
 
 func (s *userService) RoleCreate(ctx context.Context, req *v1.RoleCreateRequest) error {
@@ -409,6 +399,16 @@ func (s *userService) RoleCreate(ctx context.Context, req *v1.RoleCreateRequest)
 	return nil
 }
 
+func (s *userService) RoleUpdate(ctx context.Context, req *v1.RoleUpdateRequest) error {
+	return s.roleRepository.RoleUpdate(ctx, &model.Role{
+		Name: req.Name,
+		Sid:  req.Sid,
+		Model: gorm.Model{
+			ID: req.ID,
+		},
+	})
+}
+
 func (s *userService) RoleDelete(ctx context.Context, id uint) error {
 	old, err := s.roleRepository.GetRole(ctx, id)
 	if err != nil {
@@ -420,7 +420,7 @@ func (s *userService) RoleDelete(ctx context.Context, id uint) error {
 	return s.roleRepository.RoleDelete(ctx, id)
 }
 
-func (s *userService) ListApis(ctx context.Context, req *v1.GetApisRequest) (*v1.GetApisResponseData, error) {
+func (s *userService) ListApis(ctx context.Context, req *v1.ListApisRequest) (*v1.ListApisResponseData, error) {
 	list, total, err := s.apiRepository.GetApis(ctx, req)
 	if err != nil {
 		return nil, err
@@ -429,7 +429,7 @@ func (s *userService) ListApis(ctx context.Context, req *v1.GetApisRequest) (*v1
 	if err != nil {
 		return nil, err
 	}
-	data := &v1.GetApisResponseData{
+	data := &v1.ListApisResponseData{
 		List:   make([]v1.ApiDataItem, 0),
 		Total:  total,
 		Groups: groups,
@@ -448,6 +448,15 @@ func (s *userService) ListApis(ctx context.Context, req *v1.GetApisRequest) (*v1
 	return data, nil
 }
 
+func (s *userService) ApiCreate(ctx context.Context, req *v1.ApiCreateRequest) error {
+	return s.apiRepository.ApiCreate(ctx, &model.Api{
+		Group:  req.Group,
+		Method: req.Method,
+		Name:   req.Name,
+		Path:   req.Path,
+	})
+}
+
 func (s *userService) ApiUpdate(ctx context.Context, req *v1.ApiUpdateRequest) error {
 	return s.apiRepository.ApiUpdate(ctx, &model.Api{
 		Group:  req.Group,
@@ -457,15 +466,6 @@ func (s *userService) ApiUpdate(ctx context.Context, req *v1.ApiUpdateRequest) e
 		Model: gorm.Model{
 			ID: req.ID,
 		},
-	})
-}
-
-func (s *userService) ApiCreate(ctx context.Context, req *v1.ApiCreateRequest) error {
-	return s.apiRepository.ApiCreate(ctx, &model.Api{
-		Group:  req.Group,
-		Method: req.Method,
-		Name:   req.Name,
-		Path:   req.Path,
 	})
 }
 
@@ -488,6 +488,7 @@ func (s *userService) GetUserPermissions(ctx context.Context, uid uint) (*v1.Get
 	}
 	return data, nil
 }
+
 func (s *userService) GetRolePermissions(ctx context.Context, role string) (*v1.GetRolePermissionsData, error) {
 	data := &v1.GetRolePermissionsData{
 		List: []string{},

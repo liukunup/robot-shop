@@ -1,6 +1,6 @@
 package v1
 
-type GetApisRequest struct {
+type ListApisRequest struct {
 	Page     int    `form:"page" binding:"required" example:"1"`
 	PageSize int    `form:"pageSize" binding:"required" example:"10"`
 	Group    string `form:"group" binding:"" example:"权限管理"`
@@ -8,6 +8,7 @@ type GetApisRequest struct {
 	Path     string `form:"path" binding:"" example:"/v1/test"`
 	Method   string `form:"method" binding:"" example:"GET"`
 }
+
 type ApiDataItem struct {
 	ID        uint   `json:"id"`
 	Name      string `json:"name"`
@@ -17,21 +18,25 @@ type ApiDataItem struct {
 	UpdatedAt string `json:"updatedAt"`
 	CreatedAt string `json:"createdAt"`
 }
-type GetApisResponseData struct {
+
+type ListApisResponseData struct {
 	List   []ApiDataItem `json:"list"`
 	Total  int64         `json:"total"`
 	Groups []string      `json:"groups"`
 }
-type GetApisResponse struct {
+
+type ListApisResponse struct {
 	Response
-	Data GetApisResponseData
+	Data ListApisResponseData
 }
+
 type ApiCreateRequest struct {
 	Group  string `form:"group" binding:"" example:"权限管理"`
 	Name   string `form:"name" binding:"" example:"菜单列表"`
 	Path   string `form:"path" binding:"" example:"/v1/test"`
 	Method string `form:"method" binding:"" example:"GET"`
 }
+
 type ApiUpdateRequest struct {
 	ID     uint   `form:"id" binding:"required" example:"1"`
 	Group  string `form:"group" binding:"" example:"权限管理"`
@@ -39,6 +44,7 @@ type ApiUpdateRequest struct {
 	Path   string `form:"path" binding:"" example:"/v1/test"`
 	Method string `form:"method" binding:"" example:"GET"`
 }
+
 type ApiDeleteRequest struct {
 	ID uint `form:"id" binding:"required" example:"1"`
 }

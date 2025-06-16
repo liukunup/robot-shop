@@ -29,7 +29,7 @@ func NewRobotHandler(
 // @Summary 获取机器人
 // @Schemes
 // @Description
-// @Tags 机器人模块
+// @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -69,7 +69,7 @@ func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 // @Summary 创建机器人
 // @Schemes
 // @Description
-// @Tags 机器人模块
+// @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -108,7 +108,7 @@ func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 // @Summary 更新机器人
 // @Schemes
 // @Description
-// @Tags 机器人模块
+// @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -155,7 +155,7 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 // @Summary 删除机器人
 // @Schemes
 // @Description
-// @Tags 机器人模块
+// @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -181,7 +181,7 @@ func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 // @Summary 获取机器人列表
 // @Schemes
 // @Description
-// @Tags 机器人模块
+// @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer

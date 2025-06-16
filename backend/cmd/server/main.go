@@ -8,10 +8,11 @@ import (
 	"backend/cmd/server/wire"
 	"backend/pkg/config"
 	"backend/pkg/log"
+
 	"go.uber.org/zap"
 )
 
-// @title           Nunu Example API
+// @title           Robot Shop
 // @version         1.0.0
 // @description     This is a sample server celler server.
 // @termsOfService  http://swagger.io/terms/

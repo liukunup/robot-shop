@@ -10,14 +10,15 @@ import (
 )
 
 type UserRepository interface {
-	ListUsers(ctx context.Context, req *v1.GetUsersRequest) ([]model.User, int64, error)
-	UserUpdate(ctx context.Context, m *model.User) error
+	ListUsers(ctx context.Context, req *v1.ListUsersRequest) ([]model.User, int64, error)
 	UserCreate(ctx context.Context, m *model.User) error
+	UserUpdate(ctx context.Context, m *model.User) error
 	UserDelete(ctx context.Context, id uint) error
 
 	GetUser(ctx context.Context, uid uint) (model.User, error)
 	GetUserByUsername(ctx context.Context, username string) (model.User, error)
 	GetUserByEmail(ctx context.Context, email string) (model.User, error)
+	GetUserByUsernameOrEmail(ctx context.Context, username string, email string) (model.User, error)
 
 	GetUserPermissions(ctx context.Context, uid uint) ([][]string, error)
 	GetUserRoles(ctx context.Context, uid uint) ([]string, error)
@@ -37,7 +38,7 @@ type userRepository struct {
 	*Repository
 }
 
-func (r *userRepository) ListUsers(ctx context.Context, req *v1.GetUsersRequest) ([]model.User, int64, error) {
+func (r *userRepository) ListUsers(ctx context.Context, req *v1.ListUsersRequest) ([]model.User, int64, error) {
 	var list []model.User
 	var total int64
 	scope := r.DB(ctx).Model(&model.User{})
@@ -56,18 +57,18 @@ func (r *userRepository) ListUsers(ctx context.Context, req *v1.GetUsersRequest)
 	if err := scope.Count(&total).Error; err != nil {
 		return nil, total, err
 	}
-	if err := scope.Offset((req.Page - 1) * req.PageSize).Limit(req.PageSize).Order("id DESC").Find(&list).Error; err != nil {
+	if err := scope.Offset((req.Page - 1) * req.Size).Limit(req.Size).Order("id DESC").Find(&list).Error; err != nil {
 		return nil, total, err
 	}
 	return list, total, nil
 }
 
-func (r *userRepository) UserUpdate(ctx context.Context, m *model.User) error {
-	return r.DB(ctx).Where("id = ?", m.ID).Save(m).Error
-}
-
 func (r *userRepository) UserCreate(ctx context.Context, m *model.User) error {
 	return r.DB(ctx).Create(m).Error
+}
+
+func (r *userRepository) UserUpdate(ctx context.Context, m *model.User) error {
+	return r.DB(ctx).Where("id = ?", m.ID).Save(m).Error
 }
 
 func (r *userRepository) UserDelete(ctx context.Context, id uint) error {
@@ -89,9 +90,13 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (mode
 	return m, r.DB(ctx).Where("email = ?", email).First(&m).Error
 }
 
+func (r *userRepository) GetUserByUsernameOrEmail(ctx context.Context, username string, email string) (model.User, error) {
+	m := model.User{}
+	return m, r.DB(ctx).Where("email = ?", email).First(&m).Error
+}
+
 func (r *userRepository) GetUserPermissions(ctx context.Context, uid uint) ([][]string, error) {
 	return r.e.GetImplicitPermissionsForUser(convertor.ToString(uid))
-
 }
 
 func (r *userRepository) GetUserRoles(ctx context.Context, uid uint) ([]string, error) {

@@ -16,13 +16,14 @@ type MenuDataItem struct {
 	URL        string `json:"url,omitempty"`        // iframe模式下的跳转url，不能与path重复
 	UpdatedAt  string `json:"updatedAt,omitempty"`  // 是否保活
 }
-type GetMenuResponseData struct {
+
+type ListMenuResponseData struct {
 	List []MenuDataItem `json:"list"`
 }
 
-type GetMenuResponse struct {
+type ListMenuResponse struct {
 	Response
-	Data GetMenuResponseData
+	Data ListMenuResponseData
 }
 
 type MenuCreateRequest struct {
@@ -40,6 +41,7 @@ type MenuCreateRequest struct {
 	URL        string `json:"url,omitempty"`        // iframe模式下的跳转url，不能与path重复
 
 }
+
 type MenuUpdateRequest struct {
 	ID         uint   `json:"id,omitempty"`         // 唯一id，使用整数表示
 	ParentID   uint   `json:"parentId,omitempty"`   // 父级菜单的id，使用整数表示
@@ -56,6 +58,7 @@ type MenuUpdateRequest struct {
 	URL        string `json:"url,omitempty"`        // iframe模式下的跳转url，不能与path重复
 	UpdatedAt  string `json:"updatedAt"`
 }
+
 type MenuDeleteRequest struct {
 	ID uint `form:"id"` // 唯一id，使用整数表示
 }

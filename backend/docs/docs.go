@@ -33,9 +33,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户模块"
+                    "User"
                 ],
                 "summary": "账号登录",
+                "operationId": "login",
                 "parameters": [
                     {
                         "description": "params",
@@ -43,7 +44,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.LoginRequest"
+                            "$ref": "#/definitions/LoginParams"
                         }
                     }
                 ],
@@ -51,7 +52,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.LoginResponse"
+                            "$ref": "#/definitions/LoginResult"
                         }
                     }
                 }
@@ -67,9 +68,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户模块"
+                    "User"
                 ],
                 "summary": "用户注册",
+                "operationId": "register",
                 "parameters": [
                     {
                         "description": "params",
@@ -77,7 +79,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.RegisterRequest"
+                            "$ref": "#/definitions/RegisterParams"
                         }
                     }
                 ],
@@ -105,7 +107,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "机器人模块"
+                    "Robot"
                 ],
                 "summary": "获取机器人列表",
                 "parameters": [
@@ -144,7 +146,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "机器人模块"
+                    "Robot"
                 ],
                 "summary": "创建机器人",
                 "parameters": [
@@ -182,7 +184,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "机器人模块"
+                    "Robot"
                 ],
                 "summary": "获取机器人",
                 "parameters": [
@@ -216,7 +218,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "机器人模块"
+                    "Robot"
                 ],
                 "summary": "更新机器人",
                 "parameters": [
@@ -259,7 +261,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "机器人模块"
+                    "Robot"
                 ],
                 "summary": "删除机器人",
                 "parameters": [
@@ -295,9 +297,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户模块"
+                    "User"
                 ],
                 "summary": "获取用户信息",
+                "operationId": "queryCurrentUser",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -320,9 +323,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户模块"
+                    "User"
                 ],
                 "summary": "修改用户信息",
+                "operationId": "updateProfile",
                 "parameters": [
                     {
                         "description": "params",
@@ -330,7 +334,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.UpdateProfileRequest"
+                            "$ref": "#/definitions/UpdateProfileParams"
                         }
                     }
                 ],
@@ -346,33 +350,63 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "backend_api_v1.GetProfileResponse": {
+        "CurrentUser": {
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "type": "string",
+                    "example": "https://cravatar.cn/avatar/245467ef31b6f0addc72b039b94122a4?s=100\u0026f=y\u0026r=g"
+                },
+                "email": {
+                    "type": "string",
+                    "example": "zhangsan@163.com"
+                },
+                "nickname": {
+                    "type": "string",
+                    "example": "alan"
+                },
+                "role": {
+                    "type": "string",
+                    "example": "admin"
+                },
+                "userId": {
+                    "type": "string",
+                    "example": "1"
+                }
+            }
+        },
+        "LoginParams": {
+            "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string",
+                    "example": "123456"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "zhangsan"
+                }
+            }
+        },
+        "LoginResult": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/backend_api_v1.GetProfileResponseData"
+                    "$ref": "#/definitions/backend_api_v1.LoginResponseData"
                 },
                 "message": {
                     "type": "string"
                 }
             }
         },
-        "backend_api_v1.GetProfileResponseData": {
-            "type": "object",
-            "properties": {
-                "nickname": {
-                    "type": "string",
-                    "example": "alan"
-                },
-                "userId": {
-                    "type": "string"
-                }
-            }
-        },
-        "backend_api_v1.LoginRequest": {
+        "RegisterParams": {
             "type": "object",
             "required": [
                 "email",
@@ -381,7 +415,7 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "1234@gmail.com"
+                    "example": "zhangsan@163.com"
                 },
                 "password": {
                     "type": "string",
@@ -389,14 +423,30 @@ const docTemplate = `{
                 }
             }
         },
-        "backend_api_v1.LoginResponse": {
+        "UpdateProfileParams": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "zhangsan@163.com"
+                },
+                "nickname": {
+                    "type": "string",
+                    "example": "alan"
+                }
+            }
+        },
+        "backend_api_v1.GetProfileResponse": {
             "type": "object",
             "properties": {
                 "code": {
                     "type": "integer"
                 },
                 "data": {
-                    "$ref": "#/definitions/backend_api_v1.LoginResponseData"
+                    "$ref": "#/definitions/CurrentUser"
                 },
                 "message": {
                     "type": "string"
@@ -422,23 +472,6 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
-                }
-            }
-        },
-        "backend_api_v1.RegisterRequest": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "1234@gmail.com"
-                },
-                "password": {
-                    "type": "string",
-                    "example": "123456"
                 }
             }
         },
@@ -531,22 +564,6 @@ const docTemplate = `{
                     "example": "https://webhook.example.com"
                 }
             }
-        },
-        "backend_api_v1.UpdateProfileRequest": {
-            "type": "object",
-            "required": [
-                "email"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "1234@gmail.com"
-                },
-                "nickname": {
-                    "type": "string",
-                    "example": "alan"
-                }
-            }
         }
     },
     "securityDefinitions": {
@@ -564,7 +581,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8000",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Nunu Example API",
+	Title:            "Robot Shop",
 	Description:      "This is a sample server celler server.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

@@ -25,12 +25,13 @@ func NewUserHandler(handler *Handler, userService service.UserService) *UserHand
 // @Summary 用户注册
 // @Schemes
 // @Description 目前只支持邮箱登录
-// @Tags 用户模块
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param request body v1.RegisterRequest true "params"
 // @Success 200 {object} v1.Response
 // @Router /register [post]
+// @ID register
 func (h *UserHandler) Register(ctx *gin.Context) {
 	req := new(v1.RegisterRequest)
 	if err := ctx.ShouldBindJSON(req); err != nil {
@@ -51,12 +52,13 @@ func (h *UserHandler) Register(ctx *gin.Context) {
 // @Summary 账号登录
 // @Schemes
 // @Description
-// @Tags 用户模块
+// @Tags User
 // @Accept json
 // @Produce json
 // @Param request body v1.LoginRequest true "params"
 // @Success 200 {object} v1.LoginResponse
 // @Router /login [post]
+// @ID login
 func (h *UserHandler) Login(ctx *gin.Context) {
 	var req v1.LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -74,28 +76,29 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 	})
 }
 
-// GetAdminUsers godoc
-// @Summary 获取管理员用户列表
+// ListUsers godoc
+// @Summary 获取用户列表
 // @Schemes
-// @Description 获取管理员用户列表
-// @Tags 用户模块
+// @Description 获取用户列表
+// @Tags User
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param page query int true "页码"
-// @Param pageSize query int true "每页数量"
+// @Param size query int true "每页数量"
 // @Param username query string false "用户名"
 // @Param nickname query string false "昵称"
 // @Param phone query string false "手机号"
 // @Param email query string false "邮箱"
-// @Success 200 {object} v1.GetAdminUsersResponse
+// @Success 200 {object} v1.ListUsersResponse
 // @Router /v1/admin/users [get]
-func (h *UserHandler) GetUsers(ctx *gin.Context) {
-	var req v1.GetUsersRequest
+func (h *UserHandler) ListUsers(ctx *gin.Context) {
+	var req v1.ListUsersRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	data, err := h.userService.ListUsers(ctx, &req)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
@@ -105,35 +108,11 @@ func (h *UserHandler) GetUsers(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, data)
 }
 
-// AdminUserUpdate godoc
-// @Summary 更新管理员用户
+// UserCreate godoc
+// @Summary 创建用户
 // @Schemes
-// @Description 更新管理员用户信息
-// @Tags 用户模块
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Param request body v1.AdminUserUpdateRequest true "参数"
-// @Success 200 {object} v1.Response
-// @Router /v1/admin/user [put]
-func (h *UserHandler) UserUpdate(ctx *gin.Context) {
-	var req v1.AdminUserUpdateRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
-		return
-	}
-	if err := h.userService.UserUpdate(ctx, &req); err != nil {
-		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
-		return
-	}
-	v1.HandleSuccess(ctx, nil)
-}
-
-// AdminUserCreate godoc
-// @Summary 创建管理员用户
-// @Schemes
-// @Description 创建新的管理员用户
-// @Tags 用户模块
+// @Description 创建用户
+// @Tags User
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -141,55 +120,91 @@ func (h *UserHandler) UserUpdate(ctx *gin.Context) {
 // @Success 200 {object} v1.Response
 // @Router /v1/admin/user [post]
 func (h *UserHandler) UserCreate(ctx *gin.Context) {
-	var req v1.AdminUserCreateRequest
+	var req v1.UserCreateRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	if err := h.userService.UserCreate(ctx, &req); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
+
 	v1.HandleSuccess(ctx, nil)
 }
 
-// AdminUserDelete godoc
-// @Summary 删除管理员用户
+// UserUpdate godoc
+// @Summary 更新用户
 // @Schemes
-// @Description 删除指定管理员用户
-// @Tags 用户模块
+// @Description 更新用户信息
+// @Tags User
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body v1.UserUpdateRequest true "参数"
+// @Success 200 {object} v1.Response
+// @Router /v1/admin/user [put]
+func (h *UserHandler) UserUpdate(ctx *gin.Context) {
+	var req v1.UserUpdateRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+
+	if err := h.userService.UserUpdate(ctx, &req); err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
+		return
+	}
+
+	v1.HandleSuccess(ctx, nil)
+}
+
+// UserDelete godoc
+// @Summary 删除用户
+// @Schemes
+// @Description 删除指定用户
+// @Tags User
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param id query uint true "用户ID"
 // @Success 200 {object} v1.Response
 // @Router /v1/admin/user [delete]
-func (h *UserHandler) AdminUserDelete(ctx *gin.Context) {
-	var req v1.AdminUserDeleteRequest
+func (h *UserHandler) UserDelete(ctx *gin.Context) {
+	var req v1.UserDeleteRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	if err := h.userService.UserDelete(ctx, req.ID); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 
 	}
+
 	v1.HandleSuccess(ctx, nil)
 }
 
-// GetAdminUser godoc
-// @Summary 获取管理用户信息
+// GetUser godoc
+// @Summary 获取用户信息
 // @Schemes
 // @Description
-// @Tags 用户模块
+// @Tags User
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} v1.GetAdminUserResponse
+// @Success 200 {object} v1.GetUserResponse
 // @Router /v1/admin/user [get]
-func (h *UserHandler) GetAdminUser(ctx *gin.Context) {
-	data, err := h.userService.GetUser(ctx, GetUserIdFromCtx(ctx))
+func (h *UserHandler) GetUser(ctx *gin.Context) {
+	userId := GetUserIdFromCtx(ctx)
+	if userId == 0 {
+		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
+		return
+	}
+
+	data, err := h.userService.GetUser(ctx, userId)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
@@ -198,24 +213,24 @@ func (h *UserHandler) GetAdminUser(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, data)
 }
 
-// ListMenus godoc
+// GetMenus godoc
 // @Summary 获取用户菜单
 // @Schemes
 // @Description 获取当前用户的菜单列表
-// @Tags 菜单模块
+// @Tags Menu
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} v1.GetMenuResponse
+// @Success 200 {object} v1.ListMenuResponse
 // @Router /v1/menus [get]
-func (h *UserHandler) ListMenus(ctx *gin.Context) {
+func (h *UserHandler) GetMenus(ctx *gin.Context) {
 	userId := GetUserIdFromCtx(ctx)
 	if userId == 0 {
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
 		return
 	}
 
-	data, err := h.userService.ListMenus(ctx, userId)
+	data, err := h.userService.GetMenusByUID(ctx, userId)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
@@ -228,7 +243,7 @@ func (h *UserHandler) ListMenus(ctx *gin.Context) {
 // @Summary 更新菜单
 // @Schemes
 // @Description 更新菜单信息
-// @Tags 菜单模块
+// @Tags Menu
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -241,10 +256,12 @@ func (h *UserHandler) MenuUpdate(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	if err := h.userService.MenuUpdate(ctx, &req); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
+
 	v1.HandleSuccess(ctx, nil)
 }
 
@@ -252,7 +269,7 @@ func (h *UserHandler) MenuUpdate(ctx *gin.Context) {
 // @Summary 创建菜单
 // @Schemes
 // @Description 创建新的菜单
-// @Tags 菜单模块
+// @Tags Menu
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -265,10 +282,12 @@ func (h *UserHandler) MenuCreate(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	if err := h.userService.MenuCreate(ctx, &req); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
+
 	v1.HandleSuccess(ctx, nil)
 }
 
@@ -276,7 +295,7 @@ func (h *UserHandler) MenuCreate(ctx *gin.Context) {
 // @Summary 删除菜单
 // @Schemes
 // @Description 删除指定菜单
-// @Tags 菜单模块
+// @Tags Menu
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -289,11 +308,13 @@ func (h *UserHandler) MenuDelete(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	if err := h.userService.MenuDelete(ctx, req.ID); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 
 	}
+
 	v1.HandleSuccess(ctx, nil)
 }
 
@@ -313,18 +334,45 @@ func (h *UserHandler) GetAdminMenus(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
-	// 过滤权限菜单
+
 	v1.HandleSuccess(ctx, data)
 }
 
+// ListRoles godoc
+// @Summary 获取角色列表
+// @Schemes
+// @Description 获取角色列表
+// @Tags Role
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param page query int true "页码"
+// @Param size query int true "每页数量"
+// @Param sid query string false "角色ID"
+// @Param name query string false "角色名称"
+// @Success 200 {object} v1.ListRolesResponse
+// @Router /v1/admin/roles [get]
 func (h *UserHandler) ListRoles(ctx *gin.Context) {
+	var req v1.ListRolesRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+
+	data, err := h.userService.ListRoles(ctx, &req)
+	if err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
+		return
+	}
+
+	v1.HandleSuccess(ctx, data)
 }
 
 // RoleUpdate godoc
 // @Summary 更新角色
 // @Schemes
 // @Description 更新角色信息
-// @Tags 角色模块
+// @Tags Role
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -337,10 +385,12 @@ func (h *UserHandler) RoleUpdate(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	if err := h.userService.RoleUpdate(ctx, &req); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
+
 	v1.HandleSuccess(ctx, nil)
 }
 
@@ -348,7 +398,7 @@ func (h *UserHandler) RoleUpdate(ctx *gin.Context) {
 // @Summary 创建角色
 // @Schemes
 // @Description 创建新的角色
-// @Tags 角色模块
+// @Tags Role
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -361,10 +411,12 @@ func (h *UserHandler) RoleCreate(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	if err := h.userService.RoleCreate(ctx, &req); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
+
 	v1.HandleSuccess(ctx, nil)
 }
 
@@ -372,7 +424,7 @@ func (h *UserHandler) RoleCreate(ctx *gin.Context) {
 // @Summary 删除角色
 // @Schemes
 // @Description 删除指定角色
-// @Tags 角色模块
+// @Tags Role
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -385,35 +437,38 @@ func (h *UserHandler) RoleDelete(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	if err := h.userService.RoleDelete(ctx, req.ID); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
+
 	v1.HandleSuccess(ctx, nil)
 }
 
-// GetApis godoc
+// ListApis godoc
 // @Summary 获取API列表
 // @Schemes
 // @Description 获取API列表
-// @Tags API模块
+// @Tags API
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param page query int true "页码"
-// @Param pageSize query int true "每页数量"
+// @Param size query int true "每页数量"
 // @Param group query string false "API分组"
 // @Param name query string false "API名称"
 // @Param path query string false "API路径"
 // @Param method query string false "请求方法"
-// @Success 200 {object} v1.GetApisResponse
+// @Success 200 {object} v1.ListApisResponse
 // @Router /v1/admin/apis [get]
-func (h *UserHandler) GetApis(ctx *gin.Context) {
-	var req v1.GetApisRequest
+func (h *UserHandler) ListApis(ctx *gin.Context) {
+	var req v1.ListApisRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	data, err := h.userService.ListApis(ctx, &req)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
@@ -423,35 +478,11 @@ func (h *UserHandler) GetApis(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, data)
 }
 
-// ApiUpdate godoc
-// @Summary 更新API
-// @Schemes
-// @Description 更新API信息
-// @Tags API模块
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Param request body v1.ApiUpdateRequest true "参数"
-// @Success 200 {object} v1.Response
-// @Router /v1/admin/api [put]
-func (h *UserHandler) ApiUpdate(ctx *gin.Context) {
-	var req v1.ApiUpdateRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
-		return
-	}
-	if err := h.userService.ApiUpdate(ctx, &req); err != nil {
-		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
-		return
-	}
-	v1.HandleSuccess(ctx, nil)
-}
-
 // ApiCreate godoc
 // @Summary 创建API
 // @Schemes
 // @Description 创建新的API
-// @Tags API模块
+// @Tags API
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -464,10 +495,38 @@ func (h *UserHandler) ApiCreate(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	if err := h.userService.ApiCreate(ctx, &req); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
+
+	v1.HandleSuccess(ctx, nil)
+}
+
+// ApiUpdate godoc
+// @Summary 更新API
+// @Schemes
+// @Description 更新API信息
+// @Tags API
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body v1.ApiUpdateRequest true "参数"
+// @Success 200 {object} v1.Response
+// @Router /v1/admin/api [put]
+func (h *UserHandler) ApiUpdate(ctx *gin.Context) {
+	var req v1.ApiUpdateRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+
+	if err := h.userService.ApiUpdate(ctx, &req); err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
+		return
+	}
+
 	v1.HandleSuccess(ctx, nil)
 }
 
@@ -475,7 +534,7 @@ func (h *UserHandler) ApiCreate(ctx *gin.Context) {
 // @Summary 删除API
 // @Schemes
 // @Description 删除指定API
-// @Tags API模块
+// @Tags API
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -488,10 +547,12 @@ func (h *UserHandler) ApiDelete(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	if err := h.userService.ApiDelete(ctx, req.ID); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
+
 	v1.HandleSuccess(ctx, nil)
 }
 
@@ -499,7 +560,7 @@ func (h *UserHandler) ApiDelete(ctx *gin.Context) {
 // @Summary 获取用户权限
 // @Schemes
 // @Description 获取当前用户的权限列表
-// @Tags 权限模块
+// @Tags Permission
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -511,7 +572,7 @@ func (h *UserHandler) GetUserPermissions(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
-	// 过滤权限菜单
+
 	v1.HandleSuccess(ctx, data)
 }
 
@@ -519,7 +580,7 @@ func (h *UserHandler) GetUserPermissions(ctx *gin.Context) {
 // @Summary 获取角色权限
 // @Schemes
 // @Description 获取指定角色的权限列表
-// @Tags 权限模块
+// @Tags Permission
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -532,11 +593,13 @@ func (h *UserHandler) GetRolePermissions(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	data, err := h.userService.GetRolePermissions(ctx, req.Role)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
+
 	v1.HandleSuccess(ctx, data)
 }
 
@@ -544,7 +607,7 @@ func (h *UserHandler) GetRolePermissions(ctx *gin.Context) {
 // @Summary 更新角色权限
 // @Schemes
 // @Description 更新指定角色的权限列表
-// @Tags 权限模块
+// @Tags Permission
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -557,10 +620,12 @@ func (h *UserHandler) UpdateRolePermission(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
+
 	err := h.userService.UpdateRolePermission(ctx, &req)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
+
 	v1.HandleSuccess(ctx, nil)
 }

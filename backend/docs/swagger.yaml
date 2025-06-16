@@ -1,25 +1,47 @@
 definitions:
-  backend_api_v1.GetProfileResponse:
+  CurrentUser:
+    properties:
+      avatar:
+        example: https://cravatar.cn/avatar/245467ef31b6f0addc72b039b94122a4?s=100&f=y&r=g
+        type: string
+      email:
+        example: zhangsan@163.com
+        type: string
+      nickname:
+        example: alan
+        type: string
+      role:
+        example: admin
+        type: string
+      userId:
+        example: "1"
+        type: string
+    type: object
+  LoginParams:
+    properties:
+      password:
+        example: "123456"
+        type: string
+      username:
+        example: zhangsan
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  LoginResult:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/backend_api_v1.GetProfileResponseData'
+        $ref: '#/definitions/backend_api_v1.LoginResponseData'
       message:
         type: string
     type: object
-  backend_api_v1.GetProfileResponseData:
-    properties:
-      nickname:
-        example: alan
-        type: string
-      userId:
-        type: string
-    type: object
-  backend_api_v1.LoginRequest:
+  RegisterParams:
     properties:
       email:
-        example: 1234@gmail.com
+        example: zhangsan@163.com
         type: string
       password:
         example: "123456"
@@ -28,12 +50,23 @@ definitions:
     - email
     - password
     type: object
-  backend_api_v1.LoginResponse:
+  UpdateProfileParams:
+    properties:
+      email:
+        example: zhangsan@163.com
+        type: string
+      nickname:
+        example: alan
+        type: string
+    required:
+    - email
+    type: object
+  backend_api_v1.GetProfileResponse:
     properties:
       code:
         type: integer
       data:
-        $ref: '#/definitions/backend_api_v1.LoginResponseData'
+        $ref: '#/definitions/CurrentUser'
       message:
         type: string
     type: object
@@ -50,18 +83,6 @@ definitions:
         type: array
       total:
         type: integer
-    type: object
-  backend_api_v1.RegisterRequest:
-    properties:
-      email:
-        example: 1234@gmail.com
-        type: string
-      password:
-        example: "123456"
-        type: string
-    required:
-    - email
-    - password
     type: object
   backend_api_v1.Response:
     properties:
@@ -126,17 +147,6 @@ definitions:
         example: https://webhook.example.com
         type: string
     type: object
-  backend_api_v1.UpdateProfileRequest:
-    properties:
-      email:
-        example: 1234@gmail.com
-        type: string
-      nickname:
-        example: alan
-        type: string
-    required:
-    - email
-    type: object
 host: localhost:8000
 info:
   contact:
@@ -148,42 +158,44 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Nunu Example API
+  title: Robot Shop
   version: 1.0.0
 paths:
   /login:
     post:
       consumes:
       - application/json
+      operationId: login
       parameters:
       - description: params
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/backend_api_v1.LoginRequest'
+          $ref: '#/definitions/LoginParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/backend_api_v1.LoginResponse'
+            $ref: '#/definitions/LoginResult'
       summary: 账号登录
       tags:
-      - 用户模块
+      - User
   /register:
     post:
       consumes:
       - application/json
       description: 目前只支持邮箱登录
+      operationId: register
       parameters:
       - description: params
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/backend_api_v1.RegisterRequest'
+          $ref: '#/definitions/RegisterParams'
       produces:
       - application/json
       responses:
@@ -193,7 +205,7 @@ paths:
             $ref: '#/definitions/backend_api_v1.Response'
       summary: 用户注册
       tags:
-      - 用户模块
+      - User
   /robot:
     get:
       consumes:
@@ -218,7 +230,7 @@ paths:
       - Bearer: []
       summary: 获取机器人列表
       tags:
-      - 机器人模块
+      - Robot
     post:
       consumes:
       - application/json
@@ -240,7 +252,7 @@ paths:
       - Bearer: []
       summary: 创建机器人
       tags:
-      - 机器人模块
+      - Robot
   /robot/{id}:
     delete:
       consumes:
@@ -262,7 +274,7 @@ paths:
       - Bearer: []
       summary: 删除机器人
       tags:
-      - 机器人模块
+      - Robot
     get:
       consumes:
       - application/json
@@ -283,7 +295,7 @@ paths:
       - Bearer: []
       summary: 获取机器人
       tags:
-      - 机器人模块
+      - Robot
     put:
       consumes:
       - application/json
@@ -310,11 +322,12 @@ paths:
       - Bearer: []
       summary: 更新机器人
       tags:
-      - 机器人模块
+      - Robot
   /user:
     get:
       consumes:
       - application/json
+      operationId: queryCurrentUser
       produces:
       - application/json
       responses:
@@ -326,17 +339,18 @@ paths:
       - Bearer: []
       summary: 获取用户信息
       tags:
-      - 用户模块
+      - User
     put:
       consumes:
       - application/json
+      operationId: updateProfile
       parameters:
       - description: params
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/backend_api_v1.UpdateProfileRequest'
+          $ref: '#/definitions/UpdateProfileParams'
       produces:
       - application/json
       responses:
@@ -348,7 +362,7 @@ paths:
       - Bearer: []
       summary: 修改用户信息
       tags:
-      - 用户模块
+      - User
 securityDefinitions:
   Bearer:
     in: header
