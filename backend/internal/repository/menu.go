@@ -7,8 +7,8 @@ import (
 
 type MenuRepository interface {
 	ListMenus(ctx context.Context) ([]model.Menu, error)
-	MenuUpdate(ctx context.Context, m *model.Menu) error
 	MenuCreate(ctx context.Context, m *model.Menu) error
+	MenuUpdate(ctx context.Context, m *model.Menu) error
 	MenuDelete(ctx context.Context, id uint) error
 }
 
@@ -32,12 +32,12 @@ func (r *menuRepository) ListMenus(ctx context.Context) ([]model.Menu, error) {
 	return menuList, nil
 }
 
-func (r *menuRepository) MenuUpdate(ctx context.Context, m *model.Menu) error {
-	return r.DB(ctx).Where("id = ?", m.ID).Save(m).Error
-}
-
 func (r *menuRepository) MenuCreate(ctx context.Context, m *model.Menu) error {
 	return r.DB(ctx).Save(m).Error
+}
+
+func (r *menuRepository) MenuUpdate(ctx context.Context, m *model.Menu) error {
+	return r.DB(ctx).Where("id = ?", m.ID).Save(m).Error
 }
 
 func (r *menuRepository) MenuDelete(ctx context.Context, id uint) error {

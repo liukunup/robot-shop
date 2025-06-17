@@ -6,10 +6,10 @@ import (
 )
 
 type RobotRepository interface {
-	GetRobot(ctx context.Context, id int64) (*model.Robot, error)
+	GetRobot(ctx context.Context, id uint) (*model.Robot, error)
 	CreateRobot(ctx context.Context, robot *model.Robot) error
 	UpdateRobot(ctx context.Context, robot *model.Robot) error
-	DeleteRobot(ctx context.Context, id int64) error
+	DeleteRobot(ctx context.Context, id uint) error
 	ListRobots(ctx context.Context, page int, size int, options map[string]interface{}) ([]*model.Robot, int64, error)
 }
 
@@ -25,7 +25,7 @@ type robotRepository struct {
 	*Repository
 }
 
-func (r *robotRepository) GetRobot(ctx context.Context, id int64) (*model.Robot, error) {
+func (r *robotRepository) GetRobot(ctx context.Context, id uint) (*model.Robot, error) {
 	var robot model.Robot
 	if err := r.DB(ctx).First(&robot, id).Error; err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (r *robotRepository) UpdateRobot(ctx context.Context, robot *model.Robot) e
 	return err
 }
 
-func (r *robotRepository) DeleteRobot(ctx context.Context, id int64) error {
+func (r *robotRepository) DeleteRobot(ctx context.Context, id uint) error {
 	err := r.DB(ctx).Delete(&model.Robot{}, id).Error
 	return err
 }

@@ -11,10 +11,10 @@ import (
 )
 
 type RobotService interface {
-	GetRobot(ctx context.Context, id int64) (*model.Robot, error)
+	GetRobot(ctx context.Context, id uint) (*model.Robot, error)
 	CreateRobot(ctx context.Context, req *v1.RobotRequest) (*model.Robot, error)
-	UpdateRobot(ctx context.Context, id int64, req *v1.RobotRequest) (*model.Robot, error)
-	DeleteRobot(ctx context.Context, id int64) error
+	UpdateRobot(ctx context.Context, id uint, req *v1.RobotRequest) (*model.Robot, error)
+	DeleteRobot(ctx context.Context, id uint) error
 	ListRobots(ctx context.Context, page int, size int, options map[string]interface{}) ([]*model.Robot, int64, error)
 }
 
@@ -33,7 +33,7 @@ type robotService struct {
 	robotRepository repository.RobotRepository
 }
 
-func (s *robotService) GetRobot(ctx context.Context, id int64) (*model.Robot, error) {
+func (s *robotService) GetRobot(ctx context.Context, id uint) (*model.Robot, error) {
 	return s.robotRepository.GetRobot(ctx, id)
 }
 
@@ -64,7 +64,7 @@ func (s *robotService) CreateRobot(ctx context.Context, req *v1.RobotRequest) (*
 	return robot, nil
 }
 
-func (s *robotService) UpdateRobot(ctx context.Context, id int64, req *v1.RobotRequest) (*model.Robot, error) {
+func (s *robotService) UpdateRobot(ctx context.Context, id uint, req *v1.RobotRequest) (*model.Robot, error) {
 	robot, err := s.robotRepository.GetRobot(ctx, id)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func (s *robotService) UpdateRobot(ctx context.Context, id int64, req *v1.RobotR
 	return robot, nil
 }
 
-func (s *robotService) DeleteRobot(ctx context.Context, id int64) error {
+func (s *robotService) DeleteRobot(ctx context.Context, id uint) error {
 	return s.robotRepository.DeleteRobot(ctx, id)
 }
 

@@ -4,12 +4,12 @@ type GetUserPermissionsData struct {
 	List []string `json:"list"`
 }
 
-type GetRolePermissionsData struct {
-	List []string `json:"list"`
-}
-
 type GetRolePermissionsRequest struct {
 	Role string `form:"role" binding:"required" example:"admin"`
+}
+
+type GetRolePermissionsData struct {
+	List []string `json:"list"`
 }
 
 type UpdateRolePermissionRequest struct {

@@ -10,9 +10,9 @@ import (
 )
 
 type RoleRepository interface {
-	ListRoles(ctx context.Context, req *v1.GetRoleListRequest) ([]model.Role, int64, error)
-	RoleUpdate(ctx context.Context, m *model.Role) error
+	ListRoles(ctx context.Context, req *v1.ListRolesRequest) ([]model.Role, int64, error)
 	RoleCreate(ctx context.Context, m *model.Role) error
+	RoleUpdate(ctx context.Context, m *model.Role) error
 	RoleDelete(ctx context.Context, id uint) error
 
 	GetRole(ctx context.Context, id uint) (model.Role, error)
@@ -36,7 +36,7 @@ type roleRepository struct {
 	*Repository
 }
 
-func (r *roleRepository) ListRoles(ctx context.Context, req *v1.GetRoleListRequest) ([]model.Role, int64, error) {
+func (r *roleRepository) ListRoles(ctx context.Context, req *v1.ListRolesRequest) ([]model.Role, int64, error) {
 	var list []model.Role
 	var total int64
 	scope := r.DB(ctx).Model(&model.Role{})
@@ -55,12 +55,12 @@ func (r *roleRepository) ListRoles(ctx context.Context, req *v1.GetRoleListReque
 	return list, total, nil
 }
 
-func (r *roleRepository) RoleUpdate(ctx context.Context, m *model.Role) error {
-	return r.DB(ctx).Where("id = ?", m.ID).UpdateColumn("name", m.Name).Error
-}
-
 func (r *roleRepository) RoleCreate(ctx context.Context, m *model.Role) error {
 	return r.DB(ctx).Create(m).Error
+}
+
+func (r *roleRepository) RoleUpdate(ctx context.Context, m *model.Role) error {
+	return r.DB(ctx).Where("id = ?", m.ID).UpdateColumn("name", m.Name).Error
 }
 
 func (r *roleRepository) RoleDelete(ctx context.Context, id uint) error {

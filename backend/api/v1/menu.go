@@ -39,7 +39,6 @@ type MenuCreateRequest struct {
 	KeepAlive  bool   `json:"keepAlive,omitempty"`  // 是否保活
 	HideInMenu bool   `json:"hideInMenu,omitempty"` // 是否保活
 	URL        string `json:"url,omitempty"`        // iframe模式下的跳转url，不能与path重复
-
 }
 
 type MenuUpdateRequest struct {

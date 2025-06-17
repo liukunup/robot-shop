@@ -3,8 +3,8 @@ package v1
 type ListRolesRequest struct {
 	Page     int    `form:"page" binding:"required" example:"1"`
 	PageSize int    `form:"pageSize" binding:"required" example:"10"`
-	Sid      string `form:"sid" binding:"" example:"1"`
-	Name     string `form:"name" binding:"" example:"Admin"`
+	Sid      string `form:"sid" example:"1"`
+	Name     string `form:"name" example:"Admin"`
 }
 
 type RoleDataItem struct {

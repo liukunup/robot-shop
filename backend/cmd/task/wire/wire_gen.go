@@ -21,7 +21,8 @@ import (
 
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), error) {
 	db := repository.NewDB(viperViper, logger)
-	repositoryRepository := repository.NewRepository(logger, db)
+	syncedEnforcer := repository.NewCasbinEnforcer(viperViper, logger, db)
+	repositoryRepository := repository.NewRepository(logger, db, syncedEnforcer)
 	transaction := repository.NewTransaction(repositoryRepository)
 	sidSid := sid.NewSid()
 	taskTask := task.NewTask(transaction, logger, sidSid)
@@ -35,7 +36,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewTransaction, repository.NewUserRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewTransaction, repository.NewUserRepository, repository.NewCasbinEnforcer)
 
 var taskSet = wire.NewSet(task.NewTask, task.NewUserTask)
 

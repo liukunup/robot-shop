@@ -25,19 +25,23 @@ import (
 
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), error) {
 	jwtJWT := jwt.NewJwt(viperViper)
-	handlerHandler := handler.NewHandler(logger)
 	db := repository.NewDB(viperViper, logger)
-	repositoryRepository := repository.NewRepository(logger, db)
+	syncedEnforcer := repository.NewCasbinEnforcer(viperViper, logger, db)
+	handlerHandler := handler.NewHandler(logger)
+	repositoryRepository := repository.NewRepository(logger, db, syncedEnforcer)
 	transaction := repository.NewTransaction(repositoryRepository)
 	sidSid := sid.NewSid()
 	serviceService := service.NewService(transaction, logger, sidSid, jwtJWT)
 	userRepository := repository.NewUserRepository(repositoryRepository)
-	userService := service.NewUserService(serviceService, userRepository)
+	menuRepository := repository.NewMenuRepository(repositoryRepository)
+	roleRepository := repository.NewRoleRepository(repositoryRepository)
+	apiRepository := repository.NewApiRepository(repositoryRepository)
+	userService := service.NewUserService(serviceService, userRepository, menuRepository, roleRepository, apiRepository)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
 	robotRepository := repository.NewRobotRepository(repositoryRepository)
 	robotService := service.NewRobotService(serviceService, robotRepository)
 	robotHandler := handler.NewRobotHandler(handlerHandler, robotService)
-	httpServer := server.NewHTTPServer(logger, viperViper, jwtJWT, userHandler, robotHandler)
+	httpServer := server.NewHTTPServer(logger, viperViper, jwtJWT, syncedEnforcer, userHandler, robotHandler)
 	jobJob := job.NewJob(transaction, logger, sidSid)
 	userJob := job.NewUserJob(jobJob, userRepository)
 	jobServer := server.NewJobServer(logger, userJob)
@@ -48,7 +52,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewTransaction, repository.NewUserRepository, repository.NewRobotRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewTransaction, repository.NewUserRepository, repository.NewRoleRepository, repository.NewApiRepository, repository.NewMenuRepository, repository.NewCasbinEnforcer, repository.NewRobotRepository)
 
 var serviceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewRobotService)
 

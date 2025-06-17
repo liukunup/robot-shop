@@ -33,7 +33,7 @@ type UserService interface {
 	MenuCreate(ctx context.Context, req *v1.MenuCreateRequest) error
 	MenuUpdate(ctx context.Context, req *v1.MenuUpdateRequest) error
 	MenuDelete(ctx context.Context, id uint) error
-	GetMenusByUID(ctx context.Context, uid uint) (*v1.ListMenuResponseData, error)
+	GetMenu(ctx context.Context, uid uint) (*v1.ListMenuResponseData, error)
 
 	// Role
 	ListRoles(ctx context.Context, req *v1.ListRolesRequest) (*v1.ListRolesResponseData, error)
@@ -78,26 +78,31 @@ type userService struct {
 }
 
 func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) error {
-	// check username
-	user, err := s.userRepository.GetUserByEmail(ctx, req.Email)
-	if err != nil {
-		return v1.ErrInternalServerError
-	}
-	if err == nil && user != nil {
+	// 检查邮箱是否已注册
+	_, err := s.userRepository.GetUserByEmail(ctx, req.Email)
+	if err == nil {
 		return v1.ErrEmailAlreadyUse
 	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return v1.ErrInternalServerError
+	}
 
+	// 创建密码哈希值
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	// Generate user ID
-	userId, err := s.sid.GenString()
-	if err != nil {
-		return err
+
+	// 从邮箱中提取默认用户名
+	parts := strings.Split(req.Email, "@")
+	if len(parts) != 2 {
+		return v1.ErrInternalServerError
 	}
-	user = &model.User{
-		Username: "",
+	defaultUsername := parts[0]
+
+	// 构造新用户对象
+	user := &model.User{
+		Username: defaultUsername,
 		Password: string(hashedPassword),
 		Email:    req.Email,
 	}
@@ -114,16 +119,23 @@ func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) err
 }
 
 func (s *userService) Login(ctx context.Context, req *v1.LoginRequest) (string, error) {
-	user, err := s.userRepository.GetUserByEmail(ctx, req.Email)
-	if err != nil || user == nil {
+	// 查找指定用户
+	user, err := s.userRepository.GetUserByUsernameOrEmail(ctx, req.Username, req.Username)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return "", v1.ErrUnauthorized
 	}
+	if err != nil {
+		return "", v1.ErrInternalServerError
+	}
 
+	// 验证密码
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
 		return "", err
 	}
-	token, err := s.jwt.GenToken(user.Id, time.Now().Add(time.Hour*24*90))
+
+	// 创建AccessToken
+	token, err := s.jwt.GenToken(user.ID, time.Now().Add(time.Hour*24*90))
 	if err != nil {
 		return "", err
 	}
@@ -313,7 +325,7 @@ func (s *userService) MenuDelete(ctx context.Context, id uint) error {
 	return s.menuRepository.MenuDelete(ctx, id)
 }
 
-func (s *userService) GetMenusByUID(ctx context.Context, uid uint) (*v1.ListMenuResponseData, error) {
+func (s *userService) GetMenu(ctx context.Context, uid uint) (*v1.ListMenuResponseData, error) {
 	menuList, err := s.menuRepository.ListMenus(ctx)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("GetMenuList error", zap.Error(err))
@@ -330,7 +342,7 @@ func (s *userService) GetMenusByUID(ctx context.Context, uid uint) (*v1.ListMenu
 	menuPermMap := map[string]struct{}{}
 	for _, permission := range permissions {
 		// 防呆设置，超管可以看到所有菜单
-		if convertor.ToString(uid) == constant.SuperAdminUserID {
+		if convertor.ToString(uid) == constant.AdminUserID {
 			menuPermMap[strings.TrimPrefix(permission[1], constant.MenuResourcePrefix)] = struct{}{}
 		} else {
 			if len(permission) == 3 && strings.HasPrefix(permission[1], constant.MenuResourcePrefix) {
@@ -421,11 +433,11 @@ func (s *userService) RoleDelete(ctx context.Context, id uint) error {
 }
 
 func (s *userService) ListApis(ctx context.Context, req *v1.ListApisRequest) (*v1.ListApisResponseData, error) {
-	list, total, err := s.apiRepository.GetApis(ctx, req)
+	list, total, err := s.apiRepository.ListApis(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	groups, err := s.apiRepository.GetApiGroups(ctx)
+	groups, err := s.apiRepository.ListApiGroups(ctx)
 	if err != nil {
 		return nil, err
 	}

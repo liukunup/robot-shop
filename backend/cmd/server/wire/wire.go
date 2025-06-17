@@ -24,6 +24,10 @@ var repositorySet = wire.NewSet(
 	repository.NewRepository,
 	repository.NewTransaction,
 	repository.NewUserRepository,
+	repository.NewRoleRepository,
+	repository.NewApiRepository,
+	repository.NewMenuRepository,
+	repository.NewCasbinEnforcer,
 	repository.NewRobotRepository,
 )
 

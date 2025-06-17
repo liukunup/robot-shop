@@ -10,13 +10,14 @@ import (
 	"backend/pkg/log"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
+	"backend/pkg/sid"
 )
 
 var repositorySet = wire.NewSet(
 	repository.NewDB,
 	//repository.NewRedis,
 	repository.NewRepository,
-	repository.NewUserRepository,
+	repository.NewCasbinEnforcer,
 )
 var serverSet = wire.NewSet(
 	server.NewMigrateServer,
@@ -36,6 +37,7 @@ func NewWire(*viper.Viper, *log.Logger) (*app.App, func(), error) {
 	panic(wire.Build(
 		repositorySet,
 		serverSet,
+		sid.NewSid,
 		newApp,
 	))
 }

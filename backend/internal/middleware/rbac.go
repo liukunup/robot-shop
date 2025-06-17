@@ -20,7 +20,7 @@ func AuthMiddleware(e *casbin.SyncedEnforcer) gin.HandlerFunc {
 			return
 		}
 		uid := v.(*jwt.MyCustomClaims).UserId
-		if convertor.ToString(uid) == constant.SuperAdminUserID {
+		if convertor.ToString(uid) == constant.AdminUserID {
 			// 防呆设计，超管跳过API权限检查
 			ctx.Next()
 			return

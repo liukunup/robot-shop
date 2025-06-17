@@ -197,7 +197,7 @@ func (h *UserHandler) UserDelete(ctx *gin.Context) {
 // @Security Bearer
 // @Success 200 {object} v1.GetUserResponse
 // @Router /v1/admin/user [get]
-func (h *UserHandler) GetUser(ctx *gin.Context) {
+func (h *UserHandler) GetCurrentUser(ctx *gin.Context) {
 	userId := GetUserIdFromCtx(ctx)
 	if userId == 0 {
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
@@ -213,56 +213,24 @@ func (h *UserHandler) GetUser(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, data)
 }
 
-// GetMenus godoc
-// @Summary 获取用户菜单
+// ListMenus godoc
+// @Summary 获取管理员菜单
 // @Schemes
-// @Description 获取当前用户的菜单列表
-// @Tags Menu
+// @Description 获取管理员菜单列表
+// @Tags 菜单模块
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} v1.ListMenuResponse
-// @Router /v1/menus [get]
-func (h *UserHandler) GetMenus(ctx *gin.Context) {
-	userId := GetUserIdFromCtx(ctx)
-	if userId == 0 {
-		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
-		return
-	}
-
-	data, err := h.userService.GetMenusByUID(ctx, userId)
+// @Router /v1/admin/menus [get]
+func (h *UserHandler) ListMenus(ctx *gin.Context) {
+	data, err := h.userService.ListMenus(ctx)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
 	v1.HandleSuccess(ctx, data)
-}
-
-// MenuUpdate godoc
-// @Summary 更新菜单
-// @Schemes
-// @Description 更新菜单信息
-// @Tags Menu
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Param request body v1.MenuUpdateRequest true "参数"
-// @Success 200 {object} v1.Response
-// @Router /v1/admin/menu [put]
-func (h *UserHandler) MenuUpdate(ctx *gin.Context) {
-	var req v1.MenuUpdateRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
-		return
-	}
-
-	if err := h.userService.MenuUpdate(ctx, &req); err != nil {
-		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
-		return
-	}
-
-	v1.HandleSuccess(ctx, nil)
 }
 
 // MenuCreate godoc
@@ -284,6 +252,32 @@ func (h *UserHandler) MenuCreate(ctx *gin.Context) {
 	}
 
 	if err := h.userService.MenuCreate(ctx, &req); err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
+		return
+	}
+
+	v1.HandleSuccess(ctx, nil)
+}
+
+// MenuUpdate godoc
+// @Summary 更新菜单
+// @Schemes
+// @Description 更新菜单信息
+// @Tags Menu
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body v1.MenuUpdateRequest true "参数"
+// @Success 200 {object} v1.Response
+// @Router /v1/admin/menu [put]
+func (h *UserHandler) MenuUpdate(ctx *gin.Context) {
+	var req v1.MenuUpdateRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+
+	if err := h.userService.MenuUpdate(ctx, &req); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
@@ -318,18 +312,24 @@ func (h *UserHandler) MenuDelete(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, nil)
 }
 
-// GetAdminMenus godoc
-// @Summary 获取管理员菜单
+// GetMenus godoc
+// @Summary 获取用户菜单
 // @Schemes
-// @Description 获取管理员菜单列表
-// @Tags 菜单模块
+// @Description 获取当前用户的菜单列表
+// @Tags Menu
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} v1.GetMenuResponse
-// @Router /v1/admin/menus [get]
-func (h *UserHandler) GetAdminMenus(ctx *gin.Context) {
-	data, err := h.userService.GetAdminMenus(ctx)
+// @Success 200 {object} v1.ListMenuResponse
+// @Router /v1/menus [get]
+func (h *UserHandler) GetCurrentMenu(ctx *gin.Context) {
+	userId := GetUserIdFromCtx(ctx)
+	if userId == 0 {
+		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
+		return
+	}
+
+	data, err := h.userService.GetMenu(ctx, userId)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
@@ -368,32 +368,6 @@ func (h *UserHandler) ListRoles(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, data)
 }
 
-// RoleUpdate godoc
-// @Summary 更新角色
-// @Schemes
-// @Description 更新角色信息
-// @Tags Role
-// @Accept json
-// @Produce json
-// @Security Bearer
-// @Param request body v1.RoleUpdateRequest true "参数"
-// @Success 200 {object} v1.Response
-// @Router /v1/admin/role [put]
-func (h *UserHandler) RoleUpdate(ctx *gin.Context) {
-	var req v1.RoleUpdateRequest
-	if err := ctx.ShouldBind(&req); err != nil {
-		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
-		return
-	}
-
-	if err := h.userService.RoleUpdate(ctx, &req); err != nil {
-		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
-		return
-	}
-
-	v1.HandleSuccess(ctx, nil)
-}
-
 // RoleCreate godoc
 // @Summary 创建角色
 // @Schemes
@@ -413,6 +387,32 @@ func (h *UserHandler) RoleCreate(ctx *gin.Context) {
 	}
 
 	if err := h.userService.RoleCreate(ctx, &req); err != nil {
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
+		return
+	}
+
+	v1.HandleSuccess(ctx, nil)
+}
+
+// RoleUpdate godoc
+// @Summary 更新角色
+// @Schemes
+// @Description 更新角色信息
+// @Tags Role
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param request body v1.RoleUpdateRequest true "参数"
+// @Success 200 {object} v1.Response
+// @Router /v1/admin/role [put]
+func (h *UserHandler) RoleUpdate(ctx *gin.Context) {
+	var req v1.RoleUpdateRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+
+	if err := h.userService.RoleUpdate(ctx, &req); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}

@@ -7,11 +7,12 @@ import (
 )
 
 type ApiRepository interface {
-	GetApis(ctx context.Context, req *v1.GetApisRequest) ([]model.Api, int64, error)
-	GetApiGroups(ctx context.Context) ([]string, error)
-	ApiUpdate(ctx context.Context, m *model.Api) error
+	ListApis(ctx context.Context, req *v1.ListApisRequest) ([]model.Api, int64, error)
 	ApiCreate(ctx context.Context, m *model.Api) error
+	ApiUpdate(ctx context.Context, m *model.Api) error
 	ApiDelete(ctx context.Context, id uint) error
+
+	ListApiGroups(ctx context.Context) ([]string, error)
 }
 
 func NewApiRepository(
@@ -26,7 +27,7 @@ type apiRepository struct {
 	*Repository
 }
 
-func (r *apiRepository) GetApis(ctx context.Context, req *v1.GetApisRequest) ([]model.Api, int64, error) {
+func (r *apiRepository) ListApis(ctx context.Context, req *v1.ListApisRequest) ([]model.Api, int64, error) {
 	var list []model.Api
 	var total int64
 	scope := r.DB(ctx).Model(&model.Api{})
@@ -51,22 +52,22 @@ func (r *apiRepository) GetApis(ctx context.Context, req *v1.GetApisRequest) ([]
 	return list, total, nil
 }
 
-func (r *apiRepository) GetApiGroups(ctx context.Context) ([]string, error) {
-	res := make([]string, 0)
-	if err := r.DB(ctx).Model(&model.Api{}).Group("`group`").Pluck("`group`", &res).Error; err != nil {
-		return nil, err
-	}
-	return res, nil
+func (r *apiRepository) ApiCreate(ctx context.Context, m *model.Api) error {
+	return r.DB(ctx).Create(m).Error
 }
 
 func (r *apiRepository) ApiUpdate(ctx context.Context, m *model.Api) error {
 	return r.DB(ctx).Where("id = ?", m.ID).Save(m).Error
 }
 
-func (r *apiRepository) ApiCreate(ctx context.Context, m *model.Api) error {
-	return r.DB(ctx).Create(m).Error
-}
-
 func (r *apiRepository) ApiDelete(ctx context.Context, id uint) error {
 	return r.DB(ctx).Where("id = ?", id).Delete(&model.Api{}).Error
+}
+
+func (r *apiRepository) ListApiGroups(ctx context.Context) ([]string, error) {
+	res := make([]string, 0)
+	if err := r.DB(ctx).Model(&model.Api{}).Group("`group`").Pluck("`group`", &res).Error; err != nil {
+		return nil, err
+	}
+	return res, nil
 }

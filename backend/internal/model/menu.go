@@ -20,5 +20,5 @@ type Menu struct {
 }
 
 func (m *Menu) TableName() string {
-    return "menu"
+	return "menu"
 }

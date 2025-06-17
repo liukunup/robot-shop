@@ -47,6 +47,7 @@ func newError(code int, msg string) error {
 	errorCodeMap[err] = code
 	return err
 }
+
 func (e Error) Error() string {
 	return e.Message
 }

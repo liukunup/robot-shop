@@ -20,6 +20,7 @@ var repositorySet = wire.NewSet(
 	repository.NewRepository,
 	repository.NewTransaction,
 	repository.NewUserRepository,
+	repository.NewCasbinEnforcer,
 )
 
 var taskSet = wire.NewSet(

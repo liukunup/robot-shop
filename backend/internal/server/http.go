@@ -8,11 +8,8 @@ import (
 	"backend/pkg/jwt"
 	"backend/pkg/log"
 	"backend/pkg/server/http"
-	"backend/web"
-	nethttp "net/http"
 
 	"github.com/casbin/casbin/v2"
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	swaggerfiles "github.com/swaggo/files"
@@ -34,17 +31,6 @@ func NewHTTPServer(
 		http.WithServerHost(conf.GetString("http.host")),
 		http.WithServerPort(conf.GetInt("http.port")),
 	)
-
-	// 设置前端静态资源
-	s.Use(static.Serve("/", static.EmbedFolder(web.Assets(), "dist")))
-	s.NoRoute(func(c *gin.Context) {
-		indexPageData, err := web.Assets().ReadFile("dist/index.html")
-		if err != nil {
-			c.String(nethttp.StatusNotFound, "404 page not found")
-			return
-		}
-		c.Data(nethttp.StatusOK, "text/html; charset=utf-8", indexPageData)
-	})
 
 	// swagger doc
 	docs.SwaggerInfo.BasePath = "/"
@@ -81,27 +67,29 @@ func NewHTTPServer(
 		strictAuthRouter := v1.Group("/").Use(middleware.StrictAuth(jwt, logger), middleware.AuthMiddleware(e))
 		{
 			// User
-			strictAuthRouter.GET("/admin/users", userHandler.GetAdminUsers)
-			strictAuthRouter.GET("/admin/user", userHandler.GetUser)
-			strictAuthRouter.PUT("/admin/user", userHandler.UserUpdate)
+			strictAuthRouter.GET("/admin/users", userHandler.ListUsers)
 			strictAuthRouter.POST("/admin/user", userHandler.UserCreate)
+			strictAuthRouter.GET("/admin/user", userHandler.GetCurrentUser)
+			strictAuthRouter.PUT("/admin/user", userHandler.UserUpdate)
 			strictAuthRouter.DELETE("/admin/user", userHandler.UserDelete)
-			strictAuthRouter.GET("/admin/user/permissions", userHandler.GetUserPermissions)
-
-			// Menu
-			strictAuthRouter.GET("/menus", userHandler.ListMenus)
-			strictAuthRouter.GET("/admin/menus", userHandler.GetAdminMenus)
-			strictAuthRouter.POST("/admin/menu", userHandler.MenuCreate)
-			strictAuthRouter.PUT("/admin/menu", userHandler.MenuUpdate)
-			strictAuthRouter.DELETE("/admin/menu", userHandler.MenuDelete)
 
 			// Role
-			strictAuthRouter.GET("/admin/role/permissions", userHandler.GetRolePermissions)
-			strictAuthRouter.PUT("/admin/role/permission", userHandler.UpdateRolePermission)
 			strictAuthRouter.GET("/admin/roles", userHandler.ListRoles)
 			strictAuthRouter.POST("/admin/role", userHandler.RoleCreate)
 			strictAuthRouter.PUT("/admin/role", userHandler.RoleUpdate)
 			strictAuthRouter.DELETE("/admin/role", userHandler.RoleDelete)
+
+			// Permission
+			strictAuthRouter.GET("/admin/user/permissions", userHandler.GetUserPermissions)
+			strictAuthRouter.GET("/admin/role/permissions", userHandler.GetRolePermissions)
+			strictAuthRouter.PUT("/admin/role/permission", userHandler.UpdateRolePermission)
+
+			// Menu
+			strictAuthRouter.GET("/menus", userHandler.ListMenus)
+			strictAuthRouter.POST("/admin/menu", userHandler.MenuCreate)
+			strictAuthRouter.GET("/admin/menus", userHandler.GetCurrentMenu)
+			strictAuthRouter.PUT("/admin/menu", userHandler.MenuUpdate)
+			strictAuthRouter.DELETE("/admin/menu", userHandler.MenuDelete)
 
 			// API
 			strictAuthRouter.GET("/admin/apis", userHandler.ListApis)

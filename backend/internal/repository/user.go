@@ -92,7 +92,7 @@ func (r *userRepository) GetUserByEmail(ctx context.Context, email string) (mode
 
 func (r *userRepository) GetUserByUsernameOrEmail(ctx context.Context, username string, email string) (model.User, error) {
 	m := model.User{}
-	return m, r.DB(ctx).Where("email = ?", email).First(&m).Error
+	return m, r.DB(ctx).Where("username = ? OR email = ?", username, email).First(&m).Error
 }
 
 func (r *userRepository) GetUserPermissions(ctx context.Context, uid uint) ([][]string, error) {

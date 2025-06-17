@@ -44,14 +44,14 @@ func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 		return
 	}
 
-	robot, err := h.robotService.GetRobot(ctx, id)
+	robot, err := h.robotService.GetRobot(ctx, uint(id))
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	v1.HandleSuccess(ctx, v1.RobotResponseData{
-		Id:        robot.Id,
+		Id:        robot.ID,
 		RobotId:   robot.RobotId,
 		Name:      robot.Name,
 		Desc:      robot.Desc,
@@ -90,7 +90,7 @@ func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 	}
 
 	v1.HandleSuccess(ctx, v1.RobotResponseData{
-		Id:        robot.Id,
+		Id:        robot.ID,
 		RobotId:   robot.RobotId,
 		Name:      robot.Name,
 		Desc:      robot.Desc,
@@ -130,14 +130,14 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 		return
 	}
 
-	robot, err := h.robotService.UpdateRobot(ctx, id, &req)
+	robot, err := h.robotService.UpdateRobot(ctx, uint(id), &req)
 	if err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	v1.HandleSuccess(ctx, v1.RobotResponseData{
-		Id:        robot.Id,
+		Id:        robot.ID,
 		RobotId:   robot.RobotId,
 		Name:      robot.Name,
 		Desc:      robot.Desc,
@@ -170,7 +170,7 @@ func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.robotService.DeleteRobot(ctx, id); err != nil {
+	if err := h.robotService.DeleteRobot(ctx, uint(id)); err != nil {
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -216,10 +216,10 @@ func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 		return
 	}
 
-	items := make([]v1.RobotResponseData, 0)
+	list := make([]v1.RobotResponseData, 0)
 	for _, robot := range robots {
-		items = append(items, v1.RobotResponseData{
-			Id:        robot.Id,
+		list = append(list, v1.RobotResponseData{
+			Id:        robot.ID,
 			RobotId:   robot.RobotId,
 			Name:      robot.Name,
 			Desc:      robot.Desc,
@@ -234,7 +234,7 @@ func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 	}
 
 	v1.HandleSuccess(ctx, v1.PageResponse[v1.RobotResponseData]{
-		Items: items,
+		List:  list,
 		Total: total,
 	})
 }

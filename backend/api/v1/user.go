@@ -17,6 +17,15 @@ type LoginResponse struct {
 	Data LoginResponseData
 } // @name LoginResult
 
+type ListUsersRequest struct {
+	Page     int    `form:"page" binding:"required" example:"1"`
+	Size     int    `form:"size" binding:"required" example:"10"`
+	Username string `json:"username" binding:"" example:"张三"`
+	Nickname string `json:"nickname" binding:"" example:"小Baby"`
+	Phone    string `form:"phone" binding:"" example:"1858888888"`
+	Email    string `form:"email" binding:"" example:"1234@gmail.com"`
+}
+
 type UserDataItem struct {
 	ID        uint     `json:"id"`
 	Username  string   `json:"username" binding:"required" example:"张三"`
@@ -27,15 +36,6 @@ type UserDataItem struct {
 	Roles     []string `json:"roles" example:""`
 	UpdatedAt string   `json:"updatedAt"`
 	CreatedAt string   `json:"createdAt"`
-}
-
-type ListUsersRequest struct {
-	Page     int    `form:"page" binding:"required" example:"1"`
-	Size     int    `form:"size" binding:"required" example:"10"`
-	Username string `json:"username" binding:"" example:"张三"`
-	Nickname string `json:"nickname" binding:"" example:"小Baby"`
-	Phone    string `form:"phone" binding:"" example:"1858888888"`
-	Email    string `form:"email" binding:"" example:"1234@gmail.com"`
 }
 
 type ListUsersResponseData struct {
