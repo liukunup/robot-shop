@@ -57,7 +57,7 @@ func (r *userRepository) ListUsers(ctx context.Context, req *v1.ListUsersRequest
 	if err := scope.Count(&total).Error; err != nil {
 		return nil, total, err
 	}
-	if err := scope.Offset((req.Page - 1) * req.Size).Limit(req.Size).Order("id DESC").Find(&list).Error; err != nil {
+	if err := scope.Offset((req.Page - 1) * req.PageSize).Limit(req.PageSize).Order("id DESC").Find(&list).Error; err != nil {
 		return nil, total, err
 	}
 	return list, total, nil

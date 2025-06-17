@@ -1,4 +1,34 @@
 definitions:
+  CurrentUser:
+    properties:
+      avatar:
+        example: https://example.com/avatar.jpg
+        type: string
+      createdAt:
+        type: string
+      email:
+        example: 1234@gmail.com
+        type: string
+      id:
+        type: integer
+      nickname:
+        example: 小Baby
+        type: string
+      phone:
+        example: "1858888888"
+        type: string
+      roles:
+        example:
+        - ""
+        items:
+          type: string
+        type: array
+      updatedAt:
+        type: string
+      username:
+        example: 张三
+        type: string
+    type: object
   LoginParams:
     properties:
       password:
@@ -13,11 +43,7 @@ definitions:
     type: object
   LoginResult:
     properties:
-      code:
-        type: integer
-      data:
-        $ref: '#/definitions/backend_api_v1.LoginResponseData'
-      message:
+      accessToken:
         type: string
     type: object
   RegisterParams:
@@ -103,39 +129,13 @@ definitions:
       code:
         type: integer
       data:
-        $ref: '#/definitions/backend_api_v1.GetUserResponseData'
+        $ref: '#/definitions/CurrentUser'
       message:
         type: string
-    type: object
-  backend_api_v1.GetUserResponseData:
-    properties:
-      createdAt:
-        type: string
-      email:
-        example: 1234@gmail.com
-        type: string
-      id:
+      showType:
         type: integer
-      nickname:
-        example: 小Baby
-        type: string
-      password:
-        example: "123456"
-        type: string
-      phone:
-        example: "1858888888"
-        type: string
-      roles:
-        example:
-        - ""
-        items:
-          type: string
-        type: array
-      updatedAt:
-        type: string
-      username:
-        example: 张三
-        type: string
+      success:
+        type: boolean
     type: object
   backend_api_v1.ListApisResponse:
     properties:
@@ -145,6 +145,10 @@ definitions:
         $ref: '#/definitions/backend_api_v1.ListApisResponseData'
       message:
         type: string
+      showType:
+        type: integer
+      success:
+        type: boolean
     type: object
   backend_api_v1.ListApisResponseData:
     properties:
@@ -167,6 +171,10 @@ definitions:
         $ref: '#/definitions/backend_api_v1.ListMenuResponseData'
       message:
         type: string
+      showType:
+        type: integer
+      success:
+        type: boolean
     type: object
   backend_api_v1.ListMenuResponseData:
     properties:
@@ -183,6 +191,10 @@ definitions:
         $ref: '#/definitions/backend_api_v1.ListRolesResponseData'
       message:
         type: string
+      showType:
+        type: integer
+      success:
+        type: boolean
     type: object
   backend_api_v1.ListRolesResponseData:
     properties:
@@ -201,6 +213,10 @@ definitions:
         $ref: '#/definitions/backend_api_v1.ListUsersResponseData'
       message:
         type: string
+      showType:
+        type: integer
+      success:
+        type: boolean
     type: object
   backend_api_v1.ListUsersResponseData:
     properties:
@@ -211,10 +227,18 @@ definitions:
       total:
         type: integer
     type: object
-  backend_api_v1.LoginResponseData:
+  backend_api_v1.LoginResponse:
     properties:
-      accessToken:
+      code:
+        type: integer
+      data:
+        $ref: '#/definitions/LoginResult'
+      message:
         type: string
+      showType:
+        type: integer
+      success:
+        type: boolean
     type: object
   backend_api_v1.MenuCreateRequest:
     properties:
@@ -360,6 +384,10 @@ definitions:
       data: {}
       message:
         type: string
+      showType:
+        type: integer
+      success:
+        type: boolean
     type: object
   backend_api_v1.RobotRequest:
     properties:
@@ -511,9 +539,6 @@ definitions:
       nickname:
         example: 小Baby
         type: string
-      password:
-        example: "123456"
-        type: string
       phone:
         example: "1858888888"
         type: string
@@ -531,7 +556,6 @@ definitions:
     required:
     - email
     - nickname
-    - password
     - username
     type: object
   backend_api_v1.UserUpdateRequest:
@@ -576,10 +600,491 @@ info:
   title: Robot Shop
   version: 1.0.0
 paths:
+  /admin/api:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定API
+      parameters:
+      - description: API ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 删除API
+      tags:
+      - API
+    post:
+      consumes:
+      - application/json
+      description: 创建新的API
+      parameters:
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.ApiCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 创建API
+      tags:
+      - API
+    put:
+      consumes:
+      - application/json
+      description: 更新API信息
+      parameters:
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.ApiUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新API
+      tags:
+      - API
+  /admin/apis:
+    get:
+      consumes:
+      - application/json
+      description: 获取API列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      - description: API分组
+        in: query
+        name: group
+        type: string
+      - description: API名称
+        in: query
+        name: name
+        type: string
+      - description: API路径
+        in: query
+        name: path
+        type: string
+      - description: 请求方法
+        in: query
+        name: method
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.ListApisResponse'
+      security:
+      - Bearer: []
+      summary: 获取API列表
+      tags:
+      - API
+  /admin/menu:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定菜单
+      parameters:
+      - description: 菜单ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 删除菜单
+      tags:
+      - Menu
+    post:
+      consumes:
+      - application/json
+      description: 创建新的菜单
+      parameters:
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.MenuCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 创建菜单
+      tags:
+      - Menu
+    put:
+      consumes:
+      - application/json
+      description: 更新菜单信息
+      parameters:
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.MenuUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新菜单
+      tags:
+      - Menu
+  /admin/menus:
+    get:
+      consumes:
+      - application/json
+      description: 获取菜单列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.ListMenuResponse'
+      security:
+      - Bearer: []
+      summary: 获取菜单列表
+      tags:
+      - Menu
+  /admin/role:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定角色
+      parameters:
+      - description: 角色ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 删除角色
+      tags:
+      - Role
+    post:
+      consumes:
+      - application/json
+      description: 创建新的角色
+      parameters:
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RoleCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 创建角色
+      tags:
+      - Role
+    put:
+      consumes:
+      - application/json
+      description: 更新角色信息
+      parameters:
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RoleUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新角色
+      tags:
+      - Role
+  /admin/role/permissions:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定角色的权限列表
+      parameters:
+      - description: 角色名称
+        in: query
+        name: role
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.GetRolePermissionsData'
+      security:
+      - Bearer: []
+      summary: 获取角色权限
+      tags:
+      - Role
+    put:
+      consumes:
+      - application/json
+      description: 更新指定角色的权限列表
+      parameters:
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.UpdateRolePermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新角色权限
+      tags:
+      - Role
+  /admin/roles:
+    get:
+      consumes:
+      - application/json
+      description: 获取角色列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      - description: 角色ID
+        in: query
+        name: sid
+        type: string
+      - description: 角色名称
+        in: query
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.ListRolesResponse'
+      security:
+      - Bearer: []
+      summary: 获取角色列表
+      tags:
+      - Role
+  /admin/user:
+    delete:
+      consumes:
+      - application/json
+      description: 删除用户
+      parameters:
+      - description: 用户ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 删除用户
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: 创建用户
+      parameters:
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.UserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 创建用户
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: 更新用户
+      parameters:
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新用户
+      tags:
+      - User
+  /admin/user/permissions:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的权限列表
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.GetUserPermissionsData'
+      security:
+      - Bearer: []
+      summary: 获取用户权限
+      tags:
+      - User
+  /admin/users:
+    get:
+      consumes:
+      - application/json
+      description: 获取用户列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 每页数量
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: 昵称
+        in: query
+        name: nickname
+        type: string
+      - description: 手机号
+        in: query
+        name: phone
+        type: string
+      - description: 邮箱
+        in: query
+        name: email
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.ListUsersResponse'
+      security:
+      - Bearer: []
+      summary: 获取用户列表
+      tags:
+      - User
   /login:
     post:
       consumes:
       - application/json
+      description: 支持用户名或邮箱登录
       operationId: login
       parameters:
       - description: params
@@ -594,15 +1099,33 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/LoginResult'
+            $ref: '#/definitions/backend_api_v1.LoginResponse'
       summary: 账号登录
       tags:
       - User
+  /menu:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的菜单列表
+      operationId: queryCurrentMenu
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.ListMenuResponse'
+      security:
+      - Bearer: []
+      summary: 获取当前用户菜单
+      tags:
+      - Menu
   /register:
     post:
       consumes:
       - application/json
-      description: 目前只支持邮箱登录
+      description: 目前只支持邮箱注册
       operationId: register
       parameters:
       - description: params
@@ -738,382 +1261,12 @@ paths:
       summary: 更新机器人
       tags:
       - Robot
-  /v1/admin/api:
-    delete:
-      consumes:
-      - application/json
-      description: 删除指定API
-      parameters:
-      - description: API ID
-        in: query
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 删除API
-      tags:
-      - API
-    post:
-      consumes:
-      - application/json
-      description: 创建新的API
-      parameters:
-      - description: 参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/backend_api_v1.ApiCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 创建API
-      tags:
-      - API
-    put:
-      consumes:
-      - application/json
-      description: 更新API信息
-      parameters:
-      - description: 参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/backend_api_v1.ApiUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 更新API
-      tags:
-      - API
-  /v1/admin/apis:
+  /user:
     get:
       consumes:
       - application/json
-      description: 获取API列表
-      parameters:
-      - description: 页码
-        in: query
-        name: page
-        required: true
-        type: integer
-      - description: 每页数量
-        in: query
-        name: size
-        required: true
-        type: integer
-      - description: API分组
-        in: query
-        name: group
-        type: string
-      - description: API名称
-        in: query
-        name: name
-        type: string
-      - description: API路径
-        in: query
-        name: path
-        type: string
-      - description: 请求方法
-        in: query
-        name: method
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.ListApisResponse'
-      security:
-      - Bearer: []
-      summary: 获取API列表
-      tags:
-      - API
-  /v1/admin/menu:
-    delete:
-      consumes:
-      - application/json
-      description: 删除指定菜单
-      parameters:
-      - description: 菜单ID
-        in: query
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 删除菜单
-      tags:
-      - Menu
-    post:
-      consumes:
-      - application/json
-      description: 创建新的菜单
-      parameters:
-      - description: 参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/backend_api_v1.MenuCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 创建菜单
-      tags:
-      - Menu
-    put:
-      consumes:
-      - application/json
-      description: 更新菜单信息
-      parameters:
-      - description: 参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/backend_api_v1.MenuUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 更新菜单
-      tags:
-      - Menu
-  /v1/admin/menus:
-    get:
-      consumes:
-      - application/json
-      description: 获取管理员菜单列表
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.ListMenuResponse'
-      security:
-      - Bearer: []
-      summary: 获取管理员菜单
-      tags:
-      - 菜单模块
-  /v1/admin/role:
-    delete:
-      consumes:
-      - application/json
-      description: 删除指定角色
-      parameters:
-      - description: 角色ID
-        in: query
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 删除角色
-      tags:
-      - Role
-    post:
-      consumes:
-      - application/json
-      description: 创建新的角色
-      parameters:
-      - description: 参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/backend_api_v1.RoleCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 创建角色
-      tags:
-      - Role
-    put:
-      consumes:
-      - application/json
-      description: 更新角色信息
-      parameters:
-      - description: 参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/backend_api_v1.RoleUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 更新角色
-      tags:
-      - Role
-  /v1/admin/role/permissions:
-    get:
-      consumes:
-      - application/json
-      description: 获取指定角色的权限列表
-      parameters:
-      - description: 角色名称
-        in: query
-        name: role
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.GetRolePermissionsData'
-      security:
-      - Bearer: []
-      summary: 获取角色权限
-      tags:
-      - Permission
-    put:
-      consumes:
-      - application/json
-      description: 更新指定角色的权限列表
-      parameters:
-      - description: 参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/backend_api_v1.UpdateRolePermissionRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 更新角色权限
-      tags:
-      - Permission
-  /v1/admin/roles:
-    get:
-      consumes:
-      - application/json
-      description: 获取角色列表
-      parameters:
-      - description: 页码
-        in: query
-        name: page
-        required: true
-        type: integer
-      - description: 每页数量
-        in: query
-        name: size
-        required: true
-        type: integer
-      - description: 角色ID
-        in: query
-        name: sid
-        type: string
-      - description: 角色名称
-        in: query
-        name: name
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.ListRolesResponse'
-      security:
-      - Bearer: []
-      summary: 获取角色列表
-      tags:
-      - Role
-  /v1/admin/user:
-    delete:
-      consumes:
-      - application/json
-      description: 删除指定用户
-      parameters:
-      - description: 用户ID
-        in: query
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 删除用户
-      tags:
-      - User
-    get:
-      consumes:
-      - application/json
+      description: 获取当前用户的详细信息
+      operationId: queryCurrentUser
       produces:
       - application/json
       responses:
@@ -1123,133 +1276,9 @@ paths:
             $ref: '#/definitions/backend_api_v1.GetUserResponse'
       security:
       - Bearer: []
-      summary: 获取用户信息
+      summary: 获取当前用户
       tags:
       - User
-    post:
-      consumes:
-      - application/json
-      description: 创建用户
-      parameters:
-      - description: 参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/backend_api_v1.UserCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 创建用户
-      tags:
-      - User
-    put:
-      consumes:
-      - application/json
-      description: 更新用户信息
-      parameters:
-      - description: 参数
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/backend_api_v1.UserUpdateRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.Response'
-      security:
-      - Bearer: []
-      summary: 更新用户
-      tags:
-      - User
-  /v1/admin/user/permissions:
-    get:
-      consumes:
-      - application/json
-      description: 获取当前用户的权限列表
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.GetUserPermissionsData'
-      security:
-      - Bearer: []
-      summary: 获取用户权限
-      tags:
-      - Permission
-  /v1/admin/users:
-    get:
-      consumes:
-      - application/json
-      description: 获取用户列表
-      parameters:
-      - description: 页码
-        in: query
-        name: page
-        required: true
-        type: integer
-      - description: 每页数量
-        in: query
-        name: size
-        required: true
-        type: integer
-      - description: 用户名
-        in: query
-        name: username
-        type: string
-      - description: 昵称
-        in: query
-        name: nickname
-        type: string
-      - description: 手机号
-        in: query
-        name: phone
-        type: string
-      - description: 邮箱
-        in: query
-        name: email
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.ListUsersResponse'
-      security:
-      - Bearer: []
-      summary: 获取用户列表
-      tags:
-      - User
-  /v1/menus:
-    get:
-      consumes:
-      - application/json
-      description: 获取当前用户的菜单列表
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/backend_api_v1.ListMenuResponse'
-      security:
-      - Bearer: []
-      summary: 获取用户菜单
-      tags:
-      - Menu
 securityDefinitions:
   Bearer:
     in: header

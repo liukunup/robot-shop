@@ -159,10 +159,10 @@ func (s *userService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (
 			continue
 		}
 		data.List = append(data.List, v1.UserDataItem{
-			Email:     user.Email,
 			ID:        user.ID,
-			Nickname:  user.Nickname,
 			Username:  user.Username,
+			Nickname:  user.Nickname,
+			Email:     user.Email,
 			Phone:     user.Phone,
 			Roles:     roles,
 			CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
@@ -243,11 +243,12 @@ func (s *userService) GetUser(ctx context.Context, uid uint) (*v1.GetUserRespons
 	roles, _ := s.userRepository.GetUserRoles(ctx, uid)
 
 	return &v1.GetUserResponseData{
-		Email:     user.Email,
 		ID:        user.ID,
 		Username:  user.Username,
 		Nickname:  user.Nickname,
+		Email:     user.Email,
 		Phone:     user.Phone,
+		Avatar:    "https://cravatar.cn/avatar/245467ef31b6f0addc72b039b94122a4?s=100&f=y&r=g",
 		Roles:     roles,
 		CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
 		UpdatedAt: user.UpdatedAt.Format(constant.DateTimeLayout),

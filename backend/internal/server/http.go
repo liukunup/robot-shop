@@ -67,27 +67,25 @@ func NewHTTPServer(
 		strictAuthRouter := v1.Group("/").Use(middleware.StrictAuth(jwt, logger), middleware.AuthMiddleware(e))
 		{
 			// User
+			strictAuthRouter.GET("/user", userHandler.GetCurrentUser)
 			strictAuthRouter.GET("/admin/users", userHandler.ListUsers)
 			strictAuthRouter.POST("/admin/user", userHandler.UserCreate)
-			strictAuthRouter.GET("/admin/user", userHandler.GetCurrentUser)
 			strictAuthRouter.PUT("/admin/user", userHandler.UserUpdate)
 			strictAuthRouter.DELETE("/admin/user", userHandler.UserDelete)
+			strictAuthRouter.GET("/admin/user/permissions", userHandler.GetUserPermissions)
 
 			// Role
 			strictAuthRouter.GET("/admin/roles", userHandler.ListRoles)
 			strictAuthRouter.POST("/admin/role", userHandler.RoleCreate)
 			strictAuthRouter.PUT("/admin/role", userHandler.RoleUpdate)
 			strictAuthRouter.DELETE("/admin/role", userHandler.RoleDelete)
-
-			// Permission
-			strictAuthRouter.GET("/admin/user/permissions", userHandler.GetUserPermissions)
 			strictAuthRouter.GET("/admin/role/permissions", userHandler.GetRolePermissions)
 			strictAuthRouter.PUT("/admin/role/permission", userHandler.UpdateRolePermission)
 
 			// Menu
-			strictAuthRouter.GET("/menus", userHandler.ListMenus)
+			strictAuthRouter.GET("/menu", userHandler.GetCurrentMenu)
+			strictAuthRouter.GET("/admin/menus", userHandler.ListMenus)
 			strictAuthRouter.POST("/admin/menu", userHandler.MenuCreate)
-			strictAuthRouter.GET("/admin/menus", userHandler.GetCurrentMenu)
 			strictAuthRouter.PUT("/admin/menu", userHandler.MenuUpdate)
 			strictAuthRouter.DELETE("/admin/menu", userHandler.MenuDelete)
 

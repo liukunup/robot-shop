@@ -10,12 +10,13 @@ enum ErrorShowType {
   NOTIFICATION = 3,
   REDIRECT = 9,
 }
+
 // 与后端约定的响应数据格式
-interface ResponseStructure {
+interface IResponse {
   success: boolean;
   data: any;
-  errorCode?: number;
-  errorMessage?: string;
+  code?: number;
+  message?: string;
   showType?: ErrorShowType;
 }
 
@@ -28,13 +29,13 @@ export const errorConfig: RequestConfig = {
   // 错误处理： umi@3 的错误处理方案。
   errorConfig: {
     // 错误抛出
-    errorThrower: (res) => {
-      const { success, data, errorCode, errorMessage, showType } =
-        res as unknown as ResponseStructure;
+    errorThrower: (response) => {
+      const { success, data, code: errorCode, message: errorMessage, showType: errorShowType } =
+      response as unknown as IResponse;
       if (!success) {
         const error: any = new Error(errorMessage);
         error.name = 'BizError';
-        error.info = { errorCode, errorMessage, showType, data };
+        error.info = { errorCode, errorMessage, errorShowType, data };
         throw error; // 抛出自制的错误
       }
     },
@@ -43,30 +44,65 @@ export const errorConfig: RequestConfig = {
       if (opts?.skipErrorHandler) throw error;
       // 我们的 errorThrower 抛出的错误。
       if (error.name === 'BizError') {
-        const errorInfo: ResponseStructure | undefined = error.info;
+        const errorInfo: IResponse | undefined = error.info;
         if (errorInfo) {
-          const { errorMessage, errorCode } = errorInfo;
-          switch (errorInfo.showType) {
-            case ErrorShowType.SILENT:
-              // do nothing
-              break;
-            case ErrorShowType.WARN_MESSAGE:
-              message.warning(errorMessage);
-              break;
-            case ErrorShowType.ERROR_MESSAGE:
-              message.error(errorMessage);
-              break;
-            case ErrorShowType.NOTIFICATION:
-              notification.open({
-                description: errorMessage,
-                message: errorCode,
-              });
-              break;
-            case ErrorShowType.REDIRECT:
-              // TODO: redirect
-              break;
-            default:
-              message.error(errorMessage);
+          const { code: errorCode, message: errorMessage, showType: errorShowType } = errorInfo;
+          // 按响应码处理
+          if (errorCode === 400) {
+            notification.error({
+              message: '请求错误',
+              description: errorMessage,
+            });
+          } else if (errorCode === 401) {
+            notification.error({
+              message: '登录过期',
+              description: '请重新登录',
+              duration: 2,
+            });
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('accessToken');
+              setTimeout(() => {
+                window.location.href = '/user/login';
+              }, 2000);
+            }
+          } else if (errorCode === 403) {
+            notification.error({
+              message: '权限不足',
+              description: '请联系管理员',
+            });
+          } else if (errorCode === 404) {
+            notification.error({
+              message: '资源不存在',
+              description: '请联系管理员',
+            });
+          } else if (errorCode === 500) {
+            notification.error({
+              message: '服务器错误',
+              description: '请联系管理员',
+            });
+          } else {
+            switch (errorShowType) {
+              case ErrorShowType.SILENT:
+                // do nothing
+                break;
+              case ErrorShowType.WARN_MESSAGE:
+                message.warning(errorMessage);
+                break;
+              case ErrorShowType.ERROR_MESSAGE:
+                message.error(errorMessage);
+                break;
+              case ErrorShowType.NOTIFICATION:
+                notification.open({
+                  description: errorMessage,
+                  message: errorCode,
+                });
+                break;
+              case ErrorShowType.REDIRECT:
+                // TODO: redirect
+                break;
+              default:
+                message.error(errorMessage);
+            }
           }
         }
       } else if (error.response) {
@@ -85,24 +121,26 @@ export const errorConfig: RequestConfig = {
     },
   },
 
-  // 请求拦截器
+  // 请求拦截器 (在这里处理 Header 携带 Token 的问题)
   requestInterceptors: [
     (config: RequestOptions) => {
-      // 拦截请求配置，进行个性化处理。
-      const url = config?.url?.concat('?token = 123');
-      return { ...config, url };
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          config.headers = {
+            ...config.headers,
+            Authorization: `Bearer ${token}`,
+          };
+        }
+      }
+      return config;
     },
   ],
 
-  // 响应拦截器
+  // 响应拦截器 (在这里处理响应解包)
   responseInterceptors: [
-    (response) => {
-      // 拦截响应数据，进行个性化处理
-      const { data } = response as unknown as ResponseStructure;
-
-      if (data?.success === false) {
-        message.error('请求失败！');
-      }
+    async (response) => {
+      // 什么也没做哟
       return response;
     },
   ],

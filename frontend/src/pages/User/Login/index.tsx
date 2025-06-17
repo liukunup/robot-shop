@@ -78,7 +78,7 @@ const LoginMessage: React.FC<{
 };
 
 const Login: React.FC = () => {
-  const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
+  const [userLoginState, setUserLoginState] = useState<API.LoginResponse>({});
   const [type, setType] = useState<string>('account');
   const { initialState, setInitialState } = useModel('@@initialState');
   const { styles } = useStyles();
@@ -100,7 +100,7 @@ const Login: React.FC = () => {
     try {
       // 登录
       const resp = await login({ ...values });
-      if (resp.message === 'ok' && resp.code === 0) {
+      if (resp.success) {
         if (resp.data?.accessToken) {
           localStorage.setItem('accessToken', resp.data.accessToken);
         }
