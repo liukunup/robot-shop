@@ -1115,18 +1115,15 @@
                 },
                 "email": {
                     "type": "string",
-                    "example": "1234@gmail.com"
-                },
-                "id": {
-                    "type": "integer"
+                    "example": "zhangsan@example.com"
                 },
                 "nickname": {
                     "type": "string",
-                    "example": "小Baby"
+                    "example": "法外狂徒"
                 },
                 "phone": {
                     "type": "string",
-                    "example": "1858888888"
+                    "example": "+86-13966668888"
                 },
                 "roles": {
                     "type": "array",
@@ -1140,9 +1137,12 @@
                 "updatedAt": {
                     "type": "string"
                 },
+                "userid": {
+                    "type": "integer"
+                },
                 "username": {
                     "type": "string",
-                    "example": "张三"
+                    "example": "zhangsan"
                 }
             }
         },
@@ -1180,7 +1180,7 @@
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "zhangsan@163.com"
+                    "example": "zhangsan@example.com"
                 },
                 "password": {
                     "type": "string",
@@ -1859,11 +1859,11 @@
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "1234@gmail.com"
+                    "example": "zhangsan@example.com"
                 },
                 "nickname": {
                     "type": "string",
-                    "example": "小Baby"
+                    "example": "法外狂徒"
                 },
                 "password": {
                     "type": "string",
@@ -1871,7 +1871,7 @@
                 },
                 "phone": {
                     "type": "string",
-                    "example": "1858888888"
+                    "example": "+86-13966668888"
                 },
                 "roles": {
                     "type": "array",
@@ -1884,7 +1884,7 @@
                 },
                 "username": {
                     "type": "string",
-                    "example": "张三"
+                    "example": "zhangsan"
                 }
             }
         },
@@ -1901,18 +1901,18 @@
                 },
                 "email": {
                     "type": "string",
-                    "example": "1234@gmail.com"
+                    "example": "zhangsan@example.com"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "nickname": {
                     "type": "string",
-                    "example": "小Baby"
+                    "example": "法外狂徒"
                 },
                 "phone": {
                     "type": "string",
-                    "example": "1858888888"
+                    "example": "+86-13966668888"
                 },
                 "roles": {
                     "type": "array",
@@ -1928,7 +1928,7 @@
                 },
                 "username": {
                     "type": "string",
-                    "example": "张三"
+                    "example": "zhangsan"
                 }
             }
         },
@@ -1940,14 +1940,14 @@
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "1234@gmail.com"
+                    "example": "zhangsan@example.com"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "nickname": {
                     "type": "string",
-                    "example": "小Baby"
+                    "example": "法外狂徒"
                 },
                 "password": {
                     "type": "string",
@@ -1955,7 +1955,7 @@
                 },
                 "phone": {
                     "type": "string",
-                    "example": "1858888888"
+                    "example": "+86-13966668888"
                 },
                 "roles": {
                     "type": "array",
@@ -1968,7 +1968,7 @@
                 },
                 "username": {
                     "type": "string",
-                    "example": "张三"
+                    "example": "zhangsan"
                 }
             }
         }

@@ -1122,18 +1122,15 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string",
-                    "example": "1234@gmail.com"
-                },
-                "id": {
-                    "type": "integer"
+                    "example": "zhangsan@example.com"
                 },
                 "nickname": {
                     "type": "string",
-                    "example": "小Baby"
+                    "example": "法外狂徒"
                 },
                 "phone": {
                     "type": "string",
-                    "example": "1858888888"
+                    "example": "+86-13966668888"
                 },
                 "roles": {
                     "type": "array",
@@ -1147,9 +1144,12 @@ const docTemplate = `{
                 "updatedAt": {
                     "type": "string"
                 },
+                "userid": {
+                    "type": "integer"
+                },
                 "username": {
                     "type": "string",
-                    "example": "张三"
+                    "example": "zhangsan"
                 }
             }
         },
@@ -1187,7 +1187,7 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "zhangsan@163.com"
+                    "example": "zhangsan@example.com"
                 },
                 "password": {
                     "type": "string",
@@ -1866,11 +1866,11 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "1234@gmail.com"
+                    "example": "zhangsan@example.com"
                 },
                 "nickname": {
                     "type": "string",
-                    "example": "小Baby"
+                    "example": "法外狂徒"
                 },
                 "password": {
                     "type": "string",
@@ -1878,7 +1878,7 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string",
-                    "example": "1858888888"
+                    "example": "+86-13966668888"
                 },
                 "roles": {
                     "type": "array",
@@ -1891,7 +1891,7 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "example": "张三"
+                    "example": "zhangsan"
                 }
             }
         },
@@ -1908,18 +1908,18 @@ const docTemplate = `{
                 },
                 "email": {
                     "type": "string",
-                    "example": "1234@gmail.com"
+                    "example": "zhangsan@example.com"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "nickname": {
                     "type": "string",
-                    "example": "小Baby"
+                    "example": "法外狂徒"
                 },
                 "phone": {
                     "type": "string",
-                    "example": "1858888888"
+                    "example": "+86-13966668888"
                 },
                 "roles": {
                     "type": "array",
@@ -1935,7 +1935,7 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "example": "张三"
+                    "example": "zhangsan"
                 }
             }
         },
@@ -1947,14 +1947,14 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string",
-                    "example": "1234@gmail.com"
+                    "example": "zhangsan@example.com"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "nickname": {
                     "type": "string",
-                    "example": "小Baby"
+                    "example": "法外狂徒"
                 },
                 "password": {
                     "type": "string",
@@ -1962,7 +1962,7 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string",
-                    "example": "1858888888"
+                    "example": "+86-13966668888"
                 },
                 "roles": {
                     "type": "array",
@@ -1975,7 +1975,7 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string",
-                    "example": "张三"
+                    "example": "zhangsan"
                 }
             }
         }

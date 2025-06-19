@@ -7,15 +7,13 @@ definitions:
       createdAt:
         type: string
       email:
-        example: 1234@gmail.com
+        example: zhangsan@example.com
         type: string
-      id:
-        type: integer
       nickname:
-        example: 小Baby
+        example: 法外狂徒
         type: string
       phone:
-        example: "1858888888"
+        example: +86-13966668888
         type: string
       roles:
         example:
@@ -25,8 +23,10 @@ definitions:
         type: array
       updatedAt:
         type: string
+      userid:
+        type: integer
       username:
-        example: 张三
+        example: zhangsan
         type: string
     type: object
   LoginParams:
@@ -49,7 +49,7 @@ definitions:
   RegisterParams:
     properties:
       email:
-        example: zhangsan@163.com
+        example: zhangsan@example.com
         type: string
       password:
         example: "123456"
@@ -524,16 +524,16 @@ definitions:
   backend_api_v1.UserCreateRequest:
     properties:
       email:
-        example: 1234@gmail.com
+        example: zhangsan@example.com
         type: string
       nickname:
-        example: 小Baby
+        example: 法外狂徒
         type: string
       password:
         example: "123456"
         type: string
       phone:
-        example: "1858888888"
+        example: +86-13966668888
         type: string
       roles:
         example:
@@ -542,7 +542,7 @@ definitions:
           type: string
         type: array
       username:
-        example: 张三
+        example: zhangsan
         type: string
     required:
     - password
@@ -553,15 +553,15 @@ definitions:
       createdAt:
         type: string
       email:
-        example: 1234@gmail.com
+        example: zhangsan@example.com
         type: string
       id:
         type: integer
       nickname:
-        example: 小Baby
+        example: 法外狂徒
         type: string
       phone:
-        example: "1858888888"
+        example: +86-13966668888
         type: string
       roles:
         example:
@@ -572,7 +572,7 @@ definitions:
       updatedAt:
         type: string
       username:
-        example: 张三
+        example: zhangsan
         type: string
     required:
     - email
@@ -582,18 +582,18 @@ definitions:
   backend_api_v1.UserUpdateRequest:
     properties:
       email:
-        example: 1234@gmail.com
+        example: zhangsan@example.com
         type: string
       id:
         type: integer
       nickname:
-        example: 小Baby
+        example: 法外狂徒
         type: string
       password:
         example: "123456"
         type: string
       phone:
-        example: "1858888888"
+        example: +86-13966668888
         type: string
       roles:
         example:
@@ -602,7 +602,7 @@ definitions:
           type: string
         type: array
       username:
-        example: 张三
+        example: zhangsan
         type: string
     required:
     - username

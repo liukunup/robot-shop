@@ -7,6 +7,7 @@ import (
 	"backend/internal/repository"
 	"context"
 	"errors"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -100,11 +101,15 @@ func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) err
 	}
 	defaultUsername := parts[0]
 
+	// 生成默认昵称
+	nickname := generateHumanNickname()
+
 	// 构造新用户对象
 	user := &model.User{
 		Username: defaultUsername,
 		Password: string(hashedPassword),
 		Email:    req.Email,
+		Nickname: nickname,
 	}
 	// Transaction demo
 	err = s.tm.Transaction(ctx, func(ctx context.Context) error {
@@ -159,7 +164,7 @@ func (s *userService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (
 			continue
 		}
 		data.List = append(data.List, v1.UserDataItem{
-			ID:        user.ID,
+			UserID:    user.ID,
 			Username:  user.Username,
 			Nickname:  user.Nickname,
 			Email:     user.Email,
@@ -201,7 +206,7 @@ func (s *userService) UserCreate(ctx context.Context, req *v1.UserCreateRequest)
 }
 
 func (s *userService) UserUpdate(ctx context.Context, req *v1.UserUpdateRequest) error {
-	old, _ := s.userRepository.GetUser(ctx, req.ID)
+	old, _ := s.userRepository.GetUser(ctx, req.UserID)
 	if req.Password != "" {
 		hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
@@ -211,13 +216,13 @@ func (s *userService) UserUpdate(ctx context.Context, req *v1.UserUpdateRequest)
 	} else {
 		req.Password = old.Password
 	}
-	err := s.userRepository.UpdateUserRoles(ctx, req.ID, req.Roles)
+	err := s.userRepository.UpdateUserRoles(ctx, req.UserID, req.Roles)
 	if err != nil {
 		return err
 	}
 	return s.userRepository.UserUpdate(ctx, &model.User{
 		Model: gorm.Model{
-			ID: req.ID,
+			ID: req.UserID,
 		},
 		Email:    req.Email,
 		Nickname: req.Nickname,
@@ -243,7 +248,7 @@ func (s *userService) GetUser(ctx context.Context, uid uint) (*v1.GetUserRespons
 	roles, _ := s.userRepository.GetUserRoles(ctx, uid)
 
 	return &v1.GetUserResponseData{
-		ID:        user.ID,
+		UserID:    user.ID,
 		Username:  user.Username,
 		Nickname:  user.Nickname,
 		Email:     user.Email,
@@ -528,4 +533,28 @@ func (s *userService) UpdateRolePermission(ctx context.Context, req *v1.UpdateRo
 
 	}
 	return s.roleRepository.UpdateRolePermission(ctx, req.Role, permissions)
+}
+
+func generateHumanNickname() string {
+
+	adjectives := []string{
+		"阳光的", "温柔的", "睿智的", "活泼的", "优雅的",
+		"勇敢的", "幽默的", "神秘的", "开朗的", "沉稳的",
+		"可爱的", "聪明的", "热情的", "冷静的", "浪漫的",
+		"乐观的", "坚强的", "细心的", "真诚的", "大方的",
+		"自由的", "独特的", "时尚的", "古典的", "现代的",
+		"快乐的", "宁静的", "梦幻的", "激情的", "稳重的",
+	}
+
+	nouns := []string{
+		"小明", "小华", "子轩", "雨桐", "浩然",
+		"诗涵", "宇航", "欣怡", "俊杰", "雅婷",
+		"志强", "美玲", "文博", "雪梅", "家豪",
+		"丽娜", "建国", "婷婷", "海涛", "静怡",
+		"小龙", "佳琪", "宏伟", "芳芳", "志明",
+		"小雨", "天宇", "思琪", "大伟", "梦瑶",
+	}
+
+	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return adjectives[seededRand.Intn(len(adjectives))] + nouns[seededRand.Intn(len(nouns))]
 }

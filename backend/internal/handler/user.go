@@ -183,7 +183,7 @@ func (h *UserHandler) UserDelete(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.userService.UserDelete(ctx, req.ID); err != nil {
+	if err := h.userService.UserDelete(ctx, req.UserID); err != nil {
 		h.logger.WithContext(ctx).Error("userService.UserDelete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return

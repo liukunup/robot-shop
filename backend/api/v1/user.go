@@ -1,7 +1,7 @@
 package v1
 
 type RegisterRequest struct {
-	Email    string `json:"email" binding:"required,email" example:"zhangsan@163.com"`
+	Email    string `json:"email" binding:"required,email" example:"zhangsan@example.com"`
 	Password string `json:"password" binding:"required" example:"123456"`
 } // @name RegisterParams
 
@@ -22,18 +22,18 @@ type LoginResponse struct {
 type ListUsersRequest struct {
 	Page     int    `form:"page" binding:"required" example:"1"`
 	PageSize int    `form:"pageSize" binding:"required" example:"10"`
-	Username string `json:"username" binding:"" example:"张三"`
-	Nickname string `json:"nickname" binding:"" example:"小Baby"`
-	Phone    string `form:"phone" binding:"" example:"1858888888"`
-	Email    string `form:"email" binding:"" example:"1234@gmail.com"`
+	Username string `json:"username" binding:"" example:"zhangsan"`
+	Nickname string `json:"nickname" binding:"" example:"法外狂徒"`
+	Phone    string `form:"phone" binding:"" example:"+86-13966668888"`
+	Email    string `form:"email" binding:"" example:"zhangsan@example.com"`
 }
 
 type UserDataItem struct {
-	ID        uint     `json:"id"`
-	Username  string   `json:"username" binding:"required" example:"张三"`
-	Nickname  string   `json:"nickname" binding:"required" example:"小Baby"`
-	Email     string   `json:"email" binding:"required,email" example:"1234@gmail.com"`
-	Phone     string   `form:"phone" binding:"" example:"1858888888"`
+	UserID    uint     `json:"id"`
+	Username  string   `json:"username" binding:"required" example:"zhangsan"`
+	Nickname  string   `json:"nickname" binding:"required" example:"法外狂徒"`
+	Email     string   `json:"email" binding:"required,email" example:"zhangsan@example.com"`
+	Phone     string   `form:"phone" binding:"" example:"+86-13966668888"`
 	Roles     []string `json:"roles" example:""`
 	UpdatedAt string   `json:"updatedAt"`
 	CreatedAt string   `json:"createdAt"`
@@ -50,38 +50,38 @@ type ListUsersResponse struct {
 }
 
 type UserCreateRequest struct {
-	Username string   `json:"username" binding:"required" example:"张三"`
-	Nickname string   `json:"nickname" binding:"" example:"小Baby"`
+	Username string   `json:"username" binding:"required" example:"zhangsan"`
+	Nickname string   `json:"nickname" binding:"" example:"法外狂徒"`
 	Password string   `json:"password" binding:"required" example:"123456"`
-	Email    string   `json:"email" binding:"" example:"1234@gmail.com"`
-	Phone    string   `form:"phone" binding:"" example:"1858888888"`
+	Email    string   `json:"email" binding:"" example:"zhangsan@example.com"`
+	Phone    string   `form:"phone" binding:"" example:"+86-13966668888"`
 	Roles    []string `json:"roles" example:""`
 }
 
 type UserUpdateRequest struct {
-	ID       uint     `json:"id"`
-	Username string   `json:"username" binding:"required" example:"张三"`
-	Nickname string   `json:"nickname" binding:"" example:"小Baby"`
+	UserID   uint     `json:"id"`
+	Username string   `json:"username" binding:"required" example:"zhangsan"`
+	Nickname string   `json:"nickname" binding:"" example:"法外狂徒"`
 	Password string   `json:"password" binding:"" example:"123456"`
-	Email    string   `json:"email" binding:"" example:"1234@gmail.com"`
-	Phone    string   `form:"phone" binding:"" example:"1858888888"`
+	Email    string   `json:"email" binding:"" example:"zhangsan@example.com"`
+	Phone    string   `form:"phone" binding:"" example:"+86-13966668888"`
 	Roles    []string `json:"roles" example:""`
 }
 
 type UserDeleteRequest struct {
-	ID uint `form:"id" binding:"required" example:"1"`
+	UserID uint `form:"id" binding:"required" example:"1"`
 }
 
 type GetUserResponseData struct {
-	ID        uint     `json:"id"`
-	Username  string   `json:"username" example:"张三"`
-	Nickname  string   `json:"nickname" example:"小Baby"`
-	Email     string   `json:"email" example:"1234@gmail.com"`
-	Phone     string   `form:"phone" example:"1858888888"`
+	UserID    uint     `json:"userid"`
+	Username  string   `json:"username" example:"zhangsan"`
+	Nickname  string   `json:"nickname" example:"法外狂徒"`
 	Avatar    string   `json:"avatar" example:"https://example.com/avatar.jpg"`
+	Email     string   `json:"email,omitempty" example:"zhangsan@example.com"`
+	Phone     string   `json:"phone,omitempty" example:"+86-13966668888"`
 	Roles     []string `json:"roles" example:""`
-	UpdatedAt string   `json:"updatedAt"`
 	CreatedAt string   `json:"createdAt"`
+	UpdatedAt string   `json:"updatedAt"`
 } // @name CurrentUser
 
 type GetUserResponse struct {
