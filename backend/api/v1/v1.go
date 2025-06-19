@@ -8,11 +8,11 @@ import (
 )
 
 type Response struct {
-	Success  bool        `json:"success"`
-	Data     interface{} `json:"data"`
-	Code     int         `json:"code,omitempty"`
-	Message  string      `json:"message,omitempty"`
-	ShowType int         `json:"showType,omitempty"`
+	Success       bool        `json:"success"`
+	Data          interface{} `json:"data"`
+	ErrorCode     int         `json:"errorCode,omitempty"`     // 错误码
+	ErrorMessage  string      `json:"errorMessage,omitempty"`  // 报错信息
+	ErrorShowType int         `json:"errorShowType,omitempty"` // 前端展示方式
 }
 
 const (
@@ -27,7 +27,7 @@ func HandleSuccess(ctx *gin.Context, data interface{}) {
 	if data == nil {
 		data = map[string]any{}
 	}
-	resp := Response{Success: true, Data: data, Code: errorCodeMap[ErrSuccess], Message: ErrSuccess.Error(), ShowType: SILENT}
+	resp := Response{Success: true, Data: data, ErrorCode: errorCodeMap[ErrSuccess], ErrorMessage: ErrSuccess.Error(), ErrorShowType: SILENT}
 	if _, ok := errorCodeMap[ErrSuccess]; !ok {
 		resp = Response{Success: true, Data: data}
 	}
@@ -38,9 +38,9 @@ func HandleWithShowType(ctx *gin.Context, httpCode int, err error, data interfac
 	if data == nil {
 		data = map[string]string{}
 	}
-	resp := Response{Success: false, Data: data, Code: errorCodeMap[err], Message: err.Error(), ShowType: showType}
+	resp := Response{Success: false, Data: data, ErrorCode: errorCodeMap[err], ErrorMessage: err.Error(), ErrorShowType: showType}
 	if _, ok := errorCodeMap[err]; !ok {
-		resp = Response{Success: false, Data: data, Code: 500, Message: "unknown error", ShowType: ERROR}
+		resp = Response{Success: false, Data: data, ErrorCode: 500, ErrorMessage: "Unknown Error", ErrorShowType: ERROR}
 	}
 	ctx.JSON(httpCode, resp)
 }

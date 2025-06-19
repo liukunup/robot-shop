@@ -6,6 +6,7 @@ import { createStyles } from 'antd-style';
 import React from 'react';
 import { flushSync } from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
+import { removeToken } from '../../utils/auth';
 
 export type GlobalHeaderRightProps = {
   menu?: boolean;
@@ -42,7 +43,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
    */
   const loginOut = async () => {
     // 登出时清除 accessToken
-    localStorage.removeItem('accessToken');
+    removeToken();
     const { search, pathname } = window.location;
     const urlParams = new URL(window.location.href).searchParams;
     const searchParams = new URLSearchParams({

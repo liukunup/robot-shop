@@ -1,6 +1,7 @@
 ﻿import type { RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
+import { getToken } from './auth';
 
 // 错误处理方案： 错误类型
 enum ErrorShowType {
@@ -15,9 +16,9 @@ enum ErrorShowType {
 interface IResponse {
   success: boolean;
   data: any;
-  code?: number;
-  message?: string;
-  showType?: ErrorShowType;
+  errorCode?: number;
+  errorMessage?: string;
+  errorShowType?: ErrorShowType;
 }
 
 /**
@@ -30,7 +31,7 @@ export const errorConfig: RequestConfig = {
   errorConfig: {
     // 错误抛出
     errorThrower: (response) => {
-      const { success, data, code: errorCode, message: errorMessage, showType: errorShowType } =
+      const { success, data, errorCode, errorMessage, errorShowType } =
       response as unknown as IResponse;
       if (!success) {
         const error: any = new Error(errorMessage);
@@ -46,7 +47,7 @@ export const errorConfig: RequestConfig = {
       if (error.name === 'BizError') {
         const errorInfo: IResponse | undefined = error.info;
         if (errorInfo) {
-          const { code: errorCode, message: errorMessage, showType: errorShowType } = errorInfo;
+          const { errorCode, errorMessage, errorShowType } = errorInfo;
           // 按响应码处理
           if (errorCode === 400) {
             notification.error({
@@ -125,7 +126,7 @@ export const errorConfig: RequestConfig = {
   requestInterceptors: [
     (config: RequestOptions) => {
       if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('accessToken');
+        const token = getToken();
         if (token) {
           config.headers = {
             ...config.headers,
@@ -134,14 +135,6 @@ export const errorConfig: RequestConfig = {
         }
       }
       return config;
-    },
-  ],
-
-  // 响应拦截器 (在这里处理响应解包)
-  responseInterceptors: [
-    async (response) => {
-      // 什么也没做哟
-      return response;
     },
   ],
 };

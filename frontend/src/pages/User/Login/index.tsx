@@ -15,6 +15,7 @@ import { createStyles } from 'antd-style';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
 import Settings from '../../../../config/defaultSettings';
+import { setToken } from '../../../utils/auth';
 
 const useStyles = createStyles(({ token }) => {
   return {
@@ -102,7 +103,7 @@ const Login: React.FC = () => {
       const resp = await login({ ...values });
       if (resp.success) {
         if (resp.data?.accessToken) {
-          localStorage.setItem('accessToken', resp.data.accessToken);
+          setToken(resp.data.accessToken);
         }
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',

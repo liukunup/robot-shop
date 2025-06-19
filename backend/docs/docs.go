@@ -1295,16 +1295,19 @@ const docTemplate = `{
         "backend_api_v1.GetUserResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
                 "data": {
                     "$ref": "#/definitions/CurrentUser"
                 },
-                "message": {
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
                     "type": "string"
                 },
-                "showType": {
+                "errorShowType": {
+                    "description": "前端展示方式",
                     "type": "integer"
                 },
                 "success": {
@@ -1315,16 +1318,19 @@ const docTemplate = `{
         "backend_api_v1.ListApisResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
                 "data": {
                     "$ref": "#/definitions/backend_api_v1.ListApisResponseData"
                 },
-                "message": {
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
                     "type": "string"
                 },
-                "showType": {
+                "errorShowType": {
+                    "description": "前端展示方式",
                     "type": "integer"
                 },
                 "success": {
@@ -1355,16 +1361,19 @@ const docTemplate = `{
         "backend_api_v1.ListMenuResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
                 "data": {
                     "$ref": "#/definitions/backend_api_v1.ListMenuResponseData"
                 },
-                "message": {
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
                     "type": "string"
                 },
-                "showType": {
+                "errorShowType": {
+                    "description": "前端展示方式",
                     "type": "integer"
                 },
                 "success": {
@@ -1386,16 +1395,19 @@ const docTemplate = `{
         "backend_api_v1.ListRolesResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
                 "data": {
                     "$ref": "#/definitions/backend_api_v1.ListRolesResponseData"
                 },
-                "message": {
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
                     "type": "string"
                 },
-                "showType": {
+                "errorShowType": {
+                    "description": "前端展示方式",
                     "type": "integer"
                 },
                 "success": {
@@ -1420,16 +1432,19 @@ const docTemplate = `{
         "backend_api_v1.ListUsersResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
                 "data": {
                     "$ref": "#/definitions/backend_api_v1.ListUsersResponseData"
                 },
-                "message": {
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
                     "type": "string"
                 },
-                "showType": {
+                "errorShowType": {
+                    "description": "前端展示方式",
                     "type": "integer"
                 },
                 "success": {
@@ -1454,16 +1469,19 @@ const docTemplate = `{
         "backend_api_v1.LoginResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "integer"
-                },
                 "data": {
                     "$ref": "#/definitions/LoginResult"
                 },
-                "message": {
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
                     "type": "string"
                 },
-                "showType": {
+                "errorShowType": {
+                    "description": "前端展示方式",
                     "type": "integer"
                 },
                 "success": {
@@ -1662,14 +1680,17 @@ const docTemplate = `{
         "backend_api_v1.Response": {
             "type": "object",
             "properties": {
-                "code": {
+                "data": {},
+                "errorCode": {
+                    "description": "错误码",
                     "type": "integer"
                 },
-                "data": {},
-                "message": {
+                "errorMessage": {
+                    "description": "报错信息",
                     "type": "string"
                 },
-                "showType": {
+                "errorShowType": {
+                    "description": "前端展示方式",
                     "type": "integer"
                 },
                 "success": {
