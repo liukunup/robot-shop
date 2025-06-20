@@ -12,15 +12,8 @@
  */
 export default [
   {
-    path: '/user',
-    layout: false,
-    routes: [
-      {
-        name: 'login',
-        path: '/user/login',
-        component: './User/Login',
-      },
-    ],
+    path: '/',
+    redirect: '/welcome',
   },
   {
     path: '/welcome',
@@ -29,25 +22,72 @@ export default [
     component: './Welcome',
   },
   {
+    path: '/robot',
+    name: 'robot',
+    icon: 'robot',
+    component: './Robot',
+  },
+  {
     path: '/admin',
     name: 'admin',
     icon: 'crown',
-    access: 'canAdmin',
     routes: [
       {
         path: '/admin',
-        redirect: '/admin/sub-page',
+        redirect: '/admin/user',
       },
       {
-        path: '/admin/sub-page',
-        name: 'sub-page',
-        component: './Admin',
+        path: '/admin/user',
+        name: 'user',
+        component: './Admin/User',
+      },
+      {
+        path: '/admin/role',
+        name: 'role',
+        component: './Admin/Role',
+      },
+      {
+        path: '/admin/menu',
+        name: 'menu',
+        component: './Admin/Menu',
+      },
+      {
+        path: '/admin/api',
+        name: 'api',
+        component: './Admin/Api',
+      },
+      {
+        path: '/admin/audit',
+        name: 'audit',
+        component: './Admin/Audit',
+      },
+      {
+        path: '/admin/config',
+        name: 'config',
+        component: './Admin/Config',
       },
     ],
   },
   {
-    path: '/',
-    redirect: '/welcome',
+    path: '/user',
+    layout: false,
+    routes: [
+      {
+        name: 'login',
+        path: '/user/login',
+        component: './User/Login',
+      },
+      {
+        name: 'register',
+        path: '/user/register',
+        component: './User/Register',
+      },
+      {
+        name: 'reset-password',
+        path: '/user/reset-password',
+        component: './User/ResetPassword',
+      },
+    ],
   },
   {
     path: '*',
