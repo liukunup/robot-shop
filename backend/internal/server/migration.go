@@ -1,20 +1,21 @@
 package server
 
 import (
+	v1 "backend/api/v1"
+	"backend/internal/constant"
+	"backend/internal/model"
+	"backend/pkg/log"
+	"backend/pkg/sid"
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"os"
+
 	"github.com/casbin/casbin/v2"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"net/http"
-	v1 "backend/api/v1"
-	"backend/internal/model"
-	"backend/internal/constant"
-	"backend/pkg/log"
-	"backend/pkg/sid"
-	"os"
 )
 
 type MigrateServer struct {
@@ -44,12 +45,14 @@ func (m *MigrateServer) Start(ctx context.Context) error {
 		&model.Menu{},
 		&model.Role{},
 		&model.Api{},
+		&model.Robot{},
 	)
 	if err := m.db.AutoMigrate(
 		&model.User{},
 		&model.Menu{},
 		&model.Role{},
 		&model.Api{},
+		&model.Robot{},
 	); err != nil {
 		m.log.Error("user migrate error", zap.Error(err))
 		return err

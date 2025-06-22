@@ -1,4 +1,21 @@
 definitions:
+  CreateRobotParams:
+    properties:
+      callback:
+        type: string
+      desc:
+        type: string
+      enabled:
+        type: boolean
+      name:
+        type: string
+      owner:
+        type: string
+      webhook:
+        type: string
+    required:
+    - name
+    type: object
   CurrentUser:
     properties:
       avatar:
@@ -58,6 +75,65 @@ definitions:
     - email
     - password
     type: object
+  Robot:
+    properties:
+      callback:
+        example: https://callback.example.com
+        type: string
+      createdAt:
+        example: "2006-01-02 15:04:05"
+        type: string
+      desc:
+        example: It's a robot
+        type: string
+      enabled:
+        example: true
+        type: boolean
+      id:
+        example: 1
+        type: integer
+      name:
+        example: bot
+        type: string
+      owner:
+        example: Billy
+        type: string
+      updatedAt:
+        example: "2006-01-02 15:04:05"
+        type: string
+      webhook:
+        example: https://webhook.example.com
+        type: string
+    type: object
+  RobotList:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/Robot'
+        type: array
+      total:
+        type: integer
+    type: object
+  UpdateRobotParams:
+    properties:
+      callback:
+        type: string
+      desc:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        example: 1
+        type: integer
+      name:
+        type: string
+      owner:
+        type: string
+      webhook:
+        type: string
+    required:
+    - id
+    type: object
   backend_api_v1.ApiCreateRequest:
     properties:
       group:
@@ -109,6 +185,22 @@ definitions:
         type: string
     required:
     - id
+    type: object
+  backend_api_v1.GetRobotResponse:
+    properties:
+      data:
+        $ref: '#/definitions/Robot'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        type: boolean
     type: object
   backend_api_v1.GetRolePermissionsData:
     properties:
@@ -191,6 +283,22 @@ definitions:
         items:
           $ref: '#/definitions/backend_api_v1.MenuDataItem'
         type: array
+    type: object
+  backend_api_v1.ListRobotResponse:
+    properties:
+      data:
+        $ref: '#/definitions/RobotList'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        type: boolean
     type: object
   backend_api_v1.ListRolesResponse:
     properties:
@@ -386,15 +494,6 @@ definitions:
         description: 排序权重
         type: integer
     type: object
-  backend_api_v1.PageResponse-backend_api_v1_RobotResponseData:
-    properties:
-      list:
-        items:
-          $ref: '#/definitions/backend_api_v1.RobotResponseData'
-        type: array
-      total:
-        type: integer
-    type: object
   backend_api_v1.Response:
     properties:
       data: {}
@@ -409,61 +508,6 @@ definitions:
         type: integer
       success:
         type: boolean
-    type: object
-  backend_api_v1.RobotRequest:
-    properties:
-      callback:
-        type: string
-      desc:
-        type: string
-      enabled:
-        type: boolean
-      name:
-        type: string
-      options:
-        type: string
-      owner:
-        type: string
-      webhook:
-        type: string
-    required:
-    - name
-    type: object
-  backend_api_v1.RobotResponseData:
-    properties:
-      callback:
-        example: https://callback.example.com
-        type: string
-      createdAt:
-        example: "2006-01-02 15:04:05"
-        type: string
-      desc:
-        example: it's a robot
-        type: string
-      enabled:
-        example: true
-        type: boolean
-      id:
-        example: 1
-        type: integer
-      name:
-        example: bot
-        type: string
-      options:
-        example: '{"key": "value"}'
-        type: string
-      owner:
-        example: Billy
-        type: string
-      robot_id:
-        example: 454e7080-d105-4515-9c25-3e6fd9df176c
-        type: string
-      updatedAt:
-        example: "2006-01-02 15:04:05"
-        type: string
-      webhook:
-        example: https://webhook.example.com
-        type: string
     type: object
   backend_api_v1.RoleCreateRequest:
     properties:
@@ -1165,26 +1209,32 @@ paths:
       summary: 用户注册
       tags:
       - User
-  /robot:
+  /robots:
     get:
       consumes:
       - application/json
       parameters:
-      - description: page
+      - description: 页码
         in: query
         name: page
+        required: true
         type: integer
-      - description: size
+      - description: 每页数量
         in: query
-        name: size
+        name: pageSize
+        required: true
         type: integer
+      - description: 机器人名称
+        in: query
+        name: name
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/backend_api_v1.PageResponse-backend_api_v1_RobotResponseData'
+            $ref: '#/definitions/backend_api_v1.ListRobotResponse'
       security:
       - Bearer: []
       summary: 获取机器人列表
@@ -1194,28 +1244,29 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: params
+      - description: 机器人数据
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/backend_api_v1.RobotRequest'
+          $ref: '#/definitions/CreateRobotParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/backend_api_v1.RobotResponseData'
+            $ref: '#/definitions/backend_api_v1.Response'
       security:
       - Bearer: []
       summary: 创建机器人
       tags:
       - Robot
-  /robot/{id}:
+  /robots/{id}:
     delete:
       consumes:
       - application/json
+      operationId: deleteRobotById
       parameters:
       - description: 机器人ID
         in: path
@@ -1237,6 +1288,7 @@ paths:
     get:
       consumes:
       - application/json
+      operationId: getRobotById
       parameters:
       - description: 机器人ID
         in: path
@@ -1249,34 +1301,35 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/backend_api_v1.RobotResponseData'
+            $ref: '#/definitions/backend_api_v1.GetRobotResponse'
       security:
       - Bearer: []
-      summary: 获取机器人
+      summary: 获取单个机器人的数据
       tags:
       - Robot
     put:
       consumes:
       - application/json
+      operationId: updateRobotById
       parameters:
       - description: 机器人ID
         in: path
         name: id
         required: true
         type: integer
-      - description: params
+      - description: 机器人数据
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/backend_api_v1.RobotRequest'
+          $ref: '#/definitions/UpdateRobotParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/backend_api_v1.RobotResponseData'
+            $ref: '#/definitions/backend_api_v1.Response'
       security:
       - Bearer: []
       summary: 更新机器人

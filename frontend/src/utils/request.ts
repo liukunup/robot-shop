@@ -30,7 +30,7 @@ export const errorConfig: RequestConfig = {
   // 错误处理： umi@3 的错误处理方案。
   errorConfig: {
     // 错误抛出
-    errorThrower: (response) => {
+    errorThrower: (response: any) => {
       const { success, data, errorCode, errorMessage, errorShowType } =
       response as unknown as IResponse;
       if (!success) {

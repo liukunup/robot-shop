@@ -889,7 +889,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/robot": {
+        "/robots": {
             "get": {
                 "security": [
                     {
@@ -909,14 +909,22 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "page",
+                        "description": "页码",
                         "name": "page",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     },
                     {
                         "type": "integer",
-                        "description": "size",
-                        "name": "size",
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "机器人名称",
+                        "name": "name",
                         "in": "query"
                     }
                 ],
@@ -924,7 +932,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.PageResponse-backend_api_v1_RobotResponseData"
+                            "$ref": "#/definitions/backend_api_v1.ListRobotResponse"
                         }
                     }
                 }
@@ -947,12 +955,12 @@ const docTemplate = `{
                 "summary": "创建机器人",
                 "parameters": [
                     {
-                        "description": "params",
+                        "description": "机器人数据",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.RobotRequest"
+                            "$ref": "#/definitions/CreateRobotParams"
                         }
                     }
                 ],
@@ -960,13 +968,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.RobotResponseData"
+                            "$ref": "#/definitions/backend_api_v1.Response"
                         }
                     }
                 }
             }
         },
-        "/robot/{id}": {
+        "/robots/{id}": {
             "get": {
                 "security": [
                     {
@@ -982,7 +990,8 @@ const docTemplate = `{
                 "tags": [
                     "Robot"
                 ],
-                "summary": "获取机器人",
+                "summary": "获取单个机器人的数据",
+                "operationId": "getRobotById",
                 "parameters": [
                     {
                         "type": "integer",
@@ -996,7 +1005,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.RobotResponseData"
+                            "$ref": "#/definitions/backend_api_v1.GetRobotResponse"
                         }
                     }
                 }
@@ -1017,6 +1026,7 @@ const docTemplate = `{
                     "Robot"
                 ],
                 "summary": "更新机器人",
+                "operationId": "updateRobotById",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1026,12 +1036,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "params",
+                        "description": "机器人数据",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.RobotRequest"
+                            "$ref": "#/definitions/UpdateRobotParams"
                         }
                     }
                 ],
@@ -1039,7 +1049,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.RobotResponseData"
+                            "$ref": "#/definitions/backend_api_v1.Response"
                         }
                     }
                 }
@@ -1060,6 +1070,7 @@ const docTemplate = `{
                     "Robot"
                 ],
                 "summary": "删除机器人",
+                "operationId": "deleteRobotById",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1110,6 +1121,32 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "CreateRobotParams": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "callback": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "webhook": {
+                    "type": "string"
+                }
+            }
+        },
         "CurrentUser": {
             "type": "object",
             "properties": {
@@ -1195,6 +1232,91 @@ const docTemplate = `{
                 }
             }
         },
+        "Robot": {
+            "type": "object",
+            "properties": {
+                "callback": {
+                    "type": "string",
+                    "example": "https://callback.example.com"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
+                },
+                "desc": {
+                    "type": "string",
+                    "example": "It's a robot"
+                },
+                "enabled": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string",
+                    "example": "bot"
+                },
+                "owner": {
+                    "type": "string",
+                    "example": "Billy"
+                },
+                "updatedAt": {
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
+                },
+                "webhook": {
+                    "type": "string",
+                    "example": "https://webhook.example.com"
+                }
+            }
+        },
+        "RobotList": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Robot"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UpdateRobotParams": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "callback": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "webhook": {
+                    "type": "string"
+                }
+            }
+        },
         "backend_api_v1.ApiCreateRequest": {
             "type": "object",
             "properties": {
@@ -1267,6 +1389,29 @@ const docTemplate = `{
                 "path": {
                     "type": "string",
                     "example": "/v1/xxx"
+                }
+            }
+        },
+        "backend_api_v1.GetRobotResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/Robot"
+                },
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
+                    "type": "string"
+                },
+                "errorShowType": {
+                    "description": "前端展示方式",
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1389,6 +1534,29 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/backend_api_v1.MenuDataItem"
                     }
+                }
+            }
+        },
+        "backend_api_v1.ListRobotResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/RobotList"
+                },
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
+                    "type": "string"
+                },
+                "errorShowType": {
+                    "description": "前端展示方式",
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1663,20 +1831,6 @@ const docTemplate = `{
                 }
             }
         },
-        "backend_api_v1.PageResponse-backend_api_v1_RobotResponseData": {
-            "type": "object",
-            "properties": {
-                "list": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/backend_api_v1.RobotResponseData"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
         "backend_api_v1.Response": {
             "type": "object",
             "properties": {
@@ -1695,84 +1849,6 @@ const docTemplate = `{
                 },
                 "success": {
                     "type": "boolean"
-                }
-            }
-        },
-        "backend_api_v1.RobotRequest": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "callback": {
-                    "type": "string"
-                },
-                "desc": {
-                    "type": "string"
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "options": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "webhook": {
-                    "type": "string"
-                }
-            }
-        },
-        "backend_api_v1.RobotResponseData": {
-            "type": "object",
-            "properties": {
-                "callback": {
-                    "type": "string",
-                    "example": "https://callback.example.com"
-                },
-                "createdAt": {
-                    "type": "string",
-                    "example": "2006-01-02 15:04:05"
-                },
-                "desc": {
-                    "type": "string",
-                    "example": "it's a robot"
-                },
-                "enabled": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "id": {
-                    "type": "integer",
-                    "example": 1
-                },
-                "name": {
-                    "type": "string",
-                    "example": "bot"
-                },
-                "options": {
-                    "type": "string",
-                    "example": "{\"key\": \"value\"}"
-                },
-                "owner": {
-                    "type": "string",
-                    "example": "Billy"
-                },
-                "robot_id": {
-                    "type": "string",
-                    "example": "454e7080-d105-4515-9c25-3e6fd9df176c"
-                },
-                "updatedAt": {
-                    "type": "string",
-                    "example": "2006-01-02 15:04:05"
-                },
-                "webhook": {
-                    "type": "string",
-                    "example": "https://webhook.example.com"
                 }
             }
         },

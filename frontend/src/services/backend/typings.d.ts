@@ -24,15 +24,24 @@ declare namespace API {
     path?: string;
   };
 
+  type CreateRobotParams = {
+    callback?: string;
+    desc?: string;
+    enabled?: boolean;
+    name: string;
+    owner?: string;
+    webhook?: string;
+  };
+
   type CurrentUser = {
     avatar?: string;
     createdAt?: string;
     email?: string;
-    id?: number;
     nickname?: string;
     phone?: string;
     roles?: string[];
     updatedAt?: string;
+    userid?: number;
     username?: string;
   };
 
@@ -56,7 +65,7 @@ declare namespace API {
     id: number;
   };
 
-  type deleteRobotIdParams = {
+  type deleteRobotByIdParams = {
     /** 机器人ID */
     id: number;
   };
@@ -107,16 +116,29 @@ declare namespace API {
     email?: string;
   };
 
-  type getRobotIdParams = {
+  type getRobotByIdParams = {
     /** 机器人ID */
     id: number;
   };
 
-  type getRobotParams = {
-    /** page */
-    page?: number;
-    /** size */
-    size?: number;
+  type GetRobotResponse = {
+    data?: Robot;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
+    success?: boolean;
+  };
+
+  type getRobotsParams = {
+    /** 页码 */
+    page: number;
+    /** 每页数量 */
+    pageSize: number;
+    /** 机器人名称 */
+    name?: string;
   };
 
   type GetRolePermissionsData = {
@@ -128,18 +150,24 @@ declare namespace API {
   };
 
   type GetUserResponse = {
-    code?: number;
     data?: CurrentUser;
-    message?: string;
-    showType?: number;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
     success?: boolean;
   };
 
   type ListApisResponse = {
-    code?: number;
     data?: ListApisResponseData;
-    message?: string;
-    showType?: number;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
     success?: boolean;
   };
 
@@ -150,10 +178,13 @@ declare namespace API {
   };
 
   type ListMenuResponse = {
-    code?: number;
     data?: ListMenuResponseData;
-    message?: string;
-    showType?: number;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
     success?: boolean;
   };
 
@@ -161,11 +192,25 @@ declare namespace API {
     list?: MenuDataItem[];
   };
 
+  type ListRobotResponse = {
+    data?: RobotList;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
+    success?: boolean;
+  };
+
   type ListRolesResponse = {
-    code?: number;
     data?: ListRolesResponseData;
-    message?: string;
-    showType?: number;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
     success?: boolean;
   };
 
@@ -175,10 +220,13 @@ declare namespace API {
   };
 
   type ListUsersResponse = {
-    code?: number;
     data?: ListUsersResponseData;
-    message?: string;
-    showType?: number;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
     success?: boolean;
   };
 
@@ -193,10 +241,13 @@ declare namespace API {
   };
 
   type LoginResponse = {
-    code?: number;
     data?: LoginResult;
-    message?: string;
-    showType?: number;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
     success?: boolean;
   };
 
@@ -292,51 +343,37 @@ declare namespace API {
     weight?: number;
   };
 
-  type PageResponseBackendApiV1RobotResponseData = {
-    list?: RobotResponseData[];
-    total?: number;
-  };
-
-  type putRobotIdParams = {
-    /** 机器人ID */
-    id: number;
-  };
-
   type RegisterParams = {
     email: string;
     password: string;
   };
 
   type Response = {
-    code?: number;
     data?: any;
-    message?: string;
-    showType?: number;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
     success?: boolean;
   };
 
-  type RobotRequest = {
-    callback?: string;
-    desc?: string;
-    enabled?: boolean;
-    name: string;
-    options?: string;
-    owner?: string;
-    webhook?: string;
-  };
-
-  type RobotResponseData = {
+  type Robot = {
     callback?: string;
     createdAt?: string;
     desc?: string;
     enabled?: boolean;
     id?: number;
     name?: string;
-    options?: string;
     owner?: string;
-    robot_id?: string;
     updatedAt?: string;
     webhook?: string;
+  };
+
+  type RobotList = {
+    list?: Robot[];
+    total?: number;
   };
 
   type RoleCreateRequest = {
@@ -356,6 +393,21 @@ declare namespace API {
     id: number;
     name: string;
     sid: string;
+  };
+
+  type updateRobotByIdParams = {
+    /** 机器人ID */
+    id: number;
+  };
+
+  type UpdateRobotParams = {
+    callback?: string;
+    desc?: string;
+    enabled?: boolean;
+    id: number;
+    name?: string;
+    owner?: string;
+    webhook?: string;
   };
 
   type UpdateRolePermissionRequest = {

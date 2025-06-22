@@ -1,16 +1,17 @@
 package repository
 
 import (
+	v1 "backend/api/v1"
 	"backend/internal/model"
 	"context"
 )
 
 type RobotRepository interface {
-	GetRobot(ctx context.Context, id uint) (*model.Robot, error)
-	CreateRobot(ctx context.Context, robot *model.Robot) error
-	UpdateRobot(ctx context.Context, robot *model.Robot) error
-	DeleteRobot(ctx context.Context, id uint) error
-	ListRobots(ctx context.Context, page int, size int, options map[string]interface{}) ([]*model.Robot, int64, error)
+	List(ctx context.Context, req *v1.ListRobotRequest) ([]model.Robot, int64, error)
+	Create(ctx context.Context, robot *model.Robot) error
+	Update(ctx context.Context, robot *model.Robot) error
+	Delete(ctx context.Context, id uint) error
+	Get(ctx context.Context, id uint) (model.Robot, error)
 }
 
 func NewRobotRepository(
@@ -25,63 +26,35 @@ type robotRepository struct {
 	*Repository
 }
 
-func (r *robotRepository) GetRobot(ctx context.Context, id uint) (*model.Robot, error) {
-	var robot model.Robot
-	if err := r.DB(ctx).First(&robot, id).Error; err != nil {
-		return nil, err
+func (r *robotRepository) List(ctx context.Context, req *v1.ListRobotRequest) ([]model.Robot, int64, error) {
+	var list []model.Robot
+	var total int64
+	scope := r.DB(ctx).Model(&model.Robot{})
+	if req.Name != "" {
+		scope = scope.Where("name LIKE ?", "%"+req.Name+"%")
 	}
-	return &robot, nil
+	if err := scope.Count(&total).Error; err != nil {
+		return nil, total, err
+	}
+	if err := scope.Offset((req.Page - 1) * req.PageSize).Limit(req.PageSize).Find(&list).Error; err != nil {
+		return nil, total, err
+	}
+	return list, total, nil
 }
 
-func (r *robotRepository) CreateRobot(ctx context.Context, robot *model.Robot) error {
-	err := r.DB(ctx).Create(robot).Error
-	return err
+func (r *robotRepository) Create(ctx context.Context, m *model.Robot) error {
+	return r.DB(ctx).Create(m).Error
 }
 
-func (r *robotRepository) UpdateRobot(ctx context.Context, robot *model.Robot) error {
-	err := r.DB(ctx).Model(robot).Updates(map[string]interface{}{
-		"name":     robot.Name,
-		"desc":     robot.Desc,
-		"webhook":  robot.Webhook,
-		"callback": robot.Callback,
-		"options":  robot.Options,
-		"enabled":  robot.Enabled,
-		"owner":    robot.Owner,
-	}).Error
-	return err
+func (r *robotRepository) Update(ctx context.Context, m *model.Robot) error {
+	return r.DB(ctx).Where("id = ?", m.ID).Save(m).Error
 }
 
-func (r *robotRepository) DeleteRobot(ctx context.Context, id uint) error {
-	err := r.DB(ctx).Delete(&model.Robot{}, id).Error
-	return err
+func (r *robotRepository) Delete(ctx context.Context, id uint) error {
+	return r.DB(ctx).Where("id = ?", id).Delete(&model.Robot{}).Error
 }
 
-func (r *robotRepository) ListRobots(ctx context.Context, page int, size int, options map[string]interface{}) ([]*model.Robot, int64, error) {
-	var (
-		robots []*model.Robot
-		total  int64
-	)
-
-	stmtCount := r.DB(ctx).Model(&model.Robot{})
-	if options != nil {
-		for key, value := range options {
-			stmtCount = stmtCount.Where(key+" = ?", value)
-		}
-	}
-	if err := stmtCount.Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-
-	offset := (page - 1) * size
-	stmtData := r.DB(ctx).Limit(size).Offset(offset)
-	if options != nil {
-		for key, value := range options {
-			stmtData = stmtData.Where(key+" = ?", value)
-		}
-	}
-	if err := stmtData.Find(&robots).Error; err != nil {
-		return nil, 0, err
-	}
-
-	return robots, total, nil
+func (r *robotRepository) Get(ctx context.Context, uid uint) (model.Robot, error) {
+	m := model.Robot{}
+	return m, r.DB(ctx).Where("id = ?", uid).First(&m).Error
 }

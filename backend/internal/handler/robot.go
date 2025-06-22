@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type RobotHandler struct {
@@ -25,44 +26,33 @@ func NewRobotHandler(
 	}
 }
 
-// GetRobot godoc
-// @Summary 获取机器人
+// ListRobots godoc
+// @Summary 获取机器人列表
 // @Schemes
 // @Description
 // @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path int true "机器人ID"
-// @Success 200 {object} v1.RobotResponseData
-// @Router /robot/{id} [get]
-func (h *RobotHandler) GetRobot(ctx *gin.Context) {
-	idStr := ctx.Param("id")
-	id, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
+// @Param page query int true "页码"
+// @Param pageSize query int true "每页数量"
+// @Param name query string false "机器人名称"
+// @Success 200 {object} v1.ListRobotResponse
+// @Router /robots [get]
+func (h *RobotHandler) ListRobots(ctx *gin.Context) {
+	var req v1.ListRobotRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
-	robot, err := h.robotService.GetRobot(ctx, uint(id))
+	data, err := h.robotService.List(ctx, &req)
 	if err != nil {
-		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
+		h.logger.WithContext(ctx).Error("robotService.List error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
-
-	v1.HandleSuccess(ctx, v1.RobotResponseData{
-		Id:        robot.ID,
-		RobotId:   robot.RobotId,
-		Name:      robot.Name,
-		Desc:      robot.Desc,
-		Webhook:   robot.Webhook,
-		Callback:  robot.Callback,
-		Options:   robot.Options,
-		Enabled:   robot.Enabled,
-		Owner:     robot.Owner,
-		CreatedAt: time.FormatTime(robot.CreatedAt),
-		UpdatedAt: time.FormatTime(robot.UpdatedAt),
-	})
+	v1.HandleSuccess(ctx, data)
 }
 
 // CreateRobot godoc
@@ -73,35 +63,23 @@ func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body v1.RobotRequest true "params"
-// @Success 200 {object} v1.RobotResponseData
-// @Router /robot [post]
+// @Param request body v1.RobotCreateRequest true "机器人数据"
+// @Success 200 {object} v1.Response
+// @Router /robots [post]
 func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
-	var req v1.RobotRequest
+	var req v1.RobotCreateRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid body"})
 		return
 	}
 
-	robot, err := h.robotService.CreateRobot(ctx, &req)
+	err := h.robotService.Create(ctx, &req)
 	if err != nil {
+		h.logger.WithContext(ctx).Error("robotService.Create error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	v1.HandleSuccess(ctx, v1.RobotResponseData{
-		Id:        robot.ID,
-		RobotId:   robot.RobotId,
-		Name:      robot.Name,
-		Desc:      robot.Desc,
-		Webhook:   robot.Webhook,
-		Callback:  robot.Callback,
-		Options:   robot.Options,
-		Enabled:   robot.Enabled,
-		Owner:     robot.Owner,
-		CreatedAt: time.FormatTime(robot.CreatedAt),
-		UpdatedAt: time.FormatTime(robot.UpdatedAt),
-	})
+	v1.HandleSuccess(ctx, nil)
 }
 
 // UpdateRobot godoc
@@ -113,9 +91,10 @@ func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path int true "机器人ID"
-// @Param request body v1.RobotRequest true "params"
-// @Success 200 {object} v1.RobotResponseData
-// @Router /robot/{id} [put]
+// @Param request body v1.RobotUpdateRequest true "机器人数据"
+// @Success 200 {object} v1.Response
+// @Router /robots/{id} [put]
+// @ID updateRobotById
 func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -124,31 +103,19 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 		return
 	}
 
-	var req v1.RobotRequest
+	var req v1.RobotUpdateRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid body"})
 		return
 	}
+	req.ID = uint(id)
 
-	robot, err := h.robotService.UpdateRobot(ctx, uint(id), &req)
-	if err != nil {
+	if err := h.robotService.Update(ctx, &req); err != nil {
+		h.logger.WithContext(ctx).Error("robotService.Update error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	v1.HandleSuccess(ctx, v1.RobotResponseData{
-		Id:        robot.ID,
-		RobotId:   robot.RobotId,
-		Name:      robot.Name,
-		Desc:      robot.Desc,
-		Webhook:   robot.Webhook,
-		Callback:  robot.Callback,
-		Options:   robot.Options,
-		Enabled:   robot.Enabled,
-		Owner:     robot.Owner,
-		CreatedAt: time.FormatTime(robot.CreatedAt),
-		UpdatedAt: time.FormatTime(robot.UpdatedAt),
-	})
+	v1.HandleSuccess(ctx, nil)
 }
 
 // DeleteRobot godoc
@@ -161,7 +128,8 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 // @Security Bearer
 // @Param id path int true "机器人ID"
 // @Success 200 {object} v1.Response
-// @Router /robot/{id} [delete]
+// @Router /robots/{id} [delete]
+// @ID deleteRobotById
 func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -170,71 +138,50 @@ func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.robotService.DeleteRobot(ctx, uint(id)); err != nil {
+	if err := h.robotService.Delete(ctx, uint(id)); err != nil {
+		h.logger.WithContext(ctx).Error("robotService.Delete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
 }
 
-// ListRobots godoc
-// @Summary 获取机器人列表
+// GetRobot godoc
+// @Summary 获取单个机器人的数据
 // @Schemes
 // @Description
 // @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param page query int false "page"
-// @Param size query int false "size"
-// @Success 200 {object} v1.PageResponse[v1.RobotResponseData]
-// @Router /robot [get]
-func (h *RobotHandler) ListRobots(ctx *gin.Context) {
-	page, err := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+// @Param id path int true "机器人ID"
+// @Success 200 {object} v1.GetRobotResponse
+// @Router /robots/{id} [get]
+// @ID getRobotById
+func (h *RobotHandler) GetRobot(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid page param"})
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	size, err := strconv.Atoi(ctx.DefaultQuery("size", "10"))
+	robot, err := h.robotService.Get(ctx, uint(id))
 	if err != nil {
-		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid size param"})
-		return
-	}
-
-	options := make(map[string]interface{})
-	for key, value := range ctx.Request.URL.Query() {
-		if key == "page" || key == "size" {
-			continue
-		}
-		options[key] = value[0]
-	}
-
-	robots, total, err := h.robotService.ListRobots(ctx, page, size, options)
-	if err != nil {
+		h.logger.WithContext(ctx).Error("robotService.Get error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	list := make([]v1.RobotResponseData, 0)
-	for _, robot := range robots {
-		list = append(list, v1.RobotResponseData{
-			Id:        robot.ID,
-			RobotId:   robot.RobotId,
-			Name:      robot.Name,
-			Desc:      robot.Desc,
-			Webhook:   robot.Webhook,
-			Callback:  robot.Callback,
-			Options:   robot.Options,
-			Enabled:   robot.Enabled,
-			Owner:     robot.Owner,
-			CreatedAt: time.FormatTime(robot.CreatedAt),
-			UpdatedAt: time.FormatTime(robot.UpdatedAt),
-		})
-	}
-
-	v1.HandleSuccess(ctx, v1.PageResponse[v1.RobotResponseData]{
-		List:  list,
-		Total: total,
+	v1.HandleSuccess(ctx, v1.RobotDataItem{
+		Id:        robot.ID,
+		Name:      robot.Name,
+		Desc:      robot.Desc,
+		Webhook:   robot.Webhook,
+		Callback:  robot.Callback,
+		Enabled:   robot.Enabled,
+		Owner:     robot.Owner,
+		CreatedAt: time.FormatTime(robot.CreatedAt),
+		UpdatedAt: time.FormatTime(robot.UpdatedAt),
 	})
 }

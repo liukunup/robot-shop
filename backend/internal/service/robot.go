@@ -2,20 +2,20 @@ package service
 
 import (
 	v1 "backend/api/v1"
+	"backend/internal/constant"
 	"backend/internal/model"
 	"backend/internal/repository"
-	"backend/pkg/sid"
 	"context"
-	"encoding/json"
-	"time"
+
+	"gorm.io/gorm"
 )
 
 type RobotService interface {
-	GetRobot(ctx context.Context, id uint) (*model.Robot, error)
-	CreateRobot(ctx context.Context, req *v1.RobotRequest) (*model.Robot, error)
-	UpdateRobot(ctx context.Context, id uint, req *v1.RobotRequest) (*model.Robot, error)
-	DeleteRobot(ctx context.Context, id uint) error
-	ListRobots(ctx context.Context, page int, size int, options map[string]interface{}) ([]*model.Robot, int64, error)
+	List(ctx context.Context, req *v1.ListRobotRequest) (*v1.ListRobotResponseData, error)
+	Create(ctx context.Context, req *v1.RobotCreateRequest) error
+	Update(ctx context.Context, req *v1.RobotUpdateRequest) error
+	Delete(ctx context.Context, id uint) error
+	Get(ctx context.Context, id uint) (model.Robot, error)
 }
 
 func NewRobotService(
@@ -33,71 +33,59 @@ type robotService struct {
 	robotRepository repository.RobotRepository
 }
 
-func (s *robotService) GetRobot(ctx context.Context, id uint) (*model.Robot, error) {
-	return s.robotRepository.GetRobot(ctx, id)
+func (s *robotService) List(ctx context.Context, req *v1.ListRobotRequest) (*v1.ListRobotResponseData, error) {
+	list, total, err := s.robotRepository.List(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	data := &v1.ListRobotResponseData{
+		List:  make([]v1.RobotDataItem, 0),
+		Total: total,
+	}
+	for _, robot := range list {
+		data.List = append(data.List, v1.RobotDataItem{
+			Id:        robot.ID,
+			Name:      robot.Name,
+			Desc:      robot.Desc,
+			Webhook:   robot.Webhook,
+			Callback:  robot.Callback,
+			Enabled:   robot.Enabled,
+			CreatedAt: robot.CreatedAt.Format(constant.DateTimeLayout),
+			UpdatedAt: robot.UpdatedAt.Format(constant.DateTimeLayout),
+		})
+	}
+	return data, nil
 }
 
-func (s *robotService) CreateRobot(ctx context.Context, req *v1.RobotRequest) (*model.Robot, error) {
-	robotId, err := sid.NewSid().GenString()
-	if err != nil {
-		return nil, err
-	}
-
-	options, err := json.Marshal(req.Options)
-	if err != nil {
-		return nil, err
-	}
-
-	robot := &model.Robot{
-		RobotId:   robotId,
-		Name:      req.Name,
-		Desc:      req.Desc,
-		Webhook:   req.Webhook,
-		Callback:  req.Callback,
-		Options:   string(options),
-		Enabled:   req.Enabled,
-		Owner:     req.Owner,
-	}
-	if err := s.robotRepository.CreateRobot(ctx, robot); err != nil {
-		return nil, err
-	}
-	return robot, nil
+func (s *robotService) Create(ctx context.Context, req *v1.RobotCreateRequest) error {
+	return s.robotRepository.Create(ctx, &model.Robot{
+		Name:     req.Name,
+		Desc:     req.Desc,
+		Webhook:  req.Webhook,
+		Callback: req.Callback,
+		Enabled:  req.Enabled,
+		Owner:    req.Owner,
+	})
 }
 
-func (s *robotService) UpdateRobot(ctx context.Context, id uint, req *v1.RobotRequest) (*model.Robot, error) {
-	robot, err := s.robotRepository.GetRobot(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	options, err := json.Marshal(req.Options)
-	if err != nil {
-		return nil, err
-	}
-
-	robot.Name = req.Name
-	robot.Desc = req.Desc
-	robot.Webhook = req.Webhook
-	robot.Callback = req.Callback
-	robot.Options = string(options)
-	robot.Enabled = req.Enabled
-	robot.Owner = req.Owner
-	robot.UpdatedAt = time.Now()
-
-	if err := s.robotRepository.UpdateRobot(ctx, robot); err != nil {
-		return nil, err
-	}
-	return robot, nil
+func (s *robotService) Update(ctx context.Context, req *v1.RobotUpdateRequest) error {
+	return s.robotRepository.Update(ctx, &model.Robot{
+		Name:     req.Name,
+		Desc:     req.Desc,
+		Webhook:  req.Webhook,
+		Callback: req.Callback,
+		Enabled:  req.Enabled,
+		Owner:    req.Owner,
+		Model: gorm.Model{
+			ID: req.ID,
+		},
+	})
 }
 
-func (s *robotService) DeleteRobot(ctx context.Context, id uint) error {
-	return s.robotRepository.DeleteRobot(ctx, id)
+func (s *robotService) Delete(ctx context.Context, id uint) error {
+	return s.robotRepository.Delete(ctx, id)
 }
 
-func (s *robotService) ListRobots(ctx context.Context, page int, size int, options map[string]interface{}) ([]*model.Robot, int64, error) {
-	robots, total, err := s.robotRepository.ListRobots(ctx, page, size, options)
-	if err != nil {
-		return nil, 0, err
-	}
-	return robots, total, nil
+func (s *robotService) Get(ctx context.Context, id uint) (model.Robot, error) {
+	return s.robotRepository.Get(ctx, id)
 }
