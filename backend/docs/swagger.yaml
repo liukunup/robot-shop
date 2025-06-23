@@ -1,21 +1,4 @@
 definitions:
-  CreateRobotParams:
-    properties:
-      callback:
-        type: string
-      desc:
-        type: string
-      enabled:
-        type: boolean
-      name:
-        type: string
-      owner:
-        type: string
-      webhook:
-        type: string
-    required:
-    - name
-    type: object
   CurrentUser:
     properties:
       avatar:
@@ -45,6 +28,24 @@ definitions:
       username:
         example: zhangsan
         type: string
+    type: object
+  GetRobotListParams:
+    properties:
+      current:
+        description: 页码
+        example: 1
+        type: integer
+      name:
+        description: '筛选项: 名称 模糊匹配'
+        example: bot
+        type: string
+      pageSize:
+        description: 分页大小
+        example: 10
+        type: integer
+    required:
+    - current
+    - pageSize
     type: object
   LoginParams:
     properties:
@@ -81,6 +82,7 @@ definitions:
         example: https://callback.example.com
         type: string
       createdAt:
+        description: 创建时间
         example: "2006-01-02 15:04:05"
         type: string
       desc:
@@ -90,6 +92,7 @@ definitions:
         example: true
         type: boolean
       id:
+        description: ID
         example: 1
         type: integer
       name:
@@ -99,11 +102,29 @@ definitions:
         example: Billy
         type: string
       updatedAt:
+        description: 更新时间
         example: "2006-01-02 15:04:05"
         type: string
       webhook:
         example: https://webhook.example.com
         type: string
+    type: object
+  RobotCreateParams:
+    properties:
+      callback:
+        type: string
+      desc:
+        type: string
+      enabled:
+        type: boolean
+      name:
+        type: string
+      owner:
+        type: string
+      webhook:
+        type: string
+    required:
+    - name
     type: object
   RobotList:
     properties:
@@ -114,7 +135,7 @@ definitions:
       total:
         type: integer
     type: object
-  UpdateRobotParams:
+  RobotUpdateParams:
     properties:
       callback:
         type: string
@@ -123,6 +144,7 @@ definitions:
       enabled:
         type: boolean
       id:
+        description: ID
         example: 1
         type: integer
       name:
@@ -185,6 +207,22 @@ definitions:
         type: string
     required:
     - id
+    type: object
+  backend_api_v1.GetRobotListResponse:
+    properties:
+      data:
+        $ref: '#/definitions/RobotList'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        type: boolean
     type: object
   backend_api_v1.GetRobotResponse:
     properties:
@@ -283,22 +321,6 @@ definitions:
         items:
           $ref: '#/definitions/backend_api_v1.MenuDataItem'
         type: array
-    type: object
-  backend_api_v1.ListRobotResponse:
-    properties:
-      data:
-        $ref: '#/definitions/RobotList'
-      errorCode:
-        description: 错误码
-        type: integer
-      errorMessage:
-        description: 报错信息
-        type: string
-      errorShowType:
-        description: 前端展示方式
-        type: integer
-      success:
-        type: boolean
     type: object
   backend_api_v1.ListRolesResponse:
     properties:
@@ -1213,28 +1235,21 @@ paths:
     get:
       consumes:
       - application/json
+      operationId: searchRobots
       parameters:
-      - description: 页码
-        in: query
-        name: page
+      - description: 查询参数
+        in: body
+        name: request
         required: true
-        type: integer
-      - description: 每页数量
-        in: query
-        name: pageSize
-        required: true
-        type: integer
-      - description: 机器人名称
-        in: query
-        name: name
-        type: string
+        schema:
+          $ref: '#/definitions/GetRobotListParams'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/backend_api_v1.ListRobotResponse'
+            $ref: '#/definitions/backend_api_v1.GetRobotListResponse'
       security:
       - Bearer: []
       summary: 获取机器人列表
@@ -1243,13 +1258,14 @@ paths:
     post:
       consumes:
       - application/json
+      operationId: addRobot
       parameters:
       - description: 机器人数据
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/CreateRobotParams'
+          $ref: '#/definitions/RobotCreateParams'
       produces:
       - application/json
       responses:
@@ -1266,7 +1282,7 @@ paths:
     delete:
       consumes:
       - application/json
-      operationId: deleteRobotById
+      operationId: RemoveRobot
       parameters:
       - description: 机器人ID
         in: path
@@ -1288,7 +1304,7 @@ paths:
     get:
       consumes:
       - application/json
-      operationId: getRobotById
+      operationId: fetchRobotDetail
       parameters:
       - description: 机器人ID
         in: path
@@ -1304,13 +1320,13 @@ paths:
             $ref: '#/definitions/backend_api_v1.GetRobotResponse'
       security:
       - Bearer: []
-      summary: 获取单个机器人的数据
+      summary: 获取机器人
       tags:
       - Robot
     put:
       consumes:
       - application/json
-      operationId: updateRobotById
+      operationId: updateRobot
       parameters:
       - description: 机器人ID
         in: path
@@ -1322,7 +1338,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/UpdateRobotParams'
+          $ref: '#/definitions/RobotUpdateParams'
       produces:
       - application/json
       responses:

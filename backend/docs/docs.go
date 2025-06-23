@@ -906,33 +906,23 @@ const docTemplate = `{
                     "Robot"
                 ],
                 "summary": "获取机器人列表",
+                "operationId": "searchRobots",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "页码",
-                        "name": "page",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "每页数量",
-                        "name": "pageSize",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "机器人名称",
-                        "name": "name",
-                        "in": "query"
+                        "description": "查询参数",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GetRobotListParams"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.ListRobotResponse"
+                            "$ref": "#/definitions/backend_api_v1.GetRobotListResponse"
                         }
                     }
                 }
@@ -953,6 +943,7 @@ const docTemplate = `{
                     "Robot"
                 ],
                 "summary": "创建机器人",
+                "operationId": "addRobot",
                 "parameters": [
                     {
                         "description": "机器人数据",
@@ -960,7 +951,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/CreateRobotParams"
+                            "$ref": "#/definitions/RobotCreateParams"
                         }
                     }
                 ],
@@ -990,8 +981,8 @@ const docTemplate = `{
                 "tags": [
                     "Robot"
                 ],
-                "summary": "获取单个机器人的数据",
-                "operationId": "getRobotById",
+                "summary": "获取机器人",
+                "operationId": "fetchRobotDetail",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1026,7 +1017,7 @@ const docTemplate = `{
                     "Robot"
                 ],
                 "summary": "更新机器人",
-                "operationId": "updateRobotById",
+                "operationId": "updateRobot",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1041,7 +1032,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/UpdateRobotParams"
+                            "$ref": "#/definitions/RobotUpdateParams"
                         }
                     }
                 ],
@@ -1070,7 +1061,7 @@ const docTemplate = `{
                     "Robot"
                 ],
                 "summary": "删除机器人",
-                "operationId": "deleteRobotById",
+                "operationId": "RemoveRobot",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1121,32 +1112,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "CreateRobotParams": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "callback": {
-                    "type": "string"
-                },
-                "desc": {
-                    "type": "string"
-                },
-                "enabled": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "owner": {
-                    "type": "string"
-                },
-                "webhook": {
-                    "type": "string"
-                }
-            }
-        },
         "CurrentUser": {
             "type": "object",
             "properties": {
@@ -1187,6 +1152,30 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "example": "zhangsan"
+                }
+            }
+        },
+        "GetRobotListParams": {
+            "type": "object",
+            "required": [
+                "current",
+                "pageSize"
+            ],
+            "properties": {
+                "current": {
+                    "description": "页码",
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "description": "筛选项: 名称 模糊匹配",
+                    "type": "string",
+                    "example": "bot"
+                },
+                "pageSize": {
+                    "description": "分页大小",
+                    "type": "integer",
+                    "example": 10
                 }
             }
         },
@@ -1240,6 +1229,7 @@ const docTemplate = `{
                     "example": "https://callback.example.com"
                 },
                 "createdAt": {
+                    "description": "创建时间",
                     "type": "string",
                     "example": "2006-01-02 15:04:05"
                 },
@@ -1252,6 +1242,7 @@ const docTemplate = `{
                     "example": true
                 },
                 "id": {
+                    "description": "ID",
                     "type": "integer",
                     "example": 1
                 },
@@ -1264,12 +1255,39 @@ const docTemplate = `{
                     "example": "Billy"
                 },
                 "updatedAt": {
+                    "description": "更新时间",
                     "type": "string",
                     "example": "2006-01-02 15:04:05"
                 },
                 "webhook": {
                     "type": "string",
                     "example": "https://webhook.example.com"
+                }
+            }
+        },
+        "RobotCreateParams": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "callback": {
+                    "type": "string"
+                },
+                "desc": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "owner": {
+                    "type": "string"
+                },
+                "webhook": {
+                    "type": "string"
                 }
             }
         },
@@ -1287,7 +1305,7 @@ const docTemplate = `{
                 }
             }
         },
-        "UpdateRobotParams": {
+        "RobotUpdateParams": {
             "type": "object",
             "required": [
                 "id"
@@ -1303,6 +1321,7 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "id": {
+                    "description": "ID",
                     "type": "integer",
                     "example": 1
                 },
@@ -1389,6 +1408,29 @@ const docTemplate = `{
                 "path": {
                     "type": "string",
                     "example": "/v1/xxx"
+                }
+            }
+        },
+        "backend_api_v1.GetRobotListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/RobotList"
+                },
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
+                    "type": "string"
+                },
+                "errorShowType": {
+                    "description": "前端展示方式",
+                    "type": "integer"
+                },
+                "success": {
+                    "type": "boolean"
                 }
             }
         },
@@ -1534,29 +1576,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/backend_api_v1.MenuDataItem"
                     }
-                }
-            }
-        },
-        "backend_api_v1.ListRobotResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/RobotList"
-                },
-                "errorCode": {
-                    "description": "错误码",
-                    "type": "integer"
-                },
-                "errorMessage": {
-                    "description": "报错信息",
-                    "type": "string"
-                },
-                "errorShowType": {
-                    "description": "前端展示方式",
-                    "type": "integer"
-                },
-                "success": {
-                    "type": "boolean"
                 }
             }
         },

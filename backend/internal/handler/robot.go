@@ -26,7 +26,7 @@ func NewRobotHandler(
 	}
 }
 
-// ListRobots godoc
+// GetRobotList godoc
 // @Summary 获取机器人列表
 // @Schemes
 // @Description
@@ -34,13 +34,12 @@ func NewRobotHandler(
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param page query int true "页码"
-// @Param pageSize query int true "每页数量"
-// @Param name query string false "机器人名称"
-// @Success 200 {object} v1.ListRobotResponse
+// @Param request body v1.GetRobotListRequest true "查询参数"
+// @Success 200 {object} v1.GetRobotListResponse
 // @Router /robots [get]
-func (h *RobotHandler) ListRobots(ctx *gin.Context) {
-	var req v1.ListRobotRequest
+// @ID searchRobots
+func (h *RobotHandler) GetRobotList(ctx *gin.Context) {
+	var req v1.GetRobotListRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
@@ -66,6 +65,7 @@ func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 // @Param request body v1.RobotCreateRequest true "机器人数据"
 // @Success 200 {object} v1.Response
 // @Router /robots [post]
+// @ID addRobot
 func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 	var req v1.RobotCreateRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -90,11 +90,11 @@ func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path int true "机器人ID"
+// @Param id path uint true "机器人ID"
 // @Param request body v1.RobotUpdateRequest true "机器人数据"
 // @Success 200 {object} v1.Response
 // @Router /robots/{id} [put]
-// @ID updateRobotById
+// @ID updateRobot
 func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -126,10 +126,10 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path int true "机器人ID"
+// @Param id path uint true "机器人ID"
 // @Success 200 {object} v1.Response
 // @Router /robots/{id} [delete]
-// @ID deleteRobotById
+// @ID RemoveRobot
 func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -147,17 +147,17 @@ func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 }
 
 // GetRobot godoc
-// @Summary 获取单个机器人的数据
+// @Summary 获取机器人
 // @Schemes
 // @Description
 // @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path int true "机器人ID"
+// @Param id path uint true "机器人ID"
 // @Success 200 {object} v1.GetRobotResponse
 // @Router /robots/{id} [get]
-// @ID getRobotById
+// @ID fetchRobotDetail
 func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -175,13 +175,13 @@ func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 
 	v1.HandleSuccess(ctx, v1.RobotDataItem{
 		Id:        robot.ID,
+		CreatedAt: time.FormatTime(robot.CreatedAt),
+		UpdatedAt: time.FormatTime(robot.UpdatedAt),
 		Name:      robot.Name,
 		Desc:      robot.Desc,
 		Webhook:   robot.Webhook,
 		Callback:  robot.Callback,
 		Enabled:   robot.Enabled,
 		Owner:     robot.Owner,
-		CreatedAt: time.FormatTime(robot.CreatedAt),
-		UpdatedAt: time.FormatTime(robot.UpdatedAt),
 	})
 }

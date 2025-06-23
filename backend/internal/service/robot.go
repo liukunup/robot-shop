@@ -11,7 +11,7 @@ import (
 )
 
 type RobotService interface {
-	List(ctx context.Context, req *v1.ListRobotRequest) (*v1.ListRobotResponseData, error)
+	List(ctx context.Context, req *v1.GetRobotListRequest) (*v1.GetRobotListResponseData, error)
 	Create(ctx context.Context, req *v1.RobotCreateRequest) error
 	Update(ctx context.Context, req *v1.RobotUpdateRequest) error
 	Delete(ctx context.Context, id uint) error
@@ -33,25 +33,25 @@ type robotService struct {
 	robotRepository repository.RobotRepository
 }
 
-func (s *robotService) List(ctx context.Context, req *v1.ListRobotRequest) (*v1.ListRobotResponseData, error) {
+func (s *robotService) List(ctx context.Context, req *v1.GetRobotListRequest) (*v1.GetRobotListResponseData, error) {
 	list, total, err := s.robotRepository.List(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	data := &v1.ListRobotResponseData{
+	data := &v1.GetRobotListResponseData{
 		List:  make([]v1.RobotDataItem, 0),
 		Total: total,
 	}
 	for _, robot := range list {
 		data.List = append(data.List, v1.RobotDataItem{
 			Id:        robot.ID,
+			CreatedAt: robot.CreatedAt.Format(constant.DateTimeLayout),
+			UpdatedAt: robot.UpdatedAt.Format(constant.DateTimeLayout),
 			Name:      robot.Name,
 			Desc:      robot.Desc,
 			Webhook:   robot.Webhook,
 			Callback:  robot.Callback,
 			Enabled:   robot.Enabled,
-			CreatedAt: robot.CreatedAt.Format(constant.DateTimeLayout),
-			UpdatedAt: robot.UpdatedAt.Format(constant.DateTimeLayout),
 		})
 	}
 	return data, nil
@@ -70,15 +70,15 @@ func (s *robotService) Create(ctx context.Context, req *v1.RobotCreateRequest) e
 
 func (s *robotService) Update(ctx context.Context, req *v1.RobotUpdateRequest) error {
 	return s.robotRepository.Update(ctx, &model.Robot{
+		Model: gorm.Model{
+			ID: req.ID,
+		},
 		Name:     req.Name,
 		Desc:     req.Desc,
 		Webhook:  req.Webhook,
 		Callback: req.Callback,
 		Enabled:  req.Enabled,
 		Owner:    req.Owner,
-		Model: gorm.Model{
-			ID: req.ID,
-		},
 	})
 }
 
