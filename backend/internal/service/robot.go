@@ -11,9 +11,9 @@ import (
 )
 
 type RobotService interface {
-	List(ctx context.Context, req *v1.GetRobotListRequest) (*v1.GetRobotListResponseData, error)
-	Create(ctx context.Context, req *v1.RobotCreateRequest) error
-	Update(ctx context.Context, req *v1.RobotUpdateRequest) error
+	List(ctx context.Context, req *v1.RobotSearchRequest) (*v1.RobotSearchResponseData, error)
+	Create(ctx context.Context, req *v1.RobotRequest) error
+	Update(ctx context.Context, id uint, req *v1.RobotRequest) error
 	Delete(ctx context.Context, id uint) error
 	Get(ctx context.Context, id uint) (model.Robot, error)
 }
@@ -33,17 +33,17 @@ type robotService struct {
 	robotRepository repository.RobotRepository
 }
 
-func (s *robotService) List(ctx context.Context, req *v1.GetRobotListRequest) (*v1.GetRobotListResponseData, error) {
+func (s *robotService) List(ctx context.Context, req *v1.RobotSearchRequest) (*v1.RobotSearchResponseData, error) {
 	list, total, err := s.robotRepository.List(ctx, req)
 	if err != nil {
 		return nil, err
 	}
-	data := &v1.GetRobotListResponseData{
-		List:  make([]v1.RobotDataItem, 0),
+	data := &v1.RobotSearchResponseData{
+		List:  make([]v1.RobotData, 0),
 		Total: total,
 	}
 	for _, robot := range list {
-		data.List = append(data.List, v1.RobotDataItem{
+		data.List = append(data.List, v1.RobotData{
 			Id:        robot.ID,
 			CreatedAt: robot.CreatedAt.Format(constant.DateTimeLayout),
 			UpdatedAt: robot.UpdatedAt.Format(constant.DateTimeLayout),
@@ -52,12 +52,13 @@ func (s *robotService) List(ctx context.Context, req *v1.GetRobotListRequest) (*
 			Webhook:   robot.Webhook,
 			Callback:  robot.Callback,
 			Enabled:   robot.Enabled,
+			Owner:     robot.Owner,
 		})
 	}
 	return data, nil
 }
 
-func (s *robotService) Create(ctx context.Context, req *v1.RobotCreateRequest) error {
+func (s *robotService) Create(ctx context.Context, req *v1.RobotRequest) error {
 	return s.robotRepository.Create(ctx, &model.Robot{
 		Name:     req.Name,
 		Desc:     req.Desc,
@@ -68,10 +69,10 @@ func (s *robotService) Create(ctx context.Context, req *v1.RobotCreateRequest) e
 	})
 }
 
-func (s *robotService) Update(ctx context.Context, req *v1.RobotUpdateRequest) error {
+func (s *robotService) Update(ctx context.Context, id uint, req *v1.RobotRequest) error {
 	return s.robotRepository.Update(ctx, &model.Robot{
 		Model: gorm.Model{
-			ID: req.ID,
+			ID: id,
 		},
 		Name:     req.Name,
 		Desc:     req.Desc,

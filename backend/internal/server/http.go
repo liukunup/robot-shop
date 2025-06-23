@@ -96,7 +96,7 @@ func NewHTTPServer(
 			strictAuthRouter.DELETE("/admin/api", userHandler.ApiDelete)
 
 			// Robot
-			strictAuthRouter.GET("/robots", robotHandler.GetRobotList)
+			strictAuthRouter.GET("/robots", robotHandler.ListRobots)
 			strictAuthRouter.POST("/robots", robotHandler.CreateRobot)
 			strictAuthRouter.GET("/robots/:id", robotHandler.GetRobot)
 			strictAuthRouter.PUT("/robots/:id", robotHandler.UpdateRobot)

@@ -26,20 +26,22 @@ func NewRobotHandler(
 	}
 }
 
-// GetRobotList godoc
-// @Summary 获取机器人列表
+// ListRobots godoc
+// @Summary 批量搜索机器人
 // @Schemes
 // @Description
 // @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body v1.GetRobotListRequest true "查询参数"
-// @Success 200 {object} v1.GetRobotListResponse
+// @Param page query int true "页码"
+// @Param pageSize query int true "分页大小"
+// @Param name query string false "名称"
+// @Success 200 {object} v1.RobotSearchResponse
 // @Router /robots [get]
-// @ID searchRobots
-func (h *RobotHandler) GetRobotList(ctx *gin.Context) {
-	var req v1.GetRobotListRequest
+// @ID ListRobots
+func (h *RobotHandler) ListRobots(ctx *gin.Context) {
+	var req v1.RobotSearchRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
@@ -62,12 +64,12 @@ func (h *RobotHandler) GetRobotList(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body v1.RobotCreateRequest true "机器人数据"
+// @Param request body v1.RobotRequest true "机器人数据"
 // @Success 200 {object} v1.Response
 // @Router /robots [post]
-// @ID addRobot
+// @ID CreateRobot
 func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
-	var req v1.RobotCreateRequest
+	var req v1.RobotRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid body"})
 		return
@@ -91,10 +93,10 @@ func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path uint true "机器人ID"
-// @Param request body v1.RobotUpdateRequest true "机器人数据"
+// @Param request body v1.RobotRequest true "机器人数据"
 // @Success 200 {object} v1.Response
 // @Router /robots/{id} [put]
-// @ID updateRobot
+// @ID UpdateRobot
 func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -103,14 +105,13 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 		return
 	}
 
-	var req v1.RobotUpdateRequest
+	var req v1.RobotRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid body"})
 		return
 	}
-	req.ID = uint(id)
 
-	if err := h.robotService.Update(ctx, &req); err != nil {
+	if err := h.robotService.Update(ctx, uint(id), &req); err != nil {
 		h.logger.WithContext(ctx).Error("robotService.Update error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -129,7 +130,7 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 // @Param id path uint true "机器人ID"
 // @Success 200 {object} v1.Response
 // @Router /robots/{id} [delete]
-// @ID RemoveRobot
+// @ID DeleteRobot
 func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -147,7 +148,7 @@ func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 }
 
 // GetRobot godoc
-// @Summary 获取机器人
+// @Summary 查找机器人
 // @Schemes
 // @Description
 // @Tags Robot
@@ -155,9 +156,9 @@ func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path uint true "机器人ID"
-// @Success 200 {object} v1.GetRobotResponse
+// @Success 200 {object} v1.RobotResponse
 // @Router /robots/{id} [get]
-// @ID fetchRobotDetail
+// @ID GetRobot
 func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -173,7 +174,7 @@ func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 		return
 	}
 
-	v1.HandleSuccess(ctx, v1.RobotDataItem{
+	v1.HandleSuccess(ctx, v1.RobotData{
 		Id:        robot.ID,
 		CreatedAt: time.FormatTime(robot.CreatedAt),
 		UpdatedAt: time.FormatTime(robot.UpdatedAt),

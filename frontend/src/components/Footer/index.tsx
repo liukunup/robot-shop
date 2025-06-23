@@ -8,6 +8,7 @@ const Footer: React.FC = () => {
       style={{
         background: 'none',
       }}
+      copyright="2025 Robot Shop 版权所有"
       links={[
         {
           key: 'Ant Design Pro',

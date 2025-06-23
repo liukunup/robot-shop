@@ -24,15 +24,6 @@ declare namespace API {
     path?: string;
   };
 
-  type CreateRobotParams = {
-    callback?: string;
-    desc?: string;
-    enabled?: boolean;
-    name: string;
-    owner?: string;
-    webhook?: string;
-  };
-
   type CurrentUser = {
     avatar?: string;
     createdAt?: string;
@@ -65,7 +56,7 @@ declare namespace API {
     id: number;
   };
 
-  type deleteRobotByIdParams = {
+  type DeleteRobotParams = {
     /** 机器人ID */
     id: number;
   };
@@ -116,29 +107,9 @@ declare namespace API {
     email?: string;
   };
 
-  type getRobotByIdParams = {
+  type GetRobotParams = {
     /** 机器人ID */
     id: number;
-  };
-
-  type GetRobotResponse = {
-    data?: Robot;
-    /** 错误码 */
-    errorCode?: number;
-    /** 报错信息 */
-    errorMessage?: string;
-    /** 前端展示方式 */
-    errorShowType?: number;
-    success?: boolean;
-  };
-
-  type getRobotsParams = {
-    /** 页码 */
-    page: number;
-    /** 每页数量 */
-    pageSize: number;
-    /** 机器人名称 */
-    name?: string;
   };
 
   type GetRolePermissionsData = {
@@ -192,15 +163,13 @@ declare namespace API {
     list?: MenuDataItem[];
   };
 
-  type ListRobotResponse = {
-    data?: RobotList;
-    /** 错误码 */
-    errorCode?: number;
-    /** 报错信息 */
-    errorMessage?: string;
-    /** 前端展示方式 */
-    errorShowType?: number;
-    success?: boolean;
+  type ListRobotsParams = {
+    /** 页码 */
+    page: number;
+    /** 分页大小 */
+    pageSize: number;
+    /** 名称 */
+    name?: string;
   };
 
   type ListRolesResponse = {
@@ -361,12 +330,15 @@ declare namespace API {
 
   type Robot = {
     callback?: string;
+    /** 创建时间 */
     createdAt?: string;
     desc?: string;
     enabled?: boolean;
+    /** ID */
     id?: number;
     name?: string;
     owner?: string;
+    /** 更新时间 */
     updatedAt?: string;
     webhook?: string;
   };
@@ -374,6 +346,37 @@ declare namespace API {
   type RobotList = {
     list?: Robot[];
     total?: number;
+  };
+
+  type RobotParams = {
+    callback?: string;
+    desc?: string;
+    enabled?: boolean;
+    name?: string;
+    owner?: string;
+    webhook?: string;
+  };
+
+  type RobotResponse = {
+    data?: Robot;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
+    success?: boolean;
+  };
+
+  type RobotSearchResponse = {
+    data?: RobotList;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
+    success?: boolean;
   };
 
   type RoleCreateRequest = {
@@ -395,19 +398,9 @@ declare namespace API {
     sid: string;
   };
 
-  type updateRobotByIdParams = {
+  type UpdateRobotParams = {
     /** 机器人ID */
     id: number;
-  };
-
-  type UpdateRobotParams = {
-    callback?: string;
-    desc?: string;
-    enabled?: boolean;
-    id: number;
-    name?: string;
-    owner?: string;
-    webhook?: string;
   };
 
   type UpdateRolePermissionRequest = {

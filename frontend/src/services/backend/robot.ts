@@ -2,13 +2,13 @@
 /* eslint-disable */
 import { request } from '@umijs/max';
 
-/** 获取机器人列表 GET /robots */
-export async function getRobots(
+/** 批量搜索机器人 GET /robots */
+export async function listRobots(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getRobotsParams,
+  params: API.ListRobotsParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.ListRobotResponse>(`/v1/robots`, {
+  return request<API.RobotSearchResponse>(`/v1/robots`, {
     method: 'GET',
     params: {
       ...params,
@@ -18,7 +18,7 @@ export async function getRobots(
 }
 
 /** 创建机器人 POST /robots */
-export async function postRobots(body: API.CreateRobotParams, options?: { [key: string]: any }) {
+export async function createRobot(body: API.RobotParams, options?: { [key: string]: any }) {
   return request<API.Response>(`/v1/robots`, {
     method: 'POST',
     headers: {
@@ -29,14 +29,14 @@ export async function postRobots(body: API.CreateRobotParams, options?: { [key: 
   });
 }
 
-/** 获取单个机器人的数据 GET /robots/${param0} */
-export async function getRobotById(
+/** 查找机器人 GET /robots/${param0} */
+export async function getRobot(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getRobotByIdParams,
+  params: API.GetRobotParams,
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;
-  return request<API.GetRobotResponse>(`/v1/robots/${param0}`, {
+  return request<API.RobotResponse>(`/v1/robots/${param0}`, {
     method: 'GET',
     params: { ...queryParams },
     ...(options || {}),
@@ -44,10 +44,10 @@ export async function getRobotById(
 }
 
 /** 更新机器人 PUT /robots/${param0} */
-export async function updateRobotById(
+export async function updateRobot(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.updateRobotByIdParams,
-  body: API.UpdateRobotParams,
+  params: API.UpdateRobotParams,
+  body: API.RobotParams,
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;
@@ -63,9 +63,9 @@ export async function updateRobotById(
 }
 
 /** 删除机器人 DELETE /robots/${param0} */
-export async function deleteRobotById(
+export async function deleteRobot(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.deleteRobotByIdParams,
+  params: API.DeleteRobotParams,
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;

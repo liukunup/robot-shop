@@ -7,7 +7,7 @@ import (
 )
 
 type RobotRepository interface {
-	List(ctx context.Context, req *v1.GetRobotListRequest) ([]model.Robot, int64, error)
+	List(ctx context.Context, req *v1.RobotSearchRequest) ([]model.Robot, int64, error)
 	Create(ctx context.Context, robot *model.Robot) error
 	Update(ctx context.Context, robot *model.Robot) error
 	Delete(ctx context.Context, id uint) error
@@ -26,7 +26,7 @@ type robotRepository struct {
 	*Repository
 }
 
-func (r *robotRepository) List(ctx context.Context, req *v1.GetRobotListRequest) ([]model.Robot, int64, error) {
+func (r *robotRepository) List(ctx context.Context, req *v1.RobotSearchRequest) ([]model.Robot, int64, error) {
 	var list []model.Robot
 	var total int64
 	scope := r.DB(ctx).Model(&model.Robot{})

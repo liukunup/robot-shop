@@ -3,7 +3,7 @@ import { useForm } from 'antd/es/form/Form';
 import { useState } from 'react';
 import { updateRobot } from '../../../services/backend/robot';
 
-type RobotUpdateParams = {
+type RobotViewParams = {
   id: number;
   name: string;
   desc: string;
@@ -13,15 +13,15 @@ type RobotUpdateParams = {
   owner: string;
 };
 
-interface UpdateFormProps {
+interface ViewFormProps {
   visible: boolean;
   onCancel: () => void;
   onSuccess: () => void;
-  initialValues: RobotUpdateParams;
+  initialValues: RobotViewParams;
 }
 
-const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormProps) => {
-  const [form] = useForm<RobotUpdateParams>();
+const ViewForm = ({ visible, onCancel, onSuccess, initialValues }: ViewFormProps) => {
+  const [form] = useForm<RobotViewParams>();
   const [loading, setLoading] = useState(false);
 
   form.setFieldsValue(initialValues);
@@ -60,9 +60,13 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
       <Form
         form={form}
         layout="vertical"
-        style={{ marginTop: 24 }}
         initialValues={initialValues}
+        disabled={true}
       >
+        <Form.Item name="id" label="ID">
+          <Input />
+        </Form.Item>
+
         <Form.Item
           name="name"
           label="机器人名称"
@@ -95,4 +99,4 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
   );
 };
 
-export default UpdateForm;
+export default ViewForm;
