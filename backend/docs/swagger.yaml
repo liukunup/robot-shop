@@ -1230,6 +1230,14 @@ paths:
         in: query
         name: name
         type: string
+      - description: 描述
+        in: query
+        name: desc
+        type: string
+      - description: 所有者
+        in: query
+        name: owner
+        type: string
       produces:
       - application/json
       responses:

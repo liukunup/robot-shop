@@ -37,6 +37,8 @@ func NewRobotHandler(
 // @Param page query int true "页码"
 // @Param pageSize query int true "分页大小"
 // @Param name query string false "名称"
+// @Param desc query string false "描述"
+// @Param owner query string false "所有者"
 // @Success 200 {object} v1.RobotSearchResponse
 // @Router /robots [get]
 // @ID ListRobots

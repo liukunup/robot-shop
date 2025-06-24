@@ -53,7 +53,7 @@ func (r *robotRepository) Create(ctx context.Context, m *model.Robot) error {
 }
 
 func (r *robotRepository) Update(ctx context.Context, m *model.Robot) error {
-	return r.DB(ctx).Where("id = ?", m.ID).Save(m).Error
+	return r.DB(ctx).Where("id = ?", m.ID).Updates(m).Error
 }
 
 func (r *robotRepository) Delete(ctx context.Context, id uint) error {

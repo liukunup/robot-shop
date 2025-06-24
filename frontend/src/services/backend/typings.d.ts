@@ -170,6 +170,10 @@ declare namespace API {
     pageSize: number;
     /** 名称 */
     name?: string;
+    /** 描述 */
+    desc?: string;
+    /** 所有者 */
+    owner?: string;
   };
 
   type ListRolesResponse = {

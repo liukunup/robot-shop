@@ -927,6 +927,18 @@ const docTemplate = `{
                         "description": "名称",
                         "name": "name",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "描述",
+                        "name": "desc",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "所有者",
+                        "name": "owner",
+                        "in": "query"
                     }
                 ],
                 "responses": {

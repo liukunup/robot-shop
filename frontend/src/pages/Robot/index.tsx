@@ -1,47 +1,37 @@
 import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { ProTable, TableDropdown } from '@ant-design/pro-components';
-import { FormattedMessage, useIntl } from '@umijs/max';
+import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, Dropdown, Space, Tag, message } from 'antd';
+import { FormattedMessage, useIntl } from '@umijs/max';
 import { useRef, useState } from 'react';
 import { listRobots, deleteRobot, createRobot } from '../../services/backend/robot';
-import CreateForm from './components/CreateForm';
-import UpdateForm from './components/UpdateForm';
-import ViewForm from './components/ViewForm';
+import OperateForm from './components/OperateForm';
 
-type RobotData = {
-  id: number;
-  createdAt: string;
-  updatedAt: string;
-  name: string;
-  desc: string;
-  webhook: string;
-  callback: string;
-  enabled: boolean;
-  owner: string;
-};
-
+// 搜索机器人
 const searchRobots = async (params: {
   page: number;
   pageSize: number;
-  name?: string;}) => {
+  name?: string;
+  desc?: string;
+  owner?: string;
+}) => {
   try {
-    const result = await listRobots(params);
+    const result = await listRobots(params as API.ListRobotsParams);
     return { data: result.data?.list || [], success: result.success, total: result.data?.total };
   } catch (error) {
-    message.error('获取机器人列表失败');
+    message.error('获取列表失败');
     return { data: [], success: false, total: 0 };
-}
+  }
 };
 
 const Robot: React.FC = () => {
-  const [createVisible, setCreateVisible] = useState(false);
-  const [updateVisible, setUpdateVisible] = useState(false);
-  const [currentRobot, setCurrentRobot] = useState<RobotData | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [operation, setOperation] = useState<'create' | 'update' | 'view'>();
+  const [currentRobot, setCurrentRobot] = useState<API.Robot | null>(null);
   const actionRef = useRef<ActionType>();
   const intl = useIntl();
 
-  const columns: ProColumns<RobotData>[] = [
+  const columns: ProColumns<API.Robot>[] = [
     {
       dataIndex: 'index',
       valueType: 'indexBorder',
@@ -71,7 +61,7 @@ const Robot: React.FC = () => {
       }),
       dataIndex: 'desc',
       ellipsis: true,
-      tooltip: '描述机器人的主要功能',
+      tooltip: '描述机器人的作用',
     },
     {
       title: intl.formatMessage({
@@ -80,9 +70,9 @@ const Robot: React.FC = () => {
       }),
       dataIndex: 'webhook',
       ellipsis: true,
-      tooltip: 'Webhook 用于接收来自外部的消息',
-      hideInForm: true,
+      tooltip: '用于发送消息到外部服务器',
       hideInSearch: true,
+      hideInTable: true,
     },
     {
       title: intl.formatMessage({
@@ -91,25 +81,23 @@ const Robot: React.FC = () => {
       }),
       dataIndex: 'callback',
       ellipsis: true,
-      tooltip: '回调地址用于向机器人发送消息',
-      hideInForm: true,
+      tooltip: '用于接收来自外部服务器的消息',
       hideInSearch: true,
+      hideInTable: true,
     },
     {
-      disable: true,
       title: intl.formatMessage({
         id: 'pages.robot.table.column.enabled',
-        defaultMessage: '启用状态',
+        defaultMessage: '是否启用',
       }),
       dataIndex: 'enabled',
       search: false,
       filters: true,
       onFilter: true,
-      ellipsis: true,
       valueType: 'select',
       valueEnum: {
-        true: { text: '启用', status: 'Success' },
-        false: { text: '禁用', status: 'Error' },
+        true: { text: '启用', status: 'Enabled' },
+        false: { text: '禁用', status: 'Disabled' },
       },
       render: (_, record) => (
         <Space>
@@ -163,7 +151,8 @@ const Robot: React.FC = () => {
           onClick={() => {
             console.log(record);
             setCurrentRobot(record);
-            setUpdateVisible(true);
+            setOperation('update');
+            setVisible(true);
           }}
         >
           <FormattedMessage id="pages.robot.table.column.action.edit" defaultMessage="编辑" />
@@ -172,7 +161,8 @@ const Robot: React.FC = () => {
           key="view"
           onClick={() => {
             setCurrentRobot(record);
-            setUpdateVisible(true);
+            setOperation('view');
+            setVisible(true);
           }}
         >
           <FormattedMessage id="pages.robot.table.column.action.view" defaultMessage="查看" />
@@ -200,9 +190,11 @@ const Robot: React.FC = () => {
               key: 'delete',
               name: '删除',
               onClick: async () => {
-                await deleteRobot({ id: record.id });
-                message.success('删除成功');
-                action?.reload();
+                if (record.id) {
+                  await deleteRobot({ id: record.id });
+                  message.success('删除成功');
+                  actionRef.current?.reload();
+                }
               },
             },
           ]}
@@ -213,25 +205,27 @@ const Robot: React.FC = () => {
 
   return (
     <div>
-      <ProTable<RobotData>
+      <ProTable<API.Robot>
         columns={columns}
         actionRef={actionRef}
         cardBordered
         request={async (params, sort, filter) => {
           console.log(params, sort, filter);
-          const { current = 1, pageSize = 10, keyword } = params;
-          const resp = await searchRobots({
+          const { current = 1, pageSize = 10, name, desc, owner } = params;
+          const results = await searchRobots({
             page: current,
-            pageSize: pageSize,
-            name: keyword,
+            pageSize,
+            name,
+            desc,
+            owner,
           });
-          return resp;
+          return results;
         }}
         editable={{
           type: 'multiple',
         }}
         columnsState={{
-          persistenceKey: 'pro-table-singe-demos',
+          persistenceKey: 'pro-table-robot',
           persistenceType: 'localStorage',
           defaultValue: {
             option: { fixed: 'right', disable: true },
@@ -249,21 +243,10 @@ const Robot: React.FC = () => {
             listsHeight: 400,
           },
         }}
-        form={{
-          // Since transform is configured, the submitted parameters are different from the defined ones, so they need to be transformed here
-          syncToUrl: (values, type) => {
-            if (type === 'get') {
-              return {
-                ...values,
-                created_at: [values.startTime, values.endTime],
-              };
-            }
-            return values;
-          },
-        }}
         pagination={{
-          pageSize: 5,
-          onChange: (page) => console.log(page),
+          pageSize: 10,
+          showSizeChanger: true,
+          showQuickJumper: true,
         }}
         dateFormatter="string"
         headerTitle={intl.formatMessage({
@@ -275,52 +258,21 @@ const Robot: React.FC = () => {
             key="button"
             icon={<PlusOutlined />}
             onClick={() => {
-              setCreateVisible(true);
+              setOperation('create');
+              setVisible(true);
             }}
             type="primary"
           >
             <FormattedMessage id="pages.robot.table.toolbar.new" defaultMessage="新增" />
           </Button>,
-          <Dropdown
-            key="menu"
-            menu={{
-              items: [
-                {
-                  label: '1st item',
-                  key: '1',
-                },
-                {
-                  label: '2nd item',
-                  key: '2',
-                },
-                {
-                  label: '3rd item',
-                  key: '3',
-                },
-              ],
-            }}
-          >
-            <Button>
-              <EllipsisOutlined />
-            </Button>
-          </Dropdown>,
         ]}
       />
-
-      <CreateForm
-      visible={createVisible}
-      onCancel={() => setCreateVisible(false)}
-      onSuccess={() => {
-        setCreateVisible(false);
-        actionRef.current?.reload();
-      }}
-      />
-
-      <UpdateForm
-        visible={updateVisible}
-        onCancel={() => setUpdateVisible(false)}
+      <OperateForm
+        visible={visible}
+        operation={operation}
+        onCancel={() => setVisible(false)}
         onSuccess={() => {
-          setUpdateVisible(false);
+          setVisible(false);
           actionRef.current?.reload();
         }}
         initialValues={currentRobot}
