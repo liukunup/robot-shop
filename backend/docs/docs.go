@@ -1212,8 +1212,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "callback": {
+                    "description": "通知地址",
                     "type": "string",
-                    "example": "https://callback.example.com"
+                    "example": "https://example.com/callback"
                 },
                 "createdAt": {
                     "description": "创建时间",
@@ -1221,10 +1222,12 @@ const docTemplate = `{
                     "example": "2006-01-02 15:04:05"
                 },
                 "desc": {
+                    "description": "描述",
                     "type": "string",
                     "example": "It's a robot"
                 },
                 "enabled": {
+                    "description": "是否启用",
                     "type": "boolean",
                     "example": true
                 },
@@ -1234,10 +1237,12 @@ const docTemplate = `{
                     "example": 1
                 },
                 "name": {
+                    "description": "名称",
                     "type": "string",
                     "example": "bot"
                 },
                 "owner": {
+                    "description": "所有者",
                     "type": "string",
                     "example": "Billy"
                 },
@@ -1247,8 +1252,9 @@ const docTemplate = `{
                     "example": "2006-01-02 15:04:05"
                 },
                 "webhook": {
+                    "description": "回调地址",
                     "type": "string",
-                    "example": "https://webhook.example.com"
+                    "example": "https://example.com/webhook"
                 }
             }
         },
@@ -1256,12 +1262,14 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "list": {
+                    "description": "列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Robot"
                     }
                 },
                 "total": {
+                    "description": "总数",
                     "type": "integer"
                 }
             }
@@ -1270,22 +1278,34 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "callback": {
-                    "type": "string"
+                    "description": "通知地址",
+                    "type": "string",
+                    "example": "https://example.com/callback"
                 },
                 "desc": {
-                    "type": "string"
+                    "description": "描述",
+                    "type": "string",
+                    "example": "It's a robot"
                 },
                 "enabled": {
-                    "type": "boolean"
+                    "description": "是否启用",
+                    "type": "boolean",
+                    "example": true
                 },
                 "name": {
-                    "type": "string"
+                    "description": "名称",
+                    "type": "string",
+                    "example": "bot"
                 },
                 "owner": {
-                    "type": "string"
+                    "description": "所有者",
+                    "type": "string",
+                    "example": "Billy"
                 },
                 "webhook": {
-                    "type": "string"
+                    "description": "回调地址",
+                    "type": "string",
+                    "example": "https://example.com/webhook"
                 }
             }
         },

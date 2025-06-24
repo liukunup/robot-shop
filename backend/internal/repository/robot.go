@@ -33,6 +33,12 @@ func (r *robotRepository) List(ctx context.Context, req *v1.RobotSearchRequest) 
 	if req.Name != "" {
 		scope = scope.Where("name LIKE ?", "%"+req.Name+"%")
 	}
+	if req.Desc != "" {
+		scope = scope.Where("desc LIKE ?", "%"+req.Desc+"%")
+	}
+	if req.Owner != "" {
+		scope = scope.Where("owner = ?", req.Owner)
+	}
 	if err := scope.Count(&total).Error; err != nil {
 		return nil, total, err
 	}

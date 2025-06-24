@@ -329,31 +329,45 @@ declare namespace API {
   };
 
   type Robot = {
+    /** 通知地址 */
     callback?: string;
     /** 创建时间 */
     createdAt?: string;
+    /** 描述 */
     desc?: string;
+    /** 是否启用 */
     enabled?: boolean;
     /** ID */
     id?: number;
+    /** 名称 */
     name?: string;
+    /** 所有者 */
     owner?: string;
     /** 更新时间 */
     updatedAt?: string;
+    /** 回调地址 */
     webhook?: string;
   };
 
   type RobotList = {
+    /** 列表 */
     list?: Robot[];
+    /** 总数 */
     total?: number;
   };
 
   type RobotParams = {
+    /** 通知地址 */
     callback?: string;
+    /** 描述 */
     desc?: string;
+    /** 是否启用 */
     enabled?: boolean;
+    /** 名称 */
     name?: string;
+    /** 所有者 */
     owner?: string;
+    /** 回调地址 */
     webhook?: string;
   };
 
