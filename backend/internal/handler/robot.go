@@ -176,7 +176,7 @@ func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 		return
 	}
 
-	v1.HandleSuccess(ctx, v1.RobotData{
+	v1.HandleSuccess(ctx, v1.RobotDataItem{
 		Id:        robot.ID,
 		CreatedAt: time.FormatTime(robot.CreatedAt),
 		UpdatedAt: time.FormatTime(robot.UpdatedAt),

@@ -39,11 +39,11 @@ func (s *robotService) List(ctx context.Context, req *v1.RobotSearchRequest) (*v
 		return nil, err
 	}
 	data := &v1.RobotSearchResponseData{
-		List:  make([]v1.RobotData, 0),
+		List:  make([]v1.RobotDataItem, 0),
 		Total: total,
 	}
 	for _, robot := range list {
-		data.List = append(data.List, v1.RobotData{
+		data.List = append(data.List, v1.RobotDataItem{
 			Id:        robot.ID,
 			CreatedAt: robot.CreatedAt.Format(constant.DateTimeLayout),
 			UpdatedAt: robot.UpdatedAt.Format(constant.DateTimeLayout),
