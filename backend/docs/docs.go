@@ -974,7 +974,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RobotParams"
+                            "$ref": "#/definitions/backend_api_v1.RobotRequest"
                         }
                     }
                 ],
@@ -1055,7 +1055,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RobotParams"
+                            "$ref": "#/definitions/backend_api_v1.RobotRequest"
                         }
                     }
                 ],
@@ -1224,7 +1224,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "callback": {
-                    "description": "通知地址",
+                    "description": "回调地址",
                     "type": "string",
                     "example": "https://example.com/callback"
                 },
@@ -1264,7 +1264,7 @@ const docTemplate = `{
                     "example": "2006-01-02 15:04:05"
                 },
                 "webhook": {
-                    "description": "回调地址",
+                    "description": "通知地址",
                     "type": "string",
                     "example": "https://example.com/webhook"
                 }
@@ -1283,41 +1283,6 @@ const docTemplate = `{
                 "total": {
                     "description": "总数",
                     "type": "integer"
-                }
-            }
-        },
-        "RobotParams": {
-            "type": "object",
-            "properties": {
-                "callback": {
-                    "description": "通知地址",
-                    "type": "string",
-                    "example": "https://example.com/callback"
-                },
-                "desc": {
-                    "description": "描述",
-                    "type": "string",
-                    "example": "It's a robot"
-                },
-                "enabled": {
-                    "description": "是否启用",
-                    "type": "boolean",
-                    "example": true
-                },
-                "name": {
-                    "description": "名称",
-                    "type": "string",
-                    "example": "bot"
-                },
-                "owner": {
-                    "description": "所有者",
-                    "type": "string",
-                    "example": "Billy"
-                },
-                "webhook": {
-                    "description": "回调地址",
-                    "type": "string",
-                    "example": "https://example.com/webhook"
                 }
             }
         },
@@ -1807,6 +1772,41 @@ const docTemplate = `{
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "backend_api_v1.RobotRequest": {
+            "type": "object",
+            "properties": {
+                "callback": {
+                    "description": "回调地址",
+                    "type": "string",
+                    "example": "https://example.com/callback"
+                },
+                "desc": {
+                    "description": "描述",
+                    "type": "string",
+                    "example": "It's a robot"
+                },
+                "enabled": {
+                    "description": "是否启用",
+                    "type": "boolean",
+                    "example": true
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string",
+                    "example": "bot"
+                },
+                "owner": {
+                    "description": "所有者",
+                    "type": "string",
+                    "example": "Billy"
+                },
+                "webhook": {
+                    "description": "通知地址",
+                    "type": "string",
+                    "example": "https://example.com/webhook"
                 }
             }
         },

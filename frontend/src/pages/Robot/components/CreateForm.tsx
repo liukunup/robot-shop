@@ -1,59 +1,36 @@
 import { Checkbox, Form, Input, Modal, message } from 'antd';
+import { FormattedMessage } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState } from 'react';
-import { createRobot, updateRobot } from '@/services/backend/robot';
+import { createRobot } from '@/services/backend/robot';
 
-interface OperateFormProps {
+interface CreateFormProps {
   visible: boolean; // 弹窗是否可见
-  operation: 'create' | 'update' | 'view'; // 操作类型: 创建/更新/查看
   onCancel: () => void; // 取消回调
   onSuccess: () => void; // 成功回调
-  initialValues: API.Robot; // 初始值
 }
 
-const OperateForm = ({ visible, operation, onCancel, onSuccess, initialValues }: OperateFormProps) => {
-  const [form] = useForm<API.Robot>();
+const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
   const [loading, setLoading] = useState(false);
-
-  // 根据操作类型确定标题
-  const title = {
-    create: '新增',
-    update: '更新',
-    view: '查看',
-  }[operation];
-
-  // 仅在更新和查看操作时设置初始值
-  if (operation === 'update' || operation === 'view') {
-    form.setFieldsValue(initialValues);
-  }
+  const [form] = useForm<API.RobotRequest>();
 
   const handleOk = async () => {
     setLoading(true);
     try {
       const values = await form.validateFields();
-      if (operation === 'create') {
-        if (!values.id) {
-          values.id = 0; // 显式将字段置空
-        }
-        await createRobot(values as API.RobotParams);
-        message.success('新增成功');
-      } else if (operation === 'update') {
-        if (!values.id) {
-          throw new Error('ID is required for update operation.');
-        }
-        await updateRobot({id: values.id}, values as API.RobotParams);
-        message.success('更新成功');
-      } else if (operation === 'view') {
-        // 查看操作不需要调用接口
-      } else {
-        console.error('Unknown Operation Type:', operation);
-      }
+      // 确保值为false或true
+      const params = {
+        ...values,
+        enabled: values.enabled !== undefined ? values.enabled : true
+      };
+      await createRobot(params as API.RobotRequest);
+      message.success('新增成功');
       onSuccess();
     } catch (error) {
       if (error instanceof Error) {
-        message.error(error.message || '操作失败');
+        message.error(error.message || '新增失败');
       } else {
-        message.error('操作失败');
+        message.error('新增失败');
       }
     } finally {
       setLoading(false);
@@ -67,7 +44,7 @@ const OperateForm = ({ visible, operation, onCancel, onSuccess, initialValues }:
 
   return (
     <Modal
-      title={title}
+      title={<FormattedMessage id="pages.robot.table.createForm.newRobot" defaultMessage="新建机器人" />}
       open={visible}
       onOk={handleOk}
       onCancel={handleCancel}
@@ -76,15 +53,8 @@ const OperateForm = ({ visible, operation, onCancel, onSuccess, initialValues }:
       <Form
         form={form}
         layout="vertical"
-        initialValues={initialValues}
-        disabled={operation === 'view'}
+        initialValues={{ enabled: true }}
       >
-        <Form.Item
-          name="id"
-          label="ID"
-        >
-          <Input />
-        </Form.Item>
 
         <Form.Item
           name="name"
@@ -103,7 +73,7 @@ const OperateForm = ({ visible, operation, onCancel, onSuccess, initialValues }:
 
         <Form.Item
           name="webhook"
-          label="回调地址"
+          label="通知地址"
           rules={[{ type: 'url', message: '请输入正确的 URL' }]}
         >
           <Input.TextArea />
@@ -111,7 +81,7 @@ const OperateForm = ({ visible, operation, onCancel, onSuccess, initialValues }:
 
         <Form.Item
           name="callback"
-          label="通知地址"
+          label="回调地址"
           rules={[{ type: 'url', message: '请输入正确的 URL' }]}
         >
           <Input.TextArea />
@@ -120,8 +90,9 @@ const OperateForm = ({ visible, operation, onCancel, onSuccess, initialValues }:
         <Form.Item
           name="enabled"
           label="是否启用"
+          valuePropName="checked"
         >
-          <Checkbox defaultChecked={true} />
+          <Checkbox />
         </Form.Item>
 
         <Form.Item
@@ -135,4 +106,4 @@ const OperateForm = ({ visible, operation, onCancel, onSuccess, initialValues }:
   );
 };
 
-export default OperateForm;
+export default CreateForm;

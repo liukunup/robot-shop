@@ -1,11 +1,12 @@
-import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { ProTable, TableDropdown } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { Button, Dropdown, Space, Tag, message } from 'antd';
+import { Button, Space, Tag, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useRef, useState } from 'react';
 import { listRobots, deleteRobot, createRobot } from '../../services/backend/robot';
-import OperateForm from './components/OperateForm';
+import CreateForm from './components/CreateForm';
+import UpdateForm from './components/UpdateForm';
 
 // 搜索机器人
 const searchRobots = async (params: {
@@ -25,10 +26,10 @@ const searchRobots = async (params: {
 };
 
 const Robot: React.FC = () => {
-  const [visible, setVisible] = useState(false);
-  const [operation, setOperation] = useState<'create' | 'update' | 'view'>();
+  const [createVisible, setCreateVisible] = useState(false);
+  const [updateVisible, setUpdateVisible] = useState(false);
   const [currentRobot, setCurrentRobot] = useState<API.Robot | null>(null);
-  const actionRef = useRef<ActionType>();
+  const actionRef = useRef<ActionType>(null);
   const intl = useIntl();
 
   const columns: ProColumns<API.Robot>[] = [
@@ -151,41 +152,31 @@ const Robot: React.FC = () => {
           onClick={() => {
             console.log(record);
             setCurrentRobot(record);
-            setOperation('update');
-            setVisible(true);
+            setUpdateVisible(true);
           }}
         >
           <FormattedMessage id="pages.robot.table.column.action.edit" defaultMessage="编辑" />
         </a>,
         <a
-          key="view"
-          onClick={() => {
-            setCurrentRobot(record);
-            setOperation('view');
-            setVisible(true);
+          key="duplicate"
+          onClick={async () => {
+            await createRobot({
+              name: record.name + '-副本',
+              desc: record.desc,
+              webhook: record.webhook,
+              callback: record.callback,
+              enabled: record.enabled,
+              owner: record.owner,
+            });
+            actionRef.current?.reload();
           }}
         >
-          <FormattedMessage id="pages.robot.table.column.action.view" defaultMessage="查看" />
+          <FormattedMessage id="pages.robot.table.column.action.duplicate" defaultMessage="复制" />
         </a>,
         <TableDropdown
           key="actionGroup"
           onSelect={() => action?.reload()}
           menus={[
-            {
-              key: 'copy',
-              name: '复制',
-              onClick: async () => {
-                await createRobot({
-                  name: record.name + '-副本',
-                  desc: record.desc,
-                  webhook: record.webhook,
-                  callback: record.callback,
-                  enabled: record.enabled,
-                  owner: record.owner,
-                });
-                actionRef.current?.reload();
-              },
-            },
             {
               key: 'delete',
               name: '删除',
@@ -244,7 +235,6 @@ const Robot: React.FC = () => {
           },
         }}
         pagination={{
-          pageSize: 10,
           showSizeChanger: true,
           showQuickJumper: true,
         }}
@@ -258,8 +248,7 @@ const Robot: React.FC = () => {
             key="button"
             icon={<PlusOutlined />}
             onClick={() => {
-              setOperation('create');
-              setVisible(true);
+              setCreateVisible(true);
             }}
             type="primary"
           >
@@ -267,15 +256,22 @@ const Robot: React.FC = () => {
           </Button>,
         ]}
       />
-      <OperateForm
-        visible={visible}
-        operation={operation}
-        onCancel={() => setVisible(false)}
+      <CreateForm
+        visible={createVisible}
+        onCancel={() => setCreateVisible(false)}
         onSuccess={() => {
-          setVisible(false);
+          setCreateVisible(false);
           actionRef.current?.reload();
         }}
-        initialValues={currentRobot}
+      />
+      <UpdateForm
+        visible={updateVisible}
+        onCancel={() => setUpdateVisible(false)}
+        onSuccess={() => {
+          setUpdateVisible(false);
+          actionRef.current?.reload();
+        }}
+        initialValues={currentRobot as API.Robot}
       />
     </div>
   );

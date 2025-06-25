@@ -18,7 +18,7 @@ export async function listRobots(
 }
 
 /** 创建机器人 POST /robots */
-export async function createRobot(body: API.RobotParams, options?: { [key: string]: any }) {
+export async function createRobot(body: API.RobotRequest, options?: { [key: string]: any }) {
   return request<API.Response>(`/v1/robots`, {
     method: 'POST',
     headers: {
@@ -47,7 +47,7 @@ export async function getRobot(
 export async function updateRobot(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.UpdateRobotParams,
-  body: API.RobotParams,
+  body: API.RobotRequest,
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;

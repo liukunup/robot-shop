@@ -61,7 +61,7 @@ definitions:
   Robot:
     properties:
       callback:
-        description: 通知地址
+        description: 回调地址
         example: https://example.com/callback
         type: string
       createdAt:
@@ -93,7 +93,7 @@ definitions:
         example: "2006-01-02 15:04:05"
         type: string
       webhook:
-        description: 回调地址
+        description: 通知地址
         example: https://example.com/webhook
         type: string
     type: object
@@ -107,33 +107,6 @@ definitions:
       total:
         description: 总数
         type: integer
-    type: object
-  RobotParams:
-    properties:
-      callback:
-        description: 通知地址
-        example: https://example.com/callback
-        type: string
-      desc:
-        description: 描述
-        example: It's a robot
-        type: string
-      enabled:
-        description: 是否启用
-        example: true
-        type: boolean
-      name:
-        description: 名称
-        example: bot
-        type: string
-      owner:
-        description: 所有者
-        example: Billy
-        type: string
-      webhook:
-        description: 回调地址
-        example: https://example.com/webhook
-        type: string
     type: object
   backend_api_v1.ApiCreateRequest:
     properties:
@@ -477,6 +450,33 @@ definitions:
         type: integer
       success:
         type: boolean
+    type: object
+  backend_api_v1.RobotRequest:
+    properties:
+      callback:
+        description: 回调地址
+        example: https://example.com/callback
+        type: string
+      desc:
+        description: 描述
+        example: It's a robot
+        type: string
+      enabled:
+        description: 是否启用
+        example: true
+        type: boolean
+      name:
+        description: 名称
+        example: bot
+        type: string
+      owner:
+        description: 所有者
+        example: Billy
+        type: string
+      webhook:
+        description: 通知地址
+        example: https://example.com/webhook
+        type: string
     type: object
   backend_api_v1.RobotResponse:
     properties:
@@ -1260,7 +1260,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/RobotParams'
+          $ref: '#/definitions/backend_api_v1.RobotRequest'
       produces:
       - application/json
       responses:
@@ -1333,7 +1333,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/RobotParams'
+          $ref: '#/definitions/backend_api_v1.RobotRequest'
       produces:
       - application/json
       responses:

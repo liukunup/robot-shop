@@ -6,8 +6,6 @@ import (
 	"backend/internal/model"
 	"backend/internal/repository"
 	"context"
-
-	"gorm.io/gorm"
 )
 
 type RobotService interface {
@@ -70,17 +68,15 @@ func (s *robotService) Create(ctx context.Context, req *v1.RobotRequest) error {
 }
 
 func (s *robotService) Update(ctx context.Context, id uint, req *v1.RobotRequest) error {
-	return s.robotRepository.Update(ctx, &model.Robot{
-		Model: gorm.Model{
-			ID: id,
-		},
-		Name:     req.Name,
-		Desc:     req.Desc,
-		Webhook:  req.Webhook,
-		Callback: req.Callback,
-		Enabled:  req.Enabled,
-		Owner:    req.Owner,
-	})
+	data := map[string]interface{}{
+		"name":     req.Name,
+		"desc":     req.Desc,
+		"webhook":  req.Webhook,
+		"callback": req.Callback,
+		"enabled":  req.Enabled,
+		"owner":    req.Owner,
+	}
+	return s.robotRepository.Update(ctx, id, data)
 }
 
 func (s *robotService) Delete(ctx context.Context, id uint) error {
