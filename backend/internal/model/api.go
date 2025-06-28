@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Api struct {
 	gorm.Model
+
 	Group  string `gorm:"type:varchar(255);not null;comment:'分组'"`
 	Name   string `gorm:"type:varchar(255);not null;comment:'名称'"`
 	Path   string `gorm:"type:varchar(255);not null;comment:'路径'"`

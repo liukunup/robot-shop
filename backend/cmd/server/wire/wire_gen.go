@@ -38,10 +38,16 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	apiRepository := repository.NewApiRepository(repositoryRepository)
 	userService := service.NewUserService(serviceService, userRepository, menuRepository, roleRepository, apiRepository)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
+	roleService := service.NewRoleService(serviceService, roleRepository)
+	roleHandler := handler.NewRoleHandler(handlerHandler, roleService)
+	menuService := service.NewMenuService(serviceService, menuRepository)
+	menuHandler := handler.NewMenuHandler(handlerHandler, menuService)
+	apiService := service.NewApiService(serviceService, apiRepository)
+	apiHandler := handler.NewApiHandler(handlerHandler, apiService)
 	robotRepository := repository.NewRobotRepository(repositoryRepository)
 	robotService := service.NewRobotService(serviceService, robotRepository)
 	robotHandler := handler.NewRobotHandler(handlerHandler, robotService)
-	httpServer := server.NewHTTPServer(logger, viperViper, jwtJWT, syncedEnforcer, userHandler, robotHandler)
+	httpServer := server.NewHTTPServer(logger, viperViper, jwtJWT, syncedEnforcer, userHandler, roleHandler, menuHandler, apiHandler, robotHandler)
 	jobJob := job.NewJob(transaction, logger, sidSid)
 	userJob := job.NewUserJob(jobJob, userRepository)
 	jobServer := server.NewJobServer(logger, userJob)
@@ -52,11 +58,11 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewTransaction, repository.NewUserRepository, repository.NewRoleRepository, repository.NewApiRepository, repository.NewMenuRepository, repository.NewCasbinEnforcer, repository.NewRobotRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewTransaction, repository.NewUserRepository, repository.NewRoleRepository, repository.NewMenuRepository, repository.NewApiRepository, repository.NewCasbinEnforcer, repository.NewRobotRepository)
 
-var serviceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewRobotService)
+var serviceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewRoleService, service.NewMenuService, service.NewApiService, service.NewRobotService)
 
-var handlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewRobotHandler)
+var handlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewRoleHandler, handler.NewMenuHandler, handler.NewApiHandler, handler.NewRobotHandler)
 
 var jobSet = wire.NewSet(job.NewJob, job.NewUserJob)
 

@@ -22,6 +22,9 @@ func NewHTTPServer(
 	jwt *jwt.JWT,
 	e *casbin.SyncedEnforcer,
 	userHandler *handler.UserHandler,
+	roleHandler *handler.RoleHandler,
+	menuHandler *handler.MenuHandler,
+	apiHandler *handler.ApiHandler,
 	robotHandler *handler.RobotHandler,
 ) *http.Server {
 	gin.SetMode(gin.DebugMode)
@@ -67,40 +70,40 @@ func NewHTTPServer(
 		strictAuthRouter := v1.Group("/").Use(middleware.StrictAuth(jwt, logger), middleware.AuthMiddleware(e))
 		{
 			// User
-			strictAuthRouter.GET("/user", userHandler.GetCurrentUser)
 			strictAuthRouter.GET("/admin/users", userHandler.ListUsers)
-			strictAuthRouter.POST("/admin/user", userHandler.UserCreate)
-			strictAuthRouter.PUT("/admin/user", userHandler.UserUpdate)
-			strictAuthRouter.DELETE("/admin/user", userHandler.UserDelete)
-			strictAuthRouter.GET("/admin/user/permissions", userHandler.GetUserPermissions)
+			strictAuthRouter.POST("/admin/users", userHandler.UserCreate)
+			strictAuthRouter.PUT("/admin/users/:id", userHandler.UserUpdate)
+			strictAuthRouter.DELETE("/admin/users/:id", userHandler.UserDelete)
+			strictAuthRouter.GET("/users/me", userHandler.GetCurrentUser)
+			strictAuthRouter.GET("/users/me/permission", userHandler.GetUserPermission)
+			strictAuthRouter.GET("/users/me/menus", userHandler.GetUserMenu)
 
 			// Role
-			strictAuthRouter.GET("/admin/roles", userHandler.ListRoles)
-			strictAuthRouter.POST("/admin/role", userHandler.RoleCreate)
-			strictAuthRouter.PUT("/admin/role", userHandler.RoleUpdate)
-			strictAuthRouter.DELETE("/admin/role", userHandler.RoleDelete)
-			strictAuthRouter.GET("/admin/role/permissions", userHandler.GetRolePermissions)
-			strictAuthRouter.PUT("/admin/role/permission", userHandler.UpdateRolePermission)
+			strictAuthRouter.GET("/admin/roles", roleHandler.ListRoles)
+			strictAuthRouter.POST("/admin/roles", roleHandler.RoleCreate)
+			strictAuthRouter.PUT("/admin/roles/:id", roleHandler.RoleUpdate)
+			strictAuthRouter.DELETE("/admin/roles/:id", roleHandler.RoleDelete)
+			strictAuthRouter.GET("/admin/roles/permission", roleHandler.GetRolePermission)
+			strictAuthRouter.PUT("/admin/roles/permission", roleHandler.UpdateRolePermission)
 
 			// Menu
-			strictAuthRouter.GET("/menu", userHandler.GetCurrentMenu)
-			strictAuthRouter.GET("/admin/menus", userHandler.ListMenus)
-			strictAuthRouter.POST("/admin/menu", userHandler.MenuCreate)
-			strictAuthRouter.PUT("/admin/menu", userHandler.MenuUpdate)
-			strictAuthRouter.DELETE("/admin/menu", userHandler.MenuDelete)
+			strictAuthRouter.GET("/admin/menus", menuHandler.ListMenus)
+			strictAuthRouter.POST("/admin/menus", menuHandler.MenuCreate)
+			strictAuthRouter.PUT("/admin/menus/:id", menuHandler.MenuUpdate)
+			strictAuthRouter.DELETE("/admin/menus/:id", menuHandler.MenuDelete)
 
 			// API
-			strictAuthRouter.GET("/admin/apis", userHandler.ListApis)
-			strictAuthRouter.POST("/admin/api", userHandler.ApiCreate)
-			strictAuthRouter.PUT("/admin/api", userHandler.ApiUpdate)
-			strictAuthRouter.DELETE("/admin/api", userHandler.ApiDelete)
+			strictAuthRouter.GET("/admin/apis", apiHandler.ListApis)
+			strictAuthRouter.POST("/admin/apis", apiHandler.ApiCreate)
+			strictAuthRouter.PUT("/admin/apis/:id", apiHandler.ApiUpdate)
+			strictAuthRouter.DELETE("/admin/apis/:id", apiHandler.ApiDelete)
 
 			// Robot
 			strictAuthRouter.GET("/robots", robotHandler.ListRobots)
-			strictAuthRouter.POST("/robots", robotHandler.CreateRobot)
+			strictAuthRouter.POST("/robots", robotHandler.RobotCreate)
 			strictAuthRouter.GET("/robots/:id", robotHandler.GetRobot)
-			strictAuthRouter.PUT("/robots/:id", robotHandler.UpdateRobot)
-			strictAuthRouter.DELETE("/robots/:id", robotHandler.DeleteRobot)
+			strictAuthRouter.PUT("/robots/:id", robotHandler.RobotUpdate)
+			strictAuthRouter.DELETE("/robots/:id", robotHandler.RobotDelete)
 		}
 	}
 

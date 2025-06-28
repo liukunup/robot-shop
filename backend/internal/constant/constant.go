@@ -1,7 +1,7 @@
 package constant
 
 const (
-	AdminRole          = "admin"
+	AdminRole          = "1000"
 	AdminUserID        = "1"
 	MenuResourcePrefix = "menu:"
 	ApiResourcePrefix  = "api:"

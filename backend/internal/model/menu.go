@@ -4,6 +4,7 @@ import "gorm.io/gorm"
 
 type Menu struct {
 	gorm.Model
+
 	ParentID   uint   `json:"parentId,omitempty" gorm:"column:parent_id;index;comment:父级菜单的id，使用整数表示"`     // 父级菜单的id，使用整数表示
 	Path       string `json:"path" gorm:"column:path;type:varchar(255);comment:地址"`                        // 地址
 	Title      string `json:"title" gorm:"column:title;type:varchar(100);comment:标题，使用字符串表示"`              // 标题，使用字符串表示

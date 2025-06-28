@@ -14,6 +14,7 @@ import (
 	"backend/pkg/log"
 	"backend/pkg/server/http"
 	"backend/pkg/sid"
+
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 )
@@ -25,21 +26,30 @@ var repositorySet = wire.NewSet(
 	repository.NewTransaction,
 	repository.NewUserRepository,
 	repository.NewRoleRepository,
-	repository.NewApiRepository,
 	repository.NewMenuRepository,
+	repository.NewApiRepository,
 	repository.NewCasbinEnforcer,
+	// more biz repository
 	repository.NewRobotRepository,
 )
 
 var serviceSet = wire.NewSet(
 	service.NewService,
 	service.NewUserService,
+	service.NewRoleService,
+	service.NewMenuService,
+	service.NewApiService,
+	// more biz service
 	service.NewRobotService,
 )
 
 var handlerSet = wire.NewSet(
 	handler.NewHandler,
 	handler.NewUserHandler,
+	handler.NewRoleHandler,
+	handler.NewMenuHandler,
+	handler.NewApiHandler,
+	// more biz handler
 	handler.NewRobotHandler,
 )
 

@@ -60,7 +60,7 @@ func (r *robotRepository) Delete(ctx context.Context, id uint) error {
 	return r.DB(ctx).Where("id = ?", id).Delete(&model.Robot{}).Error
 }
 
-func (r *robotRepository) Get(ctx context.Context, uid uint) (model.Robot, error) {
+func (r *robotRepository) Get(ctx context.Context, id uint) (model.Robot, error) {
 	m := model.Robot{}
-	return m, r.DB(ctx).Where("id = ?", uid).First(&m).Error
+	return m, r.DB(ctx).Where("id = ?", id).First(&m).Error
 }

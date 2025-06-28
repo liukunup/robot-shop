@@ -27,9 +27,9 @@ func NewRobotHandler(
 }
 
 // ListRobots godoc
-// @Summary 批量搜索机器人
+// @Summary 获取机器人列表
 // @Schemes
-// @Description
+// @Description 搜索时支持名称、描述和所有者筛选
 // @Tags Robot
 // @Accept json
 // @Produce json
@@ -45,6 +45,7 @@ func NewRobotHandler(
 func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 	var req v1.RobotSearchRequest
 	if err := ctx.ShouldBind(&req); err != nil {
+		h.logger.WithContext(ctx).Error("ListRobots bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
@@ -52,16 +53,16 @@ func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 	data, err := h.robotService.List(ctx, &req)
 	if err != nil {
 		h.logger.WithContext(ctx).Error("robotService.List error", zap.Error(err))
-		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, data)
 }
 
-// CreateRobot godoc
+// RobotCreate godoc
 // @Summary 创建机器人
 // @Schemes
-// @Description
+// @Description 创建一个新的机器人
 // @Tags Robot
 // @Accept json
 // @Produce json
@@ -69,11 +70,12 @@ func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 // @Param request body v1.RobotRequest true "机器人数据"
 // @Success 200 {object} v1.Response
 // @Router /robots [post]
-// @ID CreateRobot
-func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
+// @ID RobotCreate
+func (h *RobotHandler) RobotCreate(ctx *gin.Context) {
 	var req v1.RobotRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid body"})
+		h.logger.WithContext(ctx).Error("RobotCreate bind error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
@@ -86,10 +88,10 @@ func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, nil)
 }
 
-// UpdateRobot godoc
+// RobotUpdate godoc
 // @Summary 更新机器人
 // @Schemes
-// @Description
+// @Description 更新机器人配置
 // @Tags Robot
 // @Accept json
 // @Produce json
@@ -98,18 +100,20 @@ func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 // @Param request body v1.RobotRequest true "机器人数据"
 // @Success 200 {object} v1.Response
 // @Router /robots/{id} [put]
-// @ID UpdateRobot
-func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
+// @ID RobotUpdate
+func (h *RobotHandler) RobotUpdate(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
+		h.logger.WithContext(ctx).Error("RobotUpdate parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
 	var req v1.RobotRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid body"})
+		h.logger.WithContext(ctx).Error("RobotUpdate bind error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
@@ -121,7 +125,7 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, nil)
 }
 
-// DeleteRobot godoc
+// RobotDelete godoc
 // @Summary 删除机器人
 // @Schemes
 // @Description
@@ -132,11 +136,12 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 // @Param id path uint true "机器人ID"
 // @Success 200 {object} v1.Response
 // @Router /robots/{id} [delete]
-// @ID DeleteRobot
-func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
+// @ID RobotDelete
+func (h *RobotHandler) RobotDelete(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
+		h.logger.WithContext(ctx).Error("RobotDelete parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
@@ -150,7 +155,7 @@ func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 }
 
 // GetRobot godoc
-// @Summary 查找机器人
+// @Summary 获取机器人详情
 // @Schemes
 // @Description
 // @Tags Robot
@@ -165,6 +170,7 @@ func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
+		h.logger.WithContext(ctx).Error("GetRobot parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}

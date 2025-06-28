@@ -6,8 +6,10 @@ import (
 	"backend/internal/model"
 	"backend/internal/repository"
 	"context"
+	cryptoRand "crypto/rand"
+	"encoding/base64"
 	"errors"
-	"math/rand"
+	mathRand "math/rand"
 	"strings"
 	"time"
 
@@ -18,40 +20,18 @@ import (
 )
 
 type UserService interface {
-	// Login
+	// CRUD
+	List(ctx context.Context, req *v1.UserSearchRequest) (*v1.UserSearchResponseData, error)
+	Create(ctx context.Context, req *v1.UserRequest) error
+	Update(ctx context.Context, uid uint, req *v1.UserRequest) error
+	Delete(ctx context.Context, uid uint) error
+	Get(ctx context.Context, uid uint) (*v1.UserDataItem, error)
+	// ATTR
+	GetUserMenu(ctx context.Context, uid uint) (*v1.MenuSearchResponseData, error)
+	GetUserPermission(ctx context.Context, uid uint) (*v1.UserPermissionResponseData, error)
+	// Management
 	Register(ctx context.Context, req *v1.RegisterRequest) error
 	Login(ctx context.Context, req *v1.LoginRequest) (string, error)
-
-	// User
-	ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersResponseData, error)
-	UserCreate(ctx context.Context, req *v1.UserCreateRequest) error
-	UserUpdate(ctx context.Context, req *v1.UserUpdateRequest) error
-	UserDelete(ctx context.Context, id uint) error
-	GetUser(ctx context.Context, uid uint) (*v1.GetUserResponseData, error)
-
-	// Menu
-	ListMenus(ctx context.Context) (*v1.ListMenuResponseData, error)
-	MenuCreate(ctx context.Context, req *v1.MenuCreateRequest) error
-	MenuUpdate(ctx context.Context, req *v1.MenuUpdateRequest) error
-	MenuDelete(ctx context.Context, id uint) error
-	GetMenu(ctx context.Context, uid uint) (*v1.ListMenuResponseData, error)
-
-	// Role
-	ListRoles(ctx context.Context, req *v1.ListRolesRequest) (*v1.ListRolesResponseData, error)
-	RoleCreate(ctx context.Context, req *v1.RoleCreateRequest) error
-	RoleUpdate(ctx context.Context, req *v1.RoleUpdateRequest) error
-	RoleDelete(ctx context.Context, id uint) error
-
-	// API
-	ListApis(ctx context.Context, req *v1.ListApisRequest) (*v1.ListApisResponseData, error)
-	ApiCreate(ctx context.Context, req *v1.ApiCreateRequest) error
-	ApiUpdate(ctx context.Context, req *v1.ApiUpdateRequest) error
-	ApiDelete(ctx context.Context, id uint) error
-
-	// Permission
-	GetUserPermissions(ctx context.Context, uid uint) (*v1.GetUserPermissionsData, error)
-	GetRolePermissions(ctx context.Context, role string) (*v1.GetRolePermissionsData, error)
-	UpdateRolePermission(ctx context.Context, req *v1.UpdateRolePermissionRequest) error
 }
 
 func NewUserService(
@@ -65,8 +45,6 @@ func NewUserService(
 		Service:        service,
 		userRepository: userRepository,
 		menuRepository: menuRepository,
-		roleRepository: roleRepository,
-		apiRepository:  apiRepository,
 	}
 }
 
@@ -74,13 +52,49 @@ type userService struct {
 	*Service
 	userRepository repository.UserRepository
 	menuRepository repository.MenuRepository
-	roleRepository repository.RoleRepository
-	apiRepository  repository.ApiRepository
 }
 
-func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) error {
-	// 检查邮箱是否已注册
-	_, err := s.userRepository.GetUserByEmail(ctx, req.Email)
+func (s *userService) List(ctx context.Context, req *v1.UserSearchRequest) (*v1.UserSearchResponseData, error) {
+	// 获取用户列表
+	list, total, err := s.userRepository.List(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	data := &v1.UserSearchResponseData{
+		List:  make([]v1.UserDataItem, 0),
+		Total: total,
+	}
+	for _, user := range list {
+		// 获取用户角色
+		roles, err := s.userRepository.GetRoles(ctx, user.ID)
+		if err != nil {
+			s.logger.Error("userRepository.GetRoles error", zap.Error(err))
+			continue
+		}
+
+		data.List = append(data.List, v1.UserDataItem{
+			ID:        user.ID,
+			CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
+			UpdatedAt: user.UpdatedAt.Format(constant.DateTimeLayout),
+			Username:  user.Username,
+			Nickname:  user.Nickname,
+			Avatar:    user.Avatar,
+			Email:     user.Email,
+			Phone:     user.Phone,
+			Status:    user.Status,
+			Roles:     roles,
+		})
+	}
+
+	return data, nil
+}
+
+func (s *userService) Create(ctx context.Context, req *v1.UserRequest) error {
+	var err error
+
+	// 检查邮箱是否已存在
+	_, err = s.userRepository.GetByEmail(ctx, req.Email)
 	if err == nil {
 		return v1.ErrEmailAlreadyUse
 	}
@@ -88,269 +102,132 @@ func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) err
 		return v1.ErrInternalServerError
 	}
 
-	// 创建密码哈希值
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	// 检查用户名是否已存在
+	_, err = s.userRepository.GetByUsername(ctx, req.Username)
+	if err == nil {
+		return v1.ErrUsernameAlreadyUse
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return v1.ErrInternalServerError
+	}
+
+	// 使用随机生成的密码
+	randomPassword := generateRandomPassword(16)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(randomPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
-	// 从邮箱中提取默认用户名
-	parts := strings.Split(req.Email, "@")
-	if len(parts) != 2 {
-		return v1.ErrInternalServerError
+	// 使用随机生成的昵称
+	if req.Nickname == "" {
+		req.Nickname = generateHumanNickname()
 	}
-	defaultUsername := parts[0]
-
-	// 生成默认昵称
-	nickname := generateHumanNickname()
 
 	// 构造新用户对象
-	user := &model.User{
-		Username: defaultUsername,
-		Password: string(hashedPassword),
+	newUser := &model.User{
+		Username: req.Username,
+		Password: string(hashedPassword), // 用户通过邮箱激活账户并设置新密码
+		Nickname: req.Nickname,
 		Email:    req.Email,
-		Nickname: nickname,
+		Phone:    req.Phone,
+		Status:   req.Status,
 	}
-	// Transaction demo
 	err = s.tm.Transaction(ctx, func(ctx context.Context) error {
-		// Create a user
-		if err = s.userRepository.UserCreate(ctx, user); err != nil {
+		// 创建用户
+		if err = s.userRepository.Create(ctx, newUser); err != nil {
 			return err
 		}
-		// TODO: other repo
+		// 设置角色
+		if err = s.userRepository.UpdateRoles(ctx, newUser.ID, req.Roles); err != nil {
+			return err
+		}
 		return nil
 	})
 	return err
 }
 
-func (s *userService) Login(ctx context.Context, req *v1.LoginRequest) (string, error) {
-	// 查找指定用户
-	user, err := s.userRepository.GetUserByUsernameOrEmail(ctx, req.Username, req.Username)
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return "", v1.ErrUnauthorized
-	}
+func (s *userService) Update(ctx context.Context, uid uint, req *v1.UserRequest) error {
+	// 更新用户角色
+	err := s.userRepository.UpdateRoles(ctx, uid, req.Roles)
 	if err != nil {
-		return "", v1.ErrInternalServerError
+		return err
 	}
-
-	// 验证密码
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
-	if err != nil {
-		return "", err
+	// 更新用户
+	data := map[string]interface{}{
+		"username": req.Username,
+		"nickname": req.Nickname,
+		"email":    req.Email,
+		"phone":    req.Phone,
+		"status":   req.Status,
 	}
-
-	// 创建AccessToken
-	token, err := s.jwt.GenToken(user.ID, time.Now().Add(time.Hour*24*90))
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
+	return s.userRepository.Update(ctx, uid, data)
 }
 
-func (s *userService) ListUsers(ctx context.Context, req *v1.ListUsersRequest) (*v1.ListUsersResponseData, error) {
-	list, total, err := s.userRepository.ListUsers(ctx, req)
+func (s *userService) Delete(ctx context.Context, uid uint) error {
+	// 删除用户角色
+	err := s.userRepository.DeleteRoles(ctx, uid)
 	if err != nil {
+		return err
+	}
+	// 删除用户
+	return s.userRepository.Delete(ctx, uid)
+}
+
+func (s *userService) Get(ctx context.Context, uid uint) (*v1.UserDataItem, error) {
+	// 获取用户
+	user, err := s.userRepository.Get(ctx, uid)
+	if err != nil {
+		s.logger.WithContext(ctx).Error("userRepository.Get error", zap.Error(err))
 		return nil, err
 	}
-	data := &v1.ListUsersResponseData{
-		List:  make([]v1.UserDataItem, 0),
-		Total: total,
-	}
-	for _, user := range list {
-		roles, err := s.userRepository.GetUserRoles(ctx, user.ID)
-		if err != nil {
-			s.logger.Error("GetUserRoles error", zap.Error(err))
-			continue
-		}
-		data.List = append(data.List, v1.UserDataItem{
-			UserID:    user.ID,
-			Username:  user.Username,
-			Nickname:  user.Nickname,
-			Email:     user.Email,
-			Phone:     user.Phone,
-			Roles:     roles,
-			CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
-			UpdatedAt: user.UpdatedAt.Format(constant.DateTimeLayout),
-		})
-	}
-	return data, nil
-}
-
-func (s *userService) UserCreate(ctx context.Context, req *v1.UserCreateRequest) error {
-	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	// 获取用户角色
+	roles, err := s.userRepository.GetRoles(ctx, uid)
 	if err != nil {
-		return err
-	}
-	req.Password = string(hash)
-	err = s.userRepository.UserCreate(ctx, &model.User{
-		Email:    req.Email,
-		Nickname: req.Nickname,
-		Phone:    req.Phone,
-		Username: req.Username,
-		Password: req.Password,
-	})
-	if err != nil {
-		return err
-	}
-	user, err := s.userRepository.GetUserByUsername(ctx, req.Username)
-	if err != nil {
-		return err
-	}
-	err = s.userRepository.UpdateUserRoles(ctx, user.ID, req.Roles)
-	if err != nil {
-		return err
-	}
-	return err
-
-}
-
-func (s *userService) UserUpdate(ctx context.Context, req *v1.UserUpdateRequest) error {
-	old, _ := s.userRepository.GetUser(ctx, req.UserID)
-	if req.Password != "" {
-		hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-		if err != nil {
-			return err
-		}
-		req.Password = string(hash)
-	} else {
-		req.Password = old.Password
-	}
-	err := s.userRepository.UpdateUserRoles(ctx, req.UserID, req.Roles)
-	if err != nil {
-		return err
-	}
-	return s.userRepository.UserUpdate(ctx, &model.User{
-		Model: gorm.Model{
-			ID: req.UserID,
-		},
-		Email:    req.Email,
-		Nickname: req.Nickname,
-		Phone:    req.Phone,
-		Username: req.Username,
-	})
-
-}
-
-func (s *userService) UserDelete(ctx context.Context, id uint) error {
-	err := s.userRepository.DeleteUserRoles(ctx, id)
-	if err != nil {
-		return err
-	}
-	return s.userRepository.UserDelete(ctx, id)
-}
-
-func (s *userService) GetUser(ctx context.Context, uid uint) (*v1.GetUserResponseData, error) {
-	user, err := s.userRepository.GetUser(ctx, uid)
-	if err != nil {
+		s.logger.WithContext(ctx).Error("userRepository.GetRoles error", zap.Error(err))
 		return nil, err
 	}
-	roles, _ := s.userRepository.GetUserRoles(ctx, uid)
 
-	return &v1.GetUserResponseData{
-		UserID:    user.ID,
-		Username:  user.Username,
-		Nickname:  user.Nickname,
-		Email:     user.Email,
-		Phone:     user.Phone,
-		Avatar:    "https://cravatar.cn/avatar/245467ef31b6f0addc72b039b94122a4?s=100&f=y&r=g",
-		Roles:     roles,
+	return &v1.UserDataItem{
+		ID:        user.ID,
 		CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
 		UpdatedAt: user.UpdatedAt.Format(constant.DateTimeLayout),
+		Username:  user.Username,
+		Nickname:  user.Nickname,
+		Avatar:    "https://cravatar.cn/avatar/245467ef31b6f0addc72b039b94122a4?s=100&f=y&r=g",
+		Email:     user.Email,
+		Phone:     user.Phone,
+		Status:    user.Status,
+		Roles:     roles,
 	}, nil
 }
 
-func (s *userService) ListMenus(ctx context.Context) (*v1.ListMenuResponseData, error) {
-	menuList, err := s.menuRepository.ListMenus(ctx)
+func (s *userService) GetUserMenu(ctx context.Context, uid uint) (*v1.MenuSearchResponseData, error) {
+	// 获取菜单列表
+	menuList, total, err := s.menuRepository.List(ctx)
 	if err != nil {
-		s.logger.WithContext(ctx).Error("ListMenus error", zap.Error(err))
+		s.logger.WithContext(ctx).Error("menuRepository.List error", zap.Error(err))
 		return nil, err
 	}
-	data := &v1.ListMenuResponseData{
-		List: make([]v1.MenuDataItem, 0),
+	data := &v1.MenuSearchResponseData{
+		List:  make([]v1.MenuDataItem, 0),
+		Total: total,
 	}
-	for _, menu := range menuList {
-		data.List = append(data.List, v1.MenuDataItem{
-			ID:         menu.ID,
-			Name:       menu.Name,
-			Title:      menu.Title,
-			Path:       menu.Path,
-			Component:  menu.Component,
-			Redirect:   menu.Redirect,
-			KeepAlive:  menu.KeepAlive,
-			HideInMenu: menu.HideInMenu,
-			Locale:     menu.Locale,
-			Weight:     menu.Weight,
-			Icon:       menu.Icon,
-			ParentID:   menu.ParentID,
-			UpdatedAt:  menu.UpdatedAt.Format(constant.DateTimeLayout),
-			URL:        menu.URL,
-		})
-	}
-	return data, nil
-}
 
-func (s *userService) MenuCreate(ctx context.Context, req *v1.MenuCreateRequest) error {
-	return s.menuRepository.MenuCreate(ctx, &model.Menu{
-		Component:  req.Component,
-		Icon:       req.Icon,
-		KeepAlive:  req.KeepAlive,
-		HideInMenu: req.HideInMenu,
-		Locale:     req.Locale,
-		Weight:     req.Weight,
-		Name:       req.Name,
-		ParentID:   req.ParentID,
-		Path:       req.Path,
-		Redirect:   req.Redirect,
-		Title:      req.Title,
-		URL:        req.URL,
-	})
-}
-
-func (s *userService) MenuUpdate(ctx context.Context, req *v1.MenuUpdateRequest) error {
-	return s.menuRepository.MenuUpdate(ctx, &model.Menu{
-		Component:  req.Component,
-		Icon:       req.Icon,
-		KeepAlive:  req.KeepAlive,
-		HideInMenu: req.HideInMenu,
-		Locale:     req.Locale,
-		Weight:     req.Weight,
-		Name:       req.Name,
-		ParentID:   req.ParentID,
-		Path:       req.Path,
-		Redirect:   req.Redirect,
-		Title:      req.Title,
-		URL:        req.URL,
-		Model: gorm.Model{
-			ID: req.ID,
-		},
-	})
-}
-
-func (s *userService) MenuDelete(ctx context.Context, id uint) error {
-	return s.menuRepository.MenuDelete(ctx, id)
-}
-
-func (s *userService) GetMenu(ctx context.Context, uid uint) (*v1.ListMenuResponseData, error) {
-	menuList, err := s.menuRepository.ListMenus(ctx)
+	// 获取权限列表
+	permList, err := s.userRepository.GetPermissions(ctx, uid)
 	if err != nil {
-		s.logger.WithContext(ctx).Error("GetMenuList error", zap.Error(err))
+		s.logger.WithContext(ctx).Error("userRepository.GetPermissions error", zap.Error(err))
 		return nil, err
 	}
-	data := &v1.ListMenuResponseData{
-		List: make([]v1.MenuDataItem, 0),
-	}
-	// 获取权限的菜单
-	permissions, err := s.userRepository.GetUserPermissions(ctx, uid)
-	if err != nil {
-		return nil, err
-	}
+	// 构建菜单权限映射
 	menuPermMap := map[string]struct{}{}
-	for _, permission := range permissions {
-		// 防呆设置，超管可以看到所有菜单
-		if convertor.ToString(uid) == constant.AdminUserID {
+	// 超管可以看到所有菜单
+	if convertor.ToString(uid) == constant.AdminUserID {
+		for _, permission := range permList {
 			menuPermMap[strings.TrimPrefix(permission[1], constant.MenuResourcePrefix)] = struct{}{}
-		} else {
+		}
+	} else {
+		for _, permission := range permList {
 			if len(permission) == 3 && strings.HasPrefix(permission[1], constant.MenuResourcePrefix) {
 				menuPermMap[strings.TrimPrefix(permission[1], constant.MenuResourcePrefix)] = struct{}{}
 			}
@@ -380,161 +257,106 @@ func (s *userService) GetMenu(ctx context.Context, uid uint) (*v1.ListMenuRespon
 	return data, nil
 }
 
-func (s *userService) ListRoles(ctx context.Context, req *v1.ListRolesRequest) (*v1.ListRolesResponseData, error) {
-	list, total, err := s.roleRepository.ListRoles(ctx, req)
+func (s *userService) GetUserPermission(ctx context.Context, uid uint) (*v1.UserPermissionResponseData, error) {
+	// 获取权限列表
+	permList, err := s.userRepository.GetPermissions(ctx, uid)
 	if err != nil {
+		s.logger.WithContext(ctx).Error("userRepository.GetPermissions error", zap.Error(err))
 		return nil, err
 	}
-	data := &v1.ListRolesResponseData{
-		List:  make([]v1.RoleDataItem, 0),
-		Total: total,
-	}
-	for _, role := range list {
-		data.List = append(data.List, v1.RoleDataItem{
-			ID:        role.ID,
-			Name:      role.Name,
-			Sid:       role.Sid,
-			UpdatedAt: role.UpdatedAt.Format(constant.DateTimeLayout),
-			CreatedAt: role.CreatedAt.Format(constant.DateTimeLayout),
-		})
 
+	data := &v1.UserPermissionResponseData{
+		List: []string{},
+	}
+	for _, v := range permList {
+		if len(v) == 3 {
+			data.List = append(data.List, strings.Join([]string{v[1], v[2]}, constant.PermSep))
+		}
 	}
 	return data, nil
 }
 
-func (s *userService) RoleCreate(ctx context.Context, req *v1.RoleCreateRequest) error {
-	_, err := s.roleRepository.GetRoleBySid(ctx, req.Sid)
+func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) error {
+	// 检查邮箱是否已注册
+	_, err := s.userRepository.GetByEmail(ctx, req.Email)
+	if err == nil {
+		return v1.ErrEmailAlreadyUse
+	}
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return v1.ErrInternalServerError
+	}
+
+	// 创建密码哈希值
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return s.roleRepository.RoleCreate(ctx, &model.Role{
-				Name: req.Name,
-				Sid:  req.Sid,
-			})
-		} else {
+		return err
+	}
+
+	// 从邮箱中提取默认用户名
+	parts := strings.Split(req.Email, "@")
+	if len(parts) != 2 {
+		return v1.ErrInternalServerError
+	}
+	defaultUsername := parts[0]
+
+	// 生成默认昵称
+	nickname := generateHumanNickname()
+
+	// 构造新用户对象
+	user := &model.User{
+		Username: defaultUsername,
+		Password: string(hashedPassword),
+		Nickname: nickname,
+		Email:    req.Email,
+		Status:   0,
+	}
+	err = s.tm.Transaction(ctx, func(ctx context.Context) error {
+		// Create a user
+		if err = s.userRepository.Create(ctx, user); err != nil {
 			return err
 		}
-	}
-	return nil
-}
-
-func (s *userService) RoleUpdate(ctx context.Context, req *v1.RoleUpdateRequest) error {
-	return s.roleRepository.RoleUpdate(ctx, &model.Role{
-		Name: req.Name,
-		Sid:  req.Sid,
-		Model: gorm.Model{
-			ID: req.ID,
-		},
+		// TODO: other repo
+		return nil
 	})
+	return err
 }
 
-func (s *userService) RoleDelete(ctx context.Context, id uint) error {
-	old, err := s.roleRepository.GetRole(ctx, id)
+func (s *userService) Login(ctx context.Context, req *v1.LoginRequest) (string, error) {
+	// 查找指定用户
+	user, err := s.userRepository.GetByUsernameOrEmail(ctx, req.Username, req.Username)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return "", v1.ErrUnauthorized
+	}
 	if err != nil {
-		return err
+		return "", v1.ErrInternalServerError
 	}
-	if err := s.roleRepository.CasbinRoleDelete(ctx, old.Sid); err != nil {
-		return err
-	}
-	return s.roleRepository.RoleDelete(ctx, id)
-}
 
-func (s *userService) ListApis(ctx context.Context, req *v1.ListApisRequest) (*v1.ListApisResponseData, error) {
-	list, total, err := s.apiRepository.ListApis(ctx, req)
+	// 验证密码
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	groups, err := s.apiRepository.ListApiGroups(ctx)
+
+	// 创建AccessToken
+	token, err := s.jwt.GenToken(user.ID, time.Now().Add(time.Hour*24*90))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	data := &v1.ListApisResponseData{
-		List:   make([]v1.ApiDataItem, 0),
-		Total:  total,
-		Groups: groups,
-	}
-	for _, api := range list {
-		data.List = append(data.List, v1.ApiDataItem{
-			CreatedAt: api.CreatedAt.Format(constant.DateTimeLayout),
-			Group:     api.Group,
-			ID:        api.ID,
-			Method:    api.Method,
-			Name:      api.Name,
-			Path:      api.Path,
-			UpdatedAt: api.UpdatedAt.Format(constant.DateTimeLayout),
-		})
-	}
-	return data, nil
+
+	return token, nil
 }
 
-func (s *userService) ApiCreate(ctx context.Context, req *v1.ApiCreateRequest) error {
-	return s.apiRepository.ApiCreate(ctx, &model.Api{
-		Group:  req.Group,
-		Method: req.Method,
-		Name:   req.Name,
-		Path:   req.Path,
-	})
-}
-
-func (s *userService) ApiUpdate(ctx context.Context, req *v1.ApiUpdateRequest) error {
-	return s.apiRepository.ApiUpdate(ctx, &model.Api{
-		Group:  req.Group,
-		Method: req.Method,
-		Name:   req.Name,
-		Path:   req.Path,
-		Model: gorm.Model{
-			ID: req.ID,
-		},
-	})
-}
-
-func (s *userService) ApiDelete(ctx context.Context, id uint) error {
-	return s.apiRepository.ApiDelete(ctx, id)
-}
-
-func (s *userService) GetUserPermissions(ctx context.Context, uid uint) (*v1.GetUserPermissionsData, error) {
-	data := &v1.GetUserPermissionsData{
-		List: []string{},
-	}
-	list, err := s.userRepository.GetUserPermissions(ctx, uid)
+// 生成指定长度的随机密码
+func generateRandomPassword(length int) string {
+	b := make([]byte, length)
+	_, err := cryptoRand.Read(b)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
-	for _, v := range list {
-		if len(v) == 3 {
-			data.List = append(data.List, strings.Join([]string{v[1], v[2]}, constant.PermSep))
-		}
-	}
-	return data, nil
+	return base64.StdEncoding.EncodeToString(b)
 }
 
-func (s *userService) GetRolePermissions(ctx context.Context, role string) (*v1.GetRolePermissionsData, error) {
-	data := &v1.GetRolePermissionsData{
-		List: []string{},
-	}
-	list, err := s.roleRepository.GetRolePermissions(ctx, role)
-	if err != nil {
-		return nil, err
-	}
-	for _, v := range list {
-		if len(v) == 3 {
-			data.List = append(data.List, strings.Join([]string{v[1], v[2]}, constant.PermSep))
-		}
-	}
-	return data, nil
-}
-
-func (s *userService) UpdateRolePermission(ctx context.Context, req *v1.UpdateRolePermissionRequest) error {
-	permissions := map[string]struct{}{}
-	for _, v := range req.List {
-		perm := strings.Split(v, constant.PermSep)
-		if len(perm) == 2 {
-			permissions[v] = struct{}{}
-		}
-
-	}
-	return s.roleRepository.UpdateRolePermission(ctx, req.Role, permissions)
-}
-
+// 生成一个人性化的昵称
 func generateHumanNickname() string {
 
 	adjectives := []string{
@@ -555,6 +377,6 @@ func generateHumanNickname() string {
 		"小雨", "天宇", "思琪", "大伟", "梦瑶",
 	}
 
-	seededRand := rand.New(rand.NewSource(time.Now().UnixNano()))
+	seededRand := mathRand.New(mathRand.NewSource(time.Now().UnixNano()))
 	return adjectives[seededRand.Intn(len(adjectives))] + nouns[seededRand.Intn(len(nouns))]
 }

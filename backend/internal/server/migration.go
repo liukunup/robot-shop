@@ -107,9 +107,9 @@ func (m *MigrateServer) initialUser(ctx context.Context) error {
 
 func (m *MigrateServer) initialRBAC(ctx context.Context) error {
 	roles := []model.Role{
-		{Sid: constant.AdminRole, Name: "超级管理员"},
-		{Sid: "1000", Name: "运营人员"},
-		{Sid: "1001", Name: "访客"},
+		{Role: constant.AdminRole, Name: "超级管理员"},
+		{Role: "1001", Name: "运营人员"},
+		{Role: "1002", Name: "访客"},
 	}
 	if err := m.db.Create(&roles).Error; err != nil {
 		return err
@@ -145,22 +145,22 @@ func (m *MigrateServer) initialRBAC(ctx context.Context) error {
 	}
 
 	// 添加运营人员权限
-	_, err = m.e.AddRoleForUser("2", "1000")
+	_, err = m.e.AddRoleForUser("2", "1001")
 	if err != nil {
 		m.log.Error("m.e.AddRoleForUser error", zap.Error(err))
 		return err
 	}
-	m.addPermissionForRole("1000", constant.MenuResourcePrefix+"/profile/basic", "read")
-	m.addPermissionForRole("1000", constant.MenuResourcePrefix+"/profile/advanced", "read")
-	m.addPermissionForRole("1000", constant.MenuResourcePrefix+"/profile", "read")
-	m.addPermissionForRole("1000", constant.MenuResourcePrefix+"/dashboard", "read")
-	m.addPermissionForRole("1000", constant.MenuResourcePrefix+"/dashboard/workplace", "read")
-	m.addPermissionForRole("1000", constant.MenuResourcePrefix+"/dashboard/analysis", "read")
-	m.addPermissionForRole("1000", constant.MenuResourcePrefix+"/account/settings", "read")
-	m.addPermissionForRole("1000", constant.MenuResourcePrefix+"/account/center", "read")
-	m.addPermissionForRole("1000", constant.MenuResourcePrefix+"/account", "read")
-	m.addPermissionForRole("1000", constant.ApiResourcePrefix+"/v1/menus", http.MethodGet)
-	m.addPermissionForRole("1000", constant.ApiResourcePrefix+"/v1/admin/user", http.MethodGet)
+	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/profile/basic", "read")
+	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/profile/advanced", "read")
+	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/profile", "read")
+	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/dashboard", "read")
+	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/dashboard/workplace", "read")
+	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/dashboard/analysis", "read")
+	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/account/settings", "read")
+	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/account/center", "read")
+	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/account", "read")
+	m.addPermissionForRole("1001", constant.ApiResourcePrefix+"/v1/menus", http.MethodGet)
+	m.addPermissionForRole("1001", constant.ApiResourcePrefix+"/v1/admin/user", http.MethodGet)
 
 	return nil
 }

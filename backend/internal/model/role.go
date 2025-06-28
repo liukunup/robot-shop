@@ -4,10 +4,11 @@ import "gorm.io/gorm"
 
 type Role struct {
 	gorm.Model
-	Name string `json:"name" gorm:"column:name;type:varchar(100);uniqueIndex;comment:角色名"`
-	Sid  string `json:"sid" gorm:"column:sid;type:varchar(100);uniqueIndex;comment:角色标识"`
+
+	Name string `gorm:"type:varchar(255);uniqueIndex;comment:Custom Name"`
+	Role string `gorm:"type:varchar(255);uniqueIndex;comment:Casbin Role"`
 }
 
 func (m *Role) TableName() string {
-    return "role"
+	return "role"
 }
