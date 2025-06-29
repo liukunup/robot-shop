@@ -50,9 +50,9 @@ func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.robotService.List(ctx, &req)
+	data, err := h.robotService.ListRobots(ctx, &req)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("robotService.List error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("robotService.ListRobots error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -79,9 +79,9 @@ func (h *RobotHandler) RobotCreate(ctx *gin.Context) {
 		return
 	}
 
-	err := h.robotService.Create(ctx, &req)
+	err := h.robotService.RobotCreate(ctx, &req)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("robotService.Create error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("robotService.RobotCreate error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -91,7 +91,7 @@ func (h *RobotHandler) RobotCreate(ctx *gin.Context) {
 // RobotUpdate godoc
 // @Summary 更新机器人
 // @Schemes
-// @Description 更新机器人配置
+// @Description 更新机器人数据
 // @Tags Robot
 // @Accept json
 // @Produce json
@@ -117,8 +117,8 @@ func (h *RobotHandler) RobotUpdate(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.robotService.Update(ctx, uint(id), &req); err != nil {
-		h.logger.WithContext(ctx).Error("robotService.Update error", zap.Error(err))
+	if err := h.robotService.RobotUpdate(ctx, uint(id), &req); err != nil {
+		h.logger.WithContext(ctx).Error("robotService.RobotUpdate error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -128,7 +128,7 @@ func (h *RobotHandler) RobotUpdate(ctx *gin.Context) {
 // RobotDelete godoc
 // @Summary 删除机器人
 // @Schemes
-// @Description
+// @Description 删除指定ID的机器人
 // @Tags Robot
 // @Accept json
 // @Produce json
@@ -146,8 +146,8 @@ func (h *RobotHandler) RobotDelete(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.robotService.Delete(ctx, uint(id)); err != nil {
-		h.logger.WithContext(ctx).Error("robotService.Delete error", zap.Error(err))
+	if err := h.robotService.RobotDelete(ctx, uint(id)); err != nil {
+		h.logger.WithContext(ctx).Error("robotService.RobotDelete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -155,9 +155,9 @@ func (h *RobotHandler) RobotDelete(ctx *gin.Context) {
 }
 
 // GetRobot godoc
-// @Summary 获取机器人详情
+// @Summary 获取机器人
 // @Schemes
-// @Description
+// @Description 获取指定ID的机器人信息
 // @Tags Robot
 // @Accept json
 // @Produce json
@@ -175,9 +175,9 @@ func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 		return
 	}
 
-	robot, err := h.robotService.Get(ctx, uint(id))
+	robot, err := h.robotService.GetRobot(ctx, uint(id))
 	if err != nil {
-		h.logger.WithContext(ctx).Error("robotService.Get error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("robotService.GetRobot error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

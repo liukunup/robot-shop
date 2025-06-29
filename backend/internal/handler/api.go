@@ -29,17 +29,17 @@ func NewApiHandler(
 // ListApis godoc
 // @Summary 获取接口列表
 // @Schemes
-// @Description 搜索时支持分组、名称、路径和请求方法筛选
+// @Description 搜索时支持分组名、名称、路径和方法筛选
 // @Tags API
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Param page query int true "页码"
 // @Param pageSize query int true "分页大小"
-// @Param group query string false "分组"
+// @Param group query string false "分组名"
 // @Param name query string false "名称"
 // @Param path query string false "路径"
-// @Param method query string false "请求方法"
+// @Param method query string false "方法"
 // @Success 200 {object} v1.ApiSearchResponse
 // @Router /admin/apis [get]
 func (h *ApiHandler) ListApis(ctx *gin.Context) {
@@ -50,9 +50,9 @@ func (h *ApiHandler) ListApis(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.apiService.List(ctx, &req)
+	data, err := h.apiService.ListApis(ctx, &req)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("apiService.List error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("apiService.ListApis error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -79,8 +79,8 @@ func (h *ApiHandler) ApiCreate(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.apiService.Create(ctx, &req); err != nil {
-		h.logger.WithContext(ctx).Error("apiService.Create error", zap.Error(err))
+	if err := h.apiService.ApiCreate(ctx, &req); err != nil {
+		h.logger.WithContext(ctx).Error("apiService.ApiCreate error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -90,7 +90,7 @@ func (h *ApiHandler) ApiCreate(ctx *gin.Context) {
 // ApiUpdate godoc
 // @Summary 更新接口
 // @Schemes
-// @Description 更新接口配置
+// @Description 更新接口数据
 // @Tags API
 // @Accept json
 // @Produce json
@@ -116,8 +116,8 @@ func (h *ApiHandler) ApiUpdate(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.apiService.Update(ctx, uint(id), &req); err != nil {
-		h.logger.WithContext(ctx).Error("apiService.Update error", zap.Error(err))
+	if err := h.apiService.ApiUpdate(ctx, uint(id), &req); err != nil {
+		h.logger.WithContext(ctx).Error("apiService.ApiUpdate error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
@@ -127,7 +127,7 @@ func (h *ApiHandler) ApiUpdate(ctx *gin.Context) {
 // ApiDelete godoc
 // @Summary 删除接口
 // @Schemes
-// @Description
+// @Description 删除指定ID的接口
 // @Tags API
 // @Accept json
 // @Produce json
@@ -145,8 +145,8 @@ func (h *ApiHandler) ApiDelete(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.apiService.Delete(ctx, uint(id)); err != nil {
-		h.logger.WithContext(ctx).Error("apiService.Delete error", zap.Error(err))
+	if err := h.apiService.ApiDelete(ctx, uint(id)); err != nil {
+		h.logger.WithContext(ctx).Error("apiService.ApiDelete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
@@ -154,9 +154,9 @@ func (h *ApiHandler) ApiDelete(ctx *gin.Context) {
 }
 
 // GetApi godoc
-// @Summary 获取接口详情
+// @Summary 获取接口
 // @Schemes
-// @Description
+// @Description 获取指定ID的接口信息
 // @Tags API
 // @Accept json
 // @Produce json
@@ -173,9 +173,9 @@ func (h *ApiHandler) GetApi(ctx *gin.Context) {
 		return
 	}
 
-	api, err := h.apiService.Get(ctx, uint(id))
+	api, err := h.apiService.GetApi(ctx, uint(id))
 	if err != nil {
-		h.logger.WithContext(ctx).Error("apiService.Get error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("apiService.GetApi error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}

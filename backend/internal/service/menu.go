@@ -11,10 +11,10 @@ import (
 )
 
 type MenuService interface {
-	List(ctx context.Context) (*v1.MenuSearchResponseData, error)
-	Create(ctx context.Context, req *v1.MenuRequest) error
-	Update(ctx context.Context, id uint, req *v1.MenuRequest) error
-	Delete(ctx context.Context, id uint) error
+	ListMenus(ctx context.Context) (*v1.MenuSearchResponseData, error)
+	MenuCreate(ctx context.Context, req *v1.MenuRequest) error
+	MenuUpdate(ctx context.Context, id uint, req *v1.MenuRequest) error
+	MenuDelete(ctx context.Context, id uint) error
 }
 
 func NewMenuService(
@@ -32,8 +32,8 @@ type menuService struct {
 	menuRepository repository.MenuRepository
 }
 
-func (s *menuService) List(ctx context.Context) (*v1.MenuSearchResponseData, error) {
-	list, total, err := s.menuRepository.List(ctx)
+func (s *menuService) ListMenus(ctx context.Context) (*v1.MenuSearchResponseData, error) {
+	list, total, err := s.menuRepository.ListMenus(ctx)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("List error", zap.Error(err))
 		return nil, err
@@ -63,8 +63,8 @@ func (s *menuService) List(ctx context.Context) (*v1.MenuSearchResponseData, err
 	return data, nil
 }
 
-func (s *menuService) Create(ctx context.Context, req *v1.MenuRequest) error {
-	return s.menuRepository.Create(ctx, &model.Menu{
+func (s *menuService) MenuCreate(ctx context.Context, req *v1.MenuRequest) error {
+	return s.menuRepository.MenuCreate(ctx, &model.Menu{
 		Component:  req.Component,
 		Icon:       req.Icon,
 		KeepAlive:  req.KeepAlive,
@@ -80,7 +80,7 @@ func (s *menuService) Create(ctx context.Context, req *v1.MenuRequest) error {
 	})
 }
 
-func (s *menuService) Update(ctx context.Context, id uint, req *v1.MenuRequest) error {
+func (s *menuService) MenuUpdate(ctx context.Context, id uint, req *v1.MenuRequest) error {
 	data := map[string]interface{}{
 		"component":    req.Component,
 		"icon":         req.Icon,
@@ -95,9 +95,9 @@ func (s *menuService) Update(ctx context.Context, id uint, req *v1.MenuRequest) 
 		"title":        req.Title,
 		"url":          req.URL,
 	}
-	return s.menuRepository.Update(ctx, id, data)
+	return s.menuRepository.MenuUpdate(ctx, id, data)
 }
 
-func (s *menuService) Delete(ctx context.Context, id uint) error {
-	return s.menuRepository.Delete(ctx, id)
+func (s *menuService) MenuDelete(ctx context.Context, id uint) error {
+	return s.menuRepository.MenuDelete(ctx, id)
 }

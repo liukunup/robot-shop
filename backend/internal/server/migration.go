@@ -96,12 +96,16 @@ func (m *MigrateServer) initialUser(ctx context.Context) error {
 		Username: "admin",
 		Password: string(hashedPassword),
 		Nickname: "超级管理员",
+		Email:    "admin@example.com",
+		Phone:    "+86 12345678901",
 	}).Error
 	return m.db.Create(&model.User{
 		Model:    gorm.Model{ID: 2},
 		Username: "operator",
 		Password: string(hashedPassword),
 		Nickname: "运营人员",
+		Email:    "operator@example.com",
+		Phone:    "+86 12345678901",
 	}).Error
 }
 

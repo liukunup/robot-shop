@@ -35,6 +35,7 @@ type RoleRequest struct {
 	Role string `json:"role" binding:"required" example:"1"`     // Casbin Role
 }
 
+// Role Permission
 type GetRolePermissionRequest struct {
 	Role string `json:"role" binding:"required" example:"admin"` // 角色名
 }
@@ -46,7 +47,6 @@ type GetRolePermissionResponse struct {
 	Response
 	Data GetRolePermissionResponseData
 }
-
 type UpdateRolePermissionRequest struct {
 	Role string   `form:"role" binding:"required" example:"admin"` // 角色名
 	List []string `form:"list" binding:"required" example:""`      // 权限列表

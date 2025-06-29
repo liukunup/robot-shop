@@ -37,9 +37,9 @@ func NewMenuHandler(
 // @Router /admin/menus [get]
 // @ID ListMenus
 func (h *MenuHandler) ListMenus(ctx *gin.Context) {
-	data, err := h.menuService.List(ctx)
+	data, err := h.menuService.ListMenus(ctx)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("menuService.List error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("menuService.ListMenus error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -66,8 +66,8 @@ func (h *MenuHandler) MenuCreate(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.menuService.Create(ctx, &req); err != nil {
-		h.logger.WithContext(ctx).Error("menuService.Create error", zap.Error(err))
+	if err := h.menuService.MenuCreate(ctx, &req); err != nil {
+		h.logger.WithContext(ctx).Error("menuService.MenuCreate error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -77,7 +77,7 @@ func (h *MenuHandler) MenuCreate(ctx *gin.Context) {
 // MenuUpdate godoc
 // @Summary 更新菜单
 // @Schemes
-// @Description 更新菜单配置
+// @Description 更新菜单数据
 // @Tags Menu
 // @Accept json
 // @Produce json
@@ -103,8 +103,8 @@ func (h *MenuHandler) MenuUpdate(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.menuService.Update(ctx, uint(id), &req); err != nil {
-		h.logger.WithContext(ctx).Error("menuService.Update error", zap.Error(err))
+	if err := h.menuService.MenuUpdate(ctx, uint(id), &req); err != nil {
+		h.logger.WithContext(ctx).Error("menuService.MenuUpdate error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -114,7 +114,7 @@ func (h *MenuHandler) MenuUpdate(ctx *gin.Context) {
 // MenuDelete godoc
 // @Summary 删除菜单
 // @Schemes
-// @Description
+// @Description 删除指定ID的菜单
 // @Tags Menu
 // @Accept json
 // @Produce json
@@ -132,8 +132,8 @@ func (h *MenuHandler) MenuDelete(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.menuService.Delete(ctx, uint(id)); err != nil {
-		h.logger.WithContext(ctx).Error("menuService.Delete error", zap.Error(err))
+	if err := h.menuService.MenuDelete(ctx, uint(id)); err != nil {
+		h.logger.WithContext(ctx).Error("menuService.MenuDelete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 

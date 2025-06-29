@@ -10,16 +10,16 @@ import (
 )
 
 type RoleRepository interface {
-	List(ctx context.Context, req *v1.RoleSearchRequest) ([]model.Role, int64, error)
-	Create(ctx context.Context, m *model.Role) error
-	Update(ctx context.Context, m *model.Role) error
-	Delete(ctx context.Context, id uint) error
-	Get(ctx context.Context, id uint) (model.Role, error)
+	ListRoles(ctx context.Context, req *v1.RoleSearchRequest) ([]model.Role, int64, error)
+	RoleCreate(ctx context.Context, m *model.Role) error
+	RoleUpdate(ctx context.Context, m *model.Role) error
+	RoleDelete(ctx context.Context, id uint) error
+	GetRole(ctx context.Context, id uint) (model.Role, error)
 
-	GetByCasbinRole(ctx context.Context, role string) (model.Role, error)
+	GetRoleByCasbinRole(ctx context.Context, role string) (model.Role, error)
 
-	GetPermission(ctx context.Context, role string) ([][]string, error)
-	UpdatePermission(ctx context.Context, role string, permissions map[string]struct{}) error
+	GetRolePermission(ctx context.Context, role string) ([][]string, error)
+	UpdateRolePermission(ctx context.Context, role string, permissions map[string]struct{}) error
 }
 
 func NewRoleRepository(
@@ -34,7 +34,7 @@ type roleRepository struct {
 	*Repository
 }
 
-func (r *roleRepository) List(ctx context.Context, req *v1.RoleSearchRequest) ([]model.Role, int64, error) {
+func (r *roleRepository) ListRoles(ctx context.Context, req *v1.RoleSearchRequest) ([]model.Role, int64, error) {
 	var list []model.Role
 	var total int64
 	scope := r.DB(ctx).Model(&model.Role{})
@@ -53,15 +53,15 @@ func (r *roleRepository) List(ctx context.Context, req *v1.RoleSearchRequest) ([
 	return list, total, nil
 }
 
-func (r *roleRepository) Create(ctx context.Context, m *model.Role) error {
+func (r *roleRepository) RoleCreate(ctx context.Context, m *model.Role) error {
 	return r.DB(ctx).Create(m).Error
 }
 
-func (r *roleRepository) Update(ctx context.Context, m *model.Role) error {
+func (r *roleRepository) RoleUpdate(ctx context.Context, m *model.Role) error {
 	return r.DB(ctx).Model(&model.Role{}).Where("id = ?", m.ID).UpdateColumn("name", m.Name).Error
 }
 
-func (r *roleRepository) Delete(ctx context.Context, id uint) error {
+func (r *roleRepository) RoleDelete(ctx context.Context, id uint) error {
 	return r.Transaction(ctx, func(ctx context.Context) error {
 		db := r.DB(ctx)
 		// 获取角色
@@ -81,21 +81,21 @@ func (r *roleRepository) Delete(ctx context.Context, id uint) error {
 	})
 }
 
-func (r *roleRepository) Get(ctx context.Context, id uint) (model.Role, error) {
+func (r *roleRepository) GetRole(ctx context.Context, id uint) (model.Role, error) {
 	m := model.Role{}
 	return m, r.DB(ctx).Where("id = ?", id).First(&m).Error
 }
 
-func (r *roleRepository) GetByCasbinRole(ctx context.Context, role string) (model.Role, error) {
+func (r *roleRepository) GetRoleByCasbinRole(ctx context.Context, role string) (model.Role, error) {
 	m := model.Role{}
 	return m, r.DB(ctx).Where("role = ?", role).First(&m).Error
 }
 
-func (r *roleRepository) GetPermission(ctx context.Context, role string) ([][]string, error) {
+func (r *roleRepository) GetRolePermission(ctx context.Context, role string) ([][]string, error) {
 	return r.e.GetPermissionsForUser(role)
 }
 
-func (r *roleRepository) UpdatePermission(ctx context.Context, role string, newPermSet map[string]struct{}) error {
+func (r *roleRepository) UpdateRolePermission(ctx context.Context, role string, newPermSet map[string]struct{}) error {
 	// 如果没有新的权限需要更新
 	if len(newPermSet) == 0 {
 		return nil

@@ -7,11 +7,11 @@ import (
 )
 
 type ApiRepository interface {
-	List(ctx context.Context, req *v1.ApiSearchRequest) ([]model.Api, int64, error)
-	Create(ctx context.Context, m *model.Api) error
-	Update(ctx context.Context, id uint, data map[string]interface{}) error
-	Delete(ctx context.Context, id uint) error
-	Get(ctx context.Context, id uint) (model.Api, error)
+	ListApis(ctx context.Context, req *v1.ApiSearchRequest) ([]model.Api, int64, error)
+	ApiCreate(ctx context.Context, m *model.Api) error
+	ApiUpdate(ctx context.Context, id uint, data map[string]interface{}) error
+	ApiDelete(ctx context.Context, id uint) error
+	GetApi(ctx context.Context, id uint) (model.Api, error)
 
 	GetGroups(ctx context.Context) ([]string, error)
 }
@@ -28,7 +28,7 @@ type apiRepository struct {
 	*Repository
 }
 
-func (r *apiRepository) List(ctx context.Context, req *v1.ApiSearchRequest) ([]model.Api, int64, error) {
+func (r *apiRepository) ListApis(ctx context.Context, req *v1.ApiSearchRequest) ([]model.Api, int64, error) {
 	var list []model.Api
 	var total int64
 	scope := r.DB(ctx).Model(&model.Api{})
@@ -53,19 +53,19 @@ func (r *apiRepository) List(ctx context.Context, req *v1.ApiSearchRequest) ([]m
 	return list, total, nil
 }
 
-func (r *apiRepository) Create(ctx context.Context, m *model.Api) error {
+func (r *apiRepository) ApiCreate(ctx context.Context, m *model.Api) error {
 	return r.DB(ctx).Create(m).Error
 }
 
-func (r *apiRepository) Update(ctx context.Context, id uint, data map[string]interface{}) error {
+func (r *apiRepository) ApiUpdate(ctx context.Context, id uint, data map[string]interface{}) error {
 	return r.DB(ctx).Model(&model.Api{}).Where("id = ?", id).Updates(data).Error
 }
 
-func (r *apiRepository) Delete(ctx context.Context, id uint) error {
+func (r *apiRepository) ApiDelete(ctx context.Context, id uint) error {
 	return r.DB(ctx).Where("id = ?", id).Delete(&model.Api{}).Error
 }
 
-func (r *apiRepository) Get(ctx context.Context, id uint) (model.Api, error) {
+func (r *apiRepository) GetApi(ctx context.Context, id uint) (model.Api, error) {
 	m := model.Api{}
 	return m, r.DB(ctx).Where("id = ?", id).First(&m).Error
 }

@@ -31,7 +31,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "搜索时支持分组、名称、路径和请求方法筛选",
+                "description": "搜索时支持分组名、名称、路径和方法筛选",
                 "consumes": [
                     "application/json"
                 ],
@@ -59,7 +59,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "分组",
+                        "description": "分组名",
                         "name": "group",
                         "in": "query"
                     },
@@ -77,7 +77,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "请求方法",
+                        "description": "方法",
                         "name": "method",
                         "in": "query"
                     }
@@ -132,6 +132,7 @@ const docTemplate = `{
         },
         "/admin/apis/{id}": {
             "get": {
+                "description": "获取指定ID的接口信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -141,7 +142,7 @@ const docTemplate = `{
                 "tags": [
                     "API"
                 ],
-                "summary": "获取接口详情",
+                "summary": "获取接口",
                 "operationId": "GetApi",
                 "parameters": [
                     {
@@ -167,7 +168,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "更新接口配置",
+                "description": "更新接口数据",
                 "consumes": [
                     "application/json"
                 ],
@@ -212,6 +213,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
+                "description": "删除指定ID的接口",
                 "consumes": [
                     "application/json"
                 ],
@@ -316,7 +318,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "更新菜单配置",
+                "description": "更新菜单数据",
                 "consumes": [
                     "application/json"
                 ],
@@ -361,6 +363,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
+                "description": "删除指定ID的菜单",
                 "consumes": [
                     "application/json"
                 ],
@@ -467,7 +470,7 @@ const docTemplate = `{
                 "operationId": "RoleCreate",
                 "parameters": [
                     {
-                        "description": "角色信息",
+                        "description": "角色数据",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -590,7 +593,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "角色信息",
+                        "description": "角色数据",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -614,6 +617,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
+                "description": "删除指定ID的角色",
                 "consumes": [
                     "application/json"
                 ],
@@ -803,6 +807,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
+                "description": "删除指定ID的用户",
                 "consumes": [
                     "application/json"
                 ],
@@ -1011,6 +1016,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
+                "description": "获取指定ID的机器人信息",
                 "consumes": [
                     "application/json"
                 ],
@@ -1020,7 +1026,7 @@ const docTemplate = `{
                 "tags": [
                     "Robot"
                 ],
-                "summary": "获取机器人详情",
+                "summary": "获取机器人",
                 "operationId": "GetRobot",
                 "parameters": [
                     {
@@ -1046,7 +1052,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "更新机器人配置",
+                "description": "更新机器人数据",
                 "consumes": [
                     "application/json"
                 ],
@@ -1091,6 +1097,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
+                "description": "删除指定ID的机器人",
                 "consumes": [
                     "application/json"
                 ],
@@ -1165,7 +1172,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Menu"
+                    "User"
                 ],
                 "summary": "获取用户菜单",
                 "operationId": "GetUserMenu",
@@ -1484,7 +1491,7 @@ const docTemplate = `{
                 "nickname": {
                     "description": "昵称",
                     "type": "string",
-                    "example": "法外狂徒"
+                    "example": "Jackal"
                 },
                 "phone": {
                     "description": "手机",
@@ -2004,7 +2011,7 @@ const docTemplate = `{
                 },
                 "nickname": {
                     "type": "string",
-                    "example": "法外狂徒"
+                    "example": "Jackal"
                 },
                 "phone": {
                     "type": "string",

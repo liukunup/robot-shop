@@ -34,14 +34,14 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	serviceService := service.NewService(transaction, logger, sidSid, jwtJWT)
 	userRepository := repository.NewUserRepository(repositoryRepository)
 	menuRepository := repository.NewMenuRepository(repositoryRepository)
-	roleRepository := repository.NewRoleRepository(repositoryRepository)
-	apiRepository := repository.NewApiRepository(repositoryRepository)
-	userService := service.NewUserService(serviceService, userRepository, menuRepository, roleRepository, apiRepository)
+	userService := service.NewUserService(serviceService, userRepository, menuRepository)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
+	roleRepository := repository.NewRoleRepository(repositoryRepository)
 	roleService := service.NewRoleService(serviceService, roleRepository)
 	roleHandler := handler.NewRoleHandler(handlerHandler, roleService)
 	menuService := service.NewMenuService(serviceService, menuRepository)
 	menuHandler := handler.NewMenuHandler(handlerHandler, menuService)
+	apiRepository := repository.NewApiRepository(repositoryRepository)
 	apiService := service.NewApiService(serviceService, apiRepository)
 	apiHandler := handler.NewApiHandler(handlerHandler, apiService)
 	robotRepository := repository.NewRobotRepository(repositoryRepository)
@@ -58,7 +58,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewTransaction, repository.NewUserRepository, repository.NewRoleRepository, repository.NewMenuRepository, repository.NewApiRepository, repository.NewCasbinEnforcer, repository.NewRobotRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewTransaction, repository.NewCasbinEnforcer, repository.NewUserRepository, repository.NewRoleRepository, repository.NewMenuRepository, repository.NewApiRepository, repository.NewRobotRepository)
 
 var serviceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewRoleService, service.NewMenuService, service.NewApiService, service.NewRobotService)
 

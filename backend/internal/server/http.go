@@ -101,9 +101,9 @@ func NewHTTPServer(
 			// Robot
 			strictAuthRouter.GET("/robots", robotHandler.ListRobots)
 			strictAuthRouter.POST("/robots", robotHandler.RobotCreate)
-			strictAuthRouter.GET("/robots/:id", robotHandler.GetRobot)
 			strictAuthRouter.PUT("/robots/:id", robotHandler.RobotUpdate)
 			strictAuthRouter.DELETE("/robots/:id", robotHandler.RobotDelete)
+			strictAuthRouter.GET("/robots/:id", robotHandler.GetRobot)
 		}
 	}
 

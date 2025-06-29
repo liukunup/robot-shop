@@ -7,11 +7,11 @@ import (
 )
 
 type RobotRepository interface {
-	List(ctx context.Context, req *v1.RobotSearchRequest) ([]model.Robot, int64, error)
-	Create(ctx context.Context, robot *model.Robot) error
-	Update(ctx context.Context, id uint, data map[string]interface{}) error
-	Delete(ctx context.Context, id uint) error
-	Get(ctx context.Context, id uint) (model.Robot, error)
+	ListRobots(ctx context.Context, req *v1.RobotSearchRequest) ([]model.Robot, int64, error)
+	RobotCreate(ctx context.Context, robot *model.Robot) error
+	RobotUpdate(ctx context.Context, id uint, data map[string]interface{}) error
+	RobotDelete(ctx context.Context, id uint) error
+	GetRobot(ctx context.Context, id uint) (model.Robot, error)
 }
 
 func NewRobotRepository(
@@ -26,7 +26,7 @@ type robotRepository struct {
 	*Repository
 }
 
-func (r *robotRepository) List(ctx context.Context, req *v1.RobotSearchRequest) ([]model.Robot, int64, error) {
+func (r *robotRepository) ListRobots(ctx context.Context, req *v1.RobotSearchRequest) ([]model.Robot, int64, error) {
 	var list []model.Robot
 	var total int64
 	scope := r.DB(ctx).Model(&model.Robot{})
@@ -48,19 +48,19 @@ func (r *robotRepository) List(ctx context.Context, req *v1.RobotSearchRequest) 
 	return list, total, nil
 }
 
-func (r *robotRepository) Create(ctx context.Context, m *model.Robot) error {
+func (r *robotRepository) RobotCreate(ctx context.Context, m *model.Robot) error {
 	return r.DB(ctx).Create(m).Error
 }
 
-func (r *robotRepository) Update(ctx context.Context, id uint, data map[string]interface{}) error {
+func (r *robotRepository) RobotUpdate(ctx context.Context, id uint, data map[string]interface{}) error {
 	return r.DB(ctx).Model(&model.Robot{}).Where("id = ?", id).Updates(data).Error
 }
 
-func (r *robotRepository) Delete(ctx context.Context, id uint) error {
+func (r *robotRepository) RobotDelete(ctx context.Context, id uint) error {
 	return r.DB(ctx).Where("id = ?", id).Delete(&model.Robot{}).Error
 }
 
-func (r *robotRepository) Get(ctx context.Context, id uint) (model.Robot, error) {
+func (r *robotRepository) GetRobot(ctx context.Context, id uint) (model.Robot, error) {
 	m := model.Robot{}
 	return m, r.DB(ctx).Where("id = ?", id).First(&m).Error
 }

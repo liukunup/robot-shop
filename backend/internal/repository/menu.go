@@ -6,11 +6,11 @@ import (
 )
 
 type MenuRepository interface {
-	List(ctx context.Context) ([]model.Menu, int64, error)
-	Create(ctx context.Context, m *model.Menu) error
-	Update(ctx context.Context, id uint, data map[string]interface{}) error
-	Delete(ctx context.Context, id uint) error
-	Get(ctx context.Context, id uint) (model.Menu, error)
+	ListMenus(ctx context.Context) ([]model.Menu, int64, error)
+	MenuCreate(ctx context.Context, m *model.Menu) error
+	MenuUpdate(ctx context.Context, id uint, data map[string]interface{}) error
+	MenuDelete(ctx context.Context, id uint) error
+	GetMenu(ctx context.Context, id uint) (model.Menu, error)
 }
 
 func NewMenuRepository(
@@ -25,7 +25,7 @@ type menuRepository struct {
 	*Repository
 }
 
-func (r *menuRepository) List(ctx context.Context) ([]model.Menu, int64, error) {
+func (r *menuRepository) ListMenus(ctx context.Context) ([]model.Menu, int64, error) {
 	var list []model.Menu
 	var total int64
 	if err := r.DB(ctx).Model(&model.Menu{}).Count(&total).Error; err != nil {
@@ -37,19 +37,19 @@ func (r *menuRepository) List(ctx context.Context) ([]model.Menu, int64, error) 
 	return list, total, nil
 }
 
-func (r *menuRepository) Create(ctx context.Context, m *model.Menu) error {
+func (r *menuRepository) MenuCreate(ctx context.Context, m *model.Menu) error {
 	return r.DB(ctx).Save(m).Error
 }
 
-func (r *menuRepository) Update(ctx context.Context, id uint, data map[string]interface{}) error {
+func (r *menuRepository) MenuUpdate(ctx context.Context, id uint, data map[string]interface{}) error {
 	return r.DB(ctx).Model(&model.Menu{}).Where("id = ?", id).Updates(data).Error
 }
 
-func (r *menuRepository) Delete(ctx context.Context, id uint) error {
+func (r *menuRepository) MenuDelete(ctx context.Context, id uint) error {
 	return r.DB(ctx).Where("id = ?", id).Delete(&model.Menu{}).Error
 }
 
-func (r *menuRepository) Get(ctx context.Context, id uint) (model.Menu, error) {
+func (r *menuRepository) GetMenu(ctx context.Context, id uint) (model.Menu, error) {
 	m := model.Menu{}
 	return m, r.DB(ctx).Where("id = ?", id).First(&m).Error
 }

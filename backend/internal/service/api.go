@@ -9,11 +9,11 @@ import (
 )
 
 type ApiService interface {
-	List(ctx context.Context, req *v1.ApiSearchRequest) (*v1.ApiSearchResponseData, error)
-	Create(ctx context.Context, req *v1.ApiRequest) error
-	Update(ctx context.Context, id uint, req *v1.ApiRequest) error
-	Delete(ctx context.Context, id uint) error
-	Get(ctx context.Context, id uint) (model.Api, error)
+	ListApis(ctx context.Context, req *v1.ApiSearchRequest) (*v1.ApiSearchResponseData, error)
+	ApiCreate(ctx context.Context, req *v1.ApiRequest) error
+	ApiUpdate(ctx context.Context, id uint, req *v1.ApiRequest) error
+	ApiDelete(ctx context.Context, id uint) error
+	GetApi(ctx context.Context, id uint) (model.Api, error)
 }
 
 func NewApiService(
@@ -31,8 +31,8 @@ type apiService struct {
 	apiRepository repository.ApiRepository
 }
 
-func (s *apiService) List(ctx context.Context, req *v1.ApiSearchRequest) (*v1.ApiSearchResponseData, error) {
-	list, total, err := s.apiRepository.List(ctx, req)
+func (s *apiService) ListApis(ctx context.Context, req *v1.ApiSearchRequest) (*v1.ApiSearchResponseData, error) {
+	list, total, err := s.apiRepository.ListApis(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +59,8 @@ func (s *apiService) List(ctx context.Context, req *v1.ApiSearchRequest) (*v1.Ap
 	return data, nil
 }
 
-func (s *apiService) Create(ctx context.Context, req *v1.ApiRequest) error {
-	return s.apiRepository.Create(ctx, &model.Api{
+func (s *apiService) ApiCreate(ctx context.Context, req *v1.ApiRequest) error {
+	return s.apiRepository.ApiCreate(ctx, &model.Api{
 		Group:  req.Group,
 		Name:   req.Name,
 		Path:   req.Path,
@@ -68,20 +68,20 @@ func (s *apiService) Create(ctx context.Context, req *v1.ApiRequest) error {
 	})
 }
 
-func (s *apiService) Update(ctx context.Context, id uint, req *v1.ApiRequest) error {
+func (s *apiService) ApiUpdate(ctx context.Context, id uint, req *v1.ApiRequest) error {
 	data := map[string]interface{}{
 		"group":  req.Group,
 		"name":   req.Name,
 		"path":   req.Path,
 		"method": req.Method,
 	}
-	return s.apiRepository.Update(ctx, id, data)
+	return s.apiRepository.ApiUpdate(ctx, id, data)
 }
 
-func (s *apiService) Delete(ctx context.Context, id uint) error {
-	return s.apiRepository.Delete(ctx, id)
+func (s *apiService) ApiDelete(ctx context.Context, id uint) error {
+	return s.apiRepository.ApiDelete(ctx, id)
 }
 
-func (s *apiService) Get(ctx context.Context, id uint) (model.Api, error) {
-	return s.apiRepository.Get(ctx, id)
+func (s *apiService) GetApi(ctx context.Context, id uint) (model.Api, error) {
+	return s.apiRepository.GetApi(ctx, id)
 }

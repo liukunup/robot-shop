@@ -48,10 +48,10 @@ func (h *RoleHandler) ListRoles(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.roleService.List(ctx, &req)
+	data, err := h.roleService.ListRoles(ctx, &req)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("roleService.List error", zap.Error(err))
-		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
+		h.logger.WithContext(ctx).Error("roleService.ListRoles error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, data)
@@ -65,7 +65,7 @@ func (h *RoleHandler) ListRoles(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body v1.RoleRequest true "角色信息"
+// @Param request body v1.RoleRequest true "角色数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/roles [post]
 // @ID RoleCreate
@@ -77,8 +77,8 @@ func (h *RoleHandler) RoleCreate(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.roleService.Create(ctx, &req); err != nil {
-		h.logger.WithContext(ctx).Error("roleService.Create error", zap.Error(err))
+	if err := h.roleService.RoleCreate(ctx, &req); err != nil {
+		h.logger.WithContext(ctx).Error("roleService.RoleCreate error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -94,7 +94,7 @@ func (h *RoleHandler) RoleCreate(ctx *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Param id path uint true "角色ID"
-// @Param request body v1.RoleRequest true "角色信息"
+// @Param request body v1.RoleRequest true "角色数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/roles/{id} [put]
 // @ID RoleUpdate
@@ -114,8 +114,8 @@ func (h *RoleHandler) RoleUpdate(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.roleService.Update(ctx, uint(id), &req); err != nil {
-		h.logger.WithContext(ctx).Error("roleService.Update error", zap.Error(err))
+	if err := h.roleService.RoleUpdate(ctx, uint(id), &req); err != nil {
+		h.logger.WithContext(ctx).Error("roleService.RoleUpdate error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -125,7 +125,7 @@ func (h *RoleHandler) RoleUpdate(ctx *gin.Context) {
 // RoleDelete godoc
 // @Summary 删除角色
 // @Schemes
-// @Description
+// @Description 删除指定ID的角色
 // @Tags Role
 // @Accept json
 // @Produce json
@@ -143,8 +143,8 @@ func (h *RoleHandler) RoleDelete(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.roleService.Delete(ctx, uint(id)); err != nil {
-		h.logger.WithContext(ctx).Error("roleService.Delete error", zap.Error(err))
+	if err := h.roleService.RoleDelete(ctx, uint(id)); err != nil {
+		h.logger.WithContext(ctx).Error("roleService.RoleDelete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

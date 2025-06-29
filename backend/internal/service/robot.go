@@ -9,11 +9,11 @@ import (
 )
 
 type RobotService interface {
-	List(ctx context.Context, req *v1.RobotSearchRequest) (*v1.RobotSearchResponseData, error)
-	Create(ctx context.Context, req *v1.RobotRequest) error
-	Update(ctx context.Context, id uint, req *v1.RobotRequest) error
-	Delete(ctx context.Context, id uint) error
-	Get(ctx context.Context, id uint) (model.Robot, error)
+	ListRobots(ctx context.Context, req *v1.RobotSearchRequest) (*v1.RobotSearchResponseData, error)
+	RobotCreate(ctx context.Context, req *v1.RobotRequest) error
+	RobotUpdate(ctx context.Context, id uint, req *v1.RobotRequest) error
+	RobotDelete(ctx context.Context, id uint) error
+	GetRobot(ctx context.Context, id uint) (model.Robot, error)
 }
 
 func NewRobotService(
@@ -31,8 +31,8 @@ type robotService struct {
 	robotRepository repository.RobotRepository
 }
 
-func (s *robotService) List(ctx context.Context, req *v1.RobotSearchRequest) (*v1.RobotSearchResponseData, error) {
-	list, total, err := s.robotRepository.List(ctx, req)
+func (s *robotService) ListRobots(ctx context.Context, req *v1.RobotSearchRequest) (*v1.RobotSearchResponseData, error) {
+	list, total, err := s.robotRepository.ListRobots(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func (s *robotService) List(ctx context.Context, req *v1.RobotSearchRequest) (*v
 	return data, nil
 }
 
-func (s *robotService) Create(ctx context.Context, req *v1.RobotRequest) error {
-	return s.robotRepository.Create(ctx, &model.Robot{
+func (s *robotService) RobotCreate(ctx context.Context, req *v1.RobotRequest) error {
+	return s.robotRepository.RobotCreate(ctx, &model.Robot{
 		Name:     req.Name,
 		Desc:     req.Desc,
 		Webhook:  req.Webhook,
@@ -67,7 +67,7 @@ func (s *robotService) Create(ctx context.Context, req *v1.RobotRequest) error {
 	})
 }
 
-func (s *robotService) Update(ctx context.Context, id uint, req *v1.RobotRequest) error {
+func (s *robotService) RobotUpdate(ctx context.Context, id uint, req *v1.RobotRequest) error {
 	data := map[string]interface{}{
 		"name":     req.Name,
 		"desc":     req.Desc,
@@ -76,13 +76,13 @@ func (s *robotService) Update(ctx context.Context, id uint, req *v1.RobotRequest
 		"enabled":  req.Enabled,
 		"owner":    req.Owner,
 	}
-	return s.robotRepository.Update(ctx, id, data)
+	return s.robotRepository.RobotUpdate(ctx, id, data)
 }
 
-func (s *robotService) Delete(ctx context.Context, id uint) error {
-	return s.robotRepository.Delete(ctx, id)
+func (s *robotService) RobotDelete(ctx context.Context, id uint) error {
+	return s.robotRepository.RobotDelete(ctx, id)
 }
 
-func (s *robotService) Get(ctx context.Context, id uint) (model.Robot, error) {
-	return s.robotRepository.Get(ctx, id)
+func (s *robotService) GetRobot(ctx context.Context, id uint) (model.Robot, error) {
+	return s.robotRepository.GetRobot(ctx, id)
 }

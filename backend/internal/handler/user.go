@@ -47,10 +47,10 @@ func (h *UserHandler) ListUsers(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.userService.List(ctx, &req)
+	data, err := h.userService.ListUsers(ctx, &req)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("userService.List error", zap.Error(err))
-		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
+		h.logger.WithContext(ctx).Error("userService.ListUsers error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, data)
@@ -76,8 +76,8 @@ func (h *UserHandler) UserCreate(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.userService.Create(ctx, &req); err != nil {
-		h.logger.WithContext(ctx).Error("userService.Create error", zap.Error(err))
+	if err := h.userService.UserCreate(ctx, &req); err != nil {
+		h.logger.WithContext(ctx).Error("userService.UserCreate error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -113,8 +113,8 @@ func (h *UserHandler) UserUpdate(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.userService.Update(ctx, uint(uid), &req); err != nil {
-		h.logger.WithContext(ctx).Error("userService.Update error", zap.Error(err))
+	if err := h.userService.UserUpdate(ctx, uint(uid), &req); err != nil {
+		h.logger.WithContext(ctx).Error("userService.UserUpdate error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -124,7 +124,7 @@ func (h *UserHandler) UserUpdate(ctx *gin.Context) {
 // UserDelete godoc
 // @Summary 删除用户
 // @Schemes
-// @Description
+// @Description 删除指定ID的用户
 // @Tags User
 // @Accept json
 // @Produce json
@@ -142,8 +142,8 @@ func (h *UserHandler) UserDelete(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.userService.Delete(ctx, uint(uid)); err != nil {
-		h.logger.WithContext(ctx).Error("userService.Delete error", zap.Error(err))
+	if err := h.userService.UserDelete(ctx, uint(uid)); err != nil {
+		h.logger.WithContext(ctx).Error("userService.UserDelete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
@@ -168,9 +168,9 @@ func (h *UserHandler) GetCurrentUser(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.userService.Get(ctx, uid)
+	data, err := h.userService.GetUser(ctx, uid)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("userService.Get error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("userService.GetUser error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
@@ -208,7 +208,7 @@ func (h *UserHandler) GetUserPermission(ctx *gin.Context) {
 // @Summary 获取用户菜单
 // @Schemes
 // @Description 获取当前用户的菜单列表
-// @Tags Menu
+// @Tags User
 // @Accept json
 // @Produce json
 // @Security Bearer
@@ -252,7 +252,7 @@ func (h *UserHandler) Register(ctx *gin.Context) {
 
 	if err := h.userService.Register(ctx, &req); err != nil {
 		h.logger.WithContext(ctx).Error("userService.Register error", zap.Error(err))
-		v1.HandleError(ctx, http.StatusInternalServerError, err, nil)
+		v1.HandleError(ctx, http.StatusInternalServerError, err, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
@@ -280,7 +280,7 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 	token, err := h.userService.Login(ctx, &req)
 	if err != nil {
 		h.logger.WithContext(ctx).Error("userService.Login error", zap.Error(err))
-		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
+		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 

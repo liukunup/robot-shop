@@ -197,7 +197,7 @@ definitions:
         type: integer
       nickname:
         description: 昵称
-        example: 法外狂徒
+        example: Jackal
         type: string
       phone:
         description: 手机
@@ -569,7 +569,7 @@ definitions:
         example: zhangsan@example.com
         type: string
       nickname:
-        example: 法外狂徒
+        example: Jackal
         type: string
       phone:
         example: +86-13966668888
@@ -641,7 +641,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: 搜索时支持分组、名称、路径和请求方法筛选
+      description: 搜索时支持分组名、名称、路径和方法筛选
       parameters:
       - description: 页码
         in: query
@@ -653,7 +653,7 @@ paths:
         name: pageSize
         required: true
         type: integer
-      - description: 分组
+      - description: 分组名
         in: query
         name: group
         type: string
@@ -665,7 +665,7 @@ paths:
         in: query
         name: path
         type: string
-      - description: 请求方法
+      - description: 方法
         in: query
         name: method
         type: string
@@ -709,6 +709,7 @@ paths:
     delete:
       consumes:
       - application/json
+      description: 删除指定ID的接口
       operationId: ApiDelete
       parameters:
       - description: 接口ID
@@ -731,6 +732,7 @@ paths:
     get:
       consumes:
       - application/json
+      description: 获取指定ID的接口信息
       operationId: GetApi
       parameters:
       - description: 接口ID
@@ -745,13 +747,13 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/backend_api_v1.ApiResponse'
-      summary: 获取接口详情
+      summary: 获取接口
       tags:
       - API
     put:
       consumes:
       - application/json
-      description: 更新接口配置
+      description: 更新接口数据
       operationId: ApiUpdate
       parameters:
       - description: 接口ID
@@ -823,6 +825,7 @@ paths:
     delete:
       consumes:
       - application/json
+      description: 删除指定ID的菜单
       operationId: MenuDelete
       parameters:
       - description: 菜单ID
@@ -845,7 +848,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: 更新菜单配置
+      description: 更新菜单数据
       operationId: MenuUpdate
       parameters:
       - description: 菜单ID
@@ -914,7 +917,7 @@ paths:
       description: 创建一个新的角色
       operationId: RoleCreate
       parameters:
-      - description: 角色信息
+      - description: 角色数据
         in: body
         name: request
         required: true
@@ -936,6 +939,7 @@ paths:
     delete:
       consumes:
       - application/json
+      description: 删除指定ID的角色
       operationId: RoleDelete
       parameters:
       - description: 角色ID
@@ -966,7 +970,7 @@ paths:
         name: id
         required: true
         type: integer
-      - description: 角色信息
+      - description: 角色数据
         in: body
         name: request
         required: true
@@ -1105,6 +1109,7 @@ paths:
     delete:
       consumes:
       - application/json
+      description: 删除指定ID的用户
       operationId: UserDelete
       parameters:
       - description: 用户ID
@@ -1268,6 +1273,7 @@ paths:
     delete:
       consumes:
       - application/json
+      description: 删除指定ID的机器人
       operationId: RobotDelete
       parameters:
       - description: 机器人ID
@@ -1290,6 +1296,7 @@ paths:
     get:
       consumes:
       - application/json
+      description: 获取指定ID的机器人信息
       operationId: GetRobot
       parameters:
       - description: 机器人ID
@@ -1306,13 +1313,13 @@ paths:
             $ref: '#/definitions/backend_api_v1.RobotResponse'
       security:
       - Bearer: []
-      summary: 获取机器人详情
+      summary: 获取机器人
       tags:
       - Robot
     put:
       consumes:
       - application/json
-      description: 更新机器人配置
+      description: 更新机器人数据
       operationId: RobotUpdate
       parameters:
       - description: 机器人ID
@@ -1373,7 +1380,7 @@ paths:
       - Bearer: []
       summary: 获取用户菜单
       tags:
-      - Menu
+      - User
   /users/me/permission:
     get:
       consumes:

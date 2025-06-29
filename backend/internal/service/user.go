@@ -21,11 +21,11 @@ import (
 
 type UserService interface {
 	// CRUD
-	List(ctx context.Context, req *v1.UserSearchRequest) (*v1.UserSearchResponseData, error)
-	Create(ctx context.Context, req *v1.UserRequest) error
-	Update(ctx context.Context, uid uint, req *v1.UserRequest) error
-	Delete(ctx context.Context, uid uint) error
-	Get(ctx context.Context, uid uint) (*v1.UserDataItem, error)
+	ListUsers(ctx context.Context, req *v1.UserSearchRequest) (*v1.UserSearchResponseData, error)
+	UserCreate(ctx context.Context, req *v1.UserRequest) error
+	UserUpdate(ctx context.Context, uid uint, req *v1.UserRequest) error
+	UserDelete(ctx context.Context, uid uint) error
+	GetUser(ctx context.Context, uid uint) (*v1.UserDataItem, error)
 	// ATTR
 	GetUserMenu(ctx context.Context, uid uint) (*v1.MenuSearchResponseData, error)
 	GetUserPermission(ctx context.Context, uid uint) (*v1.UserPermissionResponseData, error)
@@ -38,8 +38,6 @@ func NewUserService(
 	service *Service,
 	userRepository repository.UserRepository,
 	menuRepository repository.MenuRepository,
-	roleRepository repository.RoleRepository,
-	apiRepository repository.ApiRepository,
 ) UserService {
 	return &userService{
 		Service:        service,
@@ -54,9 +52,9 @@ type userService struct {
 	menuRepository repository.MenuRepository
 }
 
-func (s *userService) List(ctx context.Context, req *v1.UserSearchRequest) (*v1.UserSearchResponseData, error) {
+func (s *userService) ListUsers(ctx context.Context, req *v1.UserSearchRequest) (*v1.UserSearchResponseData, error) {
 	// 获取用户列表
-	list, total, err := s.userRepository.List(ctx, req)
+	list, total, err := s.userRepository.ListUsers(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +65,7 @@ func (s *userService) List(ctx context.Context, req *v1.UserSearchRequest) (*v1.
 	}
 	for _, user := range list {
 		// 获取用户角色
-		roles, err := s.userRepository.GetRoles(ctx, user.ID)
+		roles, err := s.userRepository.GetUserRoles(ctx, user.ID)
 		if err != nil {
 			s.logger.Error("userRepository.GetRoles error", zap.Error(err))
 			continue
@@ -90,11 +88,11 @@ func (s *userService) List(ctx context.Context, req *v1.UserSearchRequest) (*v1.
 	return data, nil
 }
 
-func (s *userService) Create(ctx context.Context, req *v1.UserRequest) error {
+func (s *userService) UserCreate(ctx context.Context, req *v1.UserRequest) error {
 	var err error
 
 	// 检查邮箱是否已存在
-	_, err = s.userRepository.GetByEmail(ctx, req.Email)
+	_, err = s.userRepository.GetUserByEmail(ctx, req.Email)
 	if err == nil {
 		return v1.ErrEmailAlreadyUse
 	}
@@ -103,7 +101,7 @@ func (s *userService) Create(ctx context.Context, req *v1.UserRequest) error {
 	}
 
 	// 检查用户名是否已存在
-	_, err = s.userRepository.GetByUsername(ctx, req.Username)
+	_, err = s.userRepository.GetUserByUsername(ctx, req.Username)
 	if err == nil {
 		return v1.ErrUsernameAlreadyUse
 	}
@@ -134,11 +132,11 @@ func (s *userService) Create(ctx context.Context, req *v1.UserRequest) error {
 	}
 	err = s.tm.Transaction(ctx, func(ctx context.Context) error {
 		// 创建用户
-		if err = s.userRepository.Create(ctx, newUser); err != nil {
+		if err = s.userRepository.UserCreate(ctx, newUser); err != nil {
 			return err
 		}
 		// 设置角色
-		if err = s.userRepository.UpdateRoles(ctx, newUser.ID, req.Roles); err != nil {
+		if err = s.userRepository.UpdateUserRoles(ctx, newUser.ID, req.Roles); err != nil {
 			return err
 		}
 		return nil
@@ -146,9 +144,9 @@ func (s *userService) Create(ctx context.Context, req *v1.UserRequest) error {
 	return err
 }
 
-func (s *userService) Update(ctx context.Context, uid uint, req *v1.UserRequest) error {
+func (s *userService) UserUpdate(ctx context.Context, uid uint, req *v1.UserRequest) error {
 	// 更新用户角色
-	err := s.userRepository.UpdateRoles(ctx, uid, req.Roles)
+	err := s.userRepository.UpdateUserRoles(ctx, uid, req.Roles)
 	if err != nil {
 		return err
 	}
@@ -160,28 +158,28 @@ func (s *userService) Update(ctx context.Context, uid uint, req *v1.UserRequest)
 		"phone":    req.Phone,
 		"status":   req.Status,
 	}
-	return s.userRepository.Update(ctx, uid, data)
+	return s.userRepository.UserUpdate(ctx, uid, data)
 }
 
-func (s *userService) Delete(ctx context.Context, uid uint) error {
+func (s *userService) UserDelete(ctx context.Context, uid uint) error {
 	// 删除用户角色
-	err := s.userRepository.DeleteRoles(ctx, uid)
+	err := s.userRepository.DeleteUserRoles(ctx, uid)
 	if err != nil {
 		return err
 	}
 	// 删除用户
-	return s.userRepository.Delete(ctx, uid)
+	return s.userRepository.UserDelete(ctx, uid)
 }
 
-func (s *userService) Get(ctx context.Context, uid uint) (*v1.UserDataItem, error) {
+func (s *userService) GetUser(ctx context.Context, uid uint) (*v1.UserDataItem, error) {
 	// 获取用户
-	user, err := s.userRepository.Get(ctx, uid)
+	user, err := s.userRepository.GetUser(ctx, uid)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("userRepository.Get error", zap.Error(err))
 		return nil, err
 	}
 	// 获取用户角色
-	roles, err := s.userRepository.GetRoles(ctx, uid)
+	roles, err := s.userRepository.GetUserRoles(ctx, uid)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("userRepository.GetRoles error", zap.Error(err))
 		return nil, err
@@ -203,7 +201,7 @@ func (s *userService) Get(ctx context.Context, uid uint) (*v1.UserDataItem, erro
 
 func (s *userService) GetUserMenu(ctx context.Context, uid uint) (*v1.MenuSearchResponseData, error) {
 	// 获取菜单列表
-	menuList, total, err := s.menuRepository.List(ctx)
+	menuList, total, err := s.menuRepository.ListMenus(ctx)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("menuRepository.List error", zap.Error(err))
 		return nil, err
@@ -214,7 +212,7 @@ func (s *userService) GetUserMenu(ctx context.Context, uid uint) (*v1.MenuSearch
 	}
 
 	// 获取权限列表
-	permList, err := s.userRepository.GetPermissions(ctx, uid)
+	permList, err := s.userRepository.GetUserPermission(ctx, uid)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("userRepository.GetPermissions error", zap.Error(err))
 		return nil, err
@@ -259,7 +257,7 @@ func (s *userService) GetUserMenu(ctx context.Context, uid uint) (*v1.MenuSearch
 
 func (s *userService) GetUserPermission(ctx context.Context, uid uint) (*v1.UserPermissionResponseData, error) {
 	// 获取权限列表
-	permList, err := s.userRepository.GetPermissions(ctx, uid)
+	permList, err := s.userRepository.GetUserPermission(ctx, uid)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("userRepository.GetPermissions error", zap.Error(err))
 		return nil, err
@@ -278,7 +276,7 @@ func (s *userService) GetUserPermission(ctx context.Context, uid uint) (*v1.User
 
 func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) error {
 	// 检查邮箱是否已注册
-	_, err := s.userRepository.GetByEmail(ctx, req.Email)
+	_, err := s.userRepository.GetUserByEmail(ctx, req.Email)
 	if err == nil {
 		return v1.ErrEmailAlreadyUse
 	}
@@ -312,7 +310,7 @@ func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) err
 	}
 	err = s.tm.Transaction(ctx, func(ctx context.Context) error {
 		// Create a user
-		if err = s.userRepository.Create(ctx, user); err != nil {
+		if err = s.userRepository.UserCreate(ctx, user); err != nil {
 			return err
 		}
 		// TODO: other repo
@@ -323,7 +321,7 @@ func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) err
 
 func (s *userService) Login(ctx context.Context, req *v1.LoginRequest) (string, error) {
 	// 查找指定用户
-	user, err := s.userRepository.GetByUsernameOrEmail(ctx, req.Username, req.Username)
+	user, err := s.userRepository.GetUserByUsernameOrEmail(ctx, req.Username, req.Username)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return "", v1.ErrUnauthorized
 	}

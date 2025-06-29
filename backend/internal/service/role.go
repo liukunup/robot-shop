@@ -14,10 +14,10 @@ import (
 
 type RoleService interface {
 	// CRUD
-	List(ctx context.Context, req *v1.RoleSearchRequest) (*v1.RoleSearchResponseData, error)
-	Create(ctx context.Context, req *v1.RoleRequest) error
-	Update(ctx context.Context, id uint, req *v1.RoleRequest) error
-	Delete(ctx context.Context, id uint) error
+	ListRoles(ctx context.Context, req *v1.RoleSearchRequest) (*v1.RoleSearchResponseData, error)
+	RoleCreate(ctx context.Context, req *v1.RoleRequest) error
+	RoleUpdate(ctx context.Context, id uint, req *v1.RoleRequest) error
+	RoleDelete(ctx context.Context, id uint) error
 	// Permission
 	GetRolePermission(ctx context.Context, role string) (*v1.GetRolePermissionResponseData, error)
 	UpdateRolePermission(ctx context.Context, req *v1.UpdateRolePermissionRequest) error
@@ -38,8 +38,8 @@ type roleService struct {
 	roleRepository repository.RoleRepository
 }
 
-func (s *roleService) List(ctx context.Context, req *v1.RoleSearchRequest) (*v1.RoleSearchResponseData, error) {
-	list, total, err := s.roleRepository.List(ctx, req)
+func (s *roleService) ListRoles(ctx context.Context, req *v1.RoleSearchRequest) (*v1.RoleSearchResponseData, error) {
+	list, total, err := s.roleRepository.ListRoles(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -60,11 +60,11 @@ func (s *roleService) List(ctx context.Context, req *v1.RoleSearchRequest) (*v1.
 	return data, nil
 }
 
-func (s *roleService) Create(ctx context.Context, req *v1.RoleRequest) error {
-	_, err := s.roleRepository.GetByCasbinRole(ctx, req.Role)
+func (s *roleService) RoleCreate(ctx context.Context, req *v1.RoleRequest) error {
+	_, err := s.roleRepository.GetRoleByCasbinRole(ctx, req.Role)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return s.roleRepository.Create(ctx, &model.Role{
+			return s.roleRepository.RoleCreate(ctx, &model.Role{
 				Name: req.Name,
 				Role: req.Role,
 			})
@@ -75,8 +75,8 @@ func (s *roleService) Create(ctx context.Context, req *v1.RoleRequest) error {
 	return nil
 }
 
-func (s *roleService) Update(ctx context.Context, id uint, req *v1.RoleRequest) error {
-	return s.roleRepository.Update(ctx, &model.Role{
+func (s *roleService) RoleUpdate(ctx context.Context, id uint, req *v1.RoleRequest) error {
+	return s.roleRepository.RoleUpdate(ctx, &model.Role{
 		Model: gorm.Model{
 			ID: id,
 		},
@@ -84,13 +84,13 @@ func (s *roleService) Update(ctx context.Context, id uint, req *v1.RoleRequest) 
 	})
 }
 
-func (s *roleService) Delete(ctx context.Context, id uint) error {
-	return s.roleRepository.Delete(ctx, id)
+func (s *roleService) RoleDelete(ctx context.Context, id uint) error {
+	return s.roleRepository.RoleDelete(ctx, id)
 }
 
 func (s *roleService) GetRolePermission(ctx context.Context, role string) (*v1.GetRolePermissionResponseData, error) {
 	// 获取角色对应的权限列表
-	list, err := s.roleRepository.GetPermission(ctx, role)
+	list, err := s.roleRepository.GetRolePermission(ctx, role)
 	if err != nil {
 		return nil, err
 	}
@@ -117,5 +117,5 @@ func (s *roleService) UpdateRolePermission(ctx context.Context, req *v1.UpdateRo
 		}
 
 	}
-	return s.roleRepository.UpdatePermission(ctx, req.Role, permissions)
+	return s.roleRepository.UpdateRolePermission(ctx, req.Role, permissions)
 }
