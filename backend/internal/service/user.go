@@ -67,7 +67,7 @@ func (s *userService) ListUsers(ctx context.Context, req *v1.UserSearchRequest) 
 		// 获取用户角色
 		roles, err := s.userRepository.GetUserRoles(ctx, user.ID)
 		if err != nil {
-			s.logger.Error("userRepository.GetRoles error", zap.Error(err))
+			s.logger.Error("userRepository.GetUserRoles error", zap.Error(err))
 			continue
 		}
 

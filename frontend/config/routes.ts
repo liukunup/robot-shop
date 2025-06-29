@@ -56,16 +56,6 @@ export default [
         name: 'api',
         component: './Admin/Api',
       },
-      {
-        path: '/admin/audit',
-        name: 'audit',
-        component: './Admin/Audit',
-      },
-      {
-        path: '/admin/config',
-        name: 'config',
-        component: './Admin/Config',
-      },
     ],
   },
   {
@@ -81,11 +71,6 @@ export default [
         name: 'register',
         path: '/user/register',
         component: './User/Register',
-      },
-      {
-        name: 'reset-password',
-        path: '/user/reset-password',
-        component: './User/ResetPassword',
       },
     ],
   },

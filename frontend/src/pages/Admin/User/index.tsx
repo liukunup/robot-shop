@@ -1,242 +1,272 @@
-import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
+import { ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { ProTable, TableDropdown } from '@ant-design/pro-components';
-import { Button, Dropdown, Space, Tag } from 'antd';
-import { useRef } from 'react';
-import request from 'umi-request';
-export const waitTimePromise = async (time: number = 100) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, time);
-  });
+import { Button, Space, Tag, message } from 'antd';
+import { FormattedMessage, useIntl } from '@umijs/max';
+import { useRef, useState } from 'react';
+import { listUsers, userDelete } from '@/services/backend/user';
+import CreateForm from './components/CreateForm';
+import UpdateForm from './components/UpdateForm';
+
+// 搜索用户
+const searchUsers = async (params: {
+  page: number;
+  pageSize: number;
+  username?: string;
+  nickname?: string;
+  email?: string;
+  phone?: string;
+}) => {
+  try {
+    const result = await listUsers(params as API.ListUsersParams);
+    return { data: result.data?.list || [], success: result.success, total: result.data?.total };
+  } catch (error) {
+    message.error('获取列表失败');
+    return { data: [], success: false, total: 0 };
+  }
 };
 
-export const waitTime = async (time: number = 100) => {
-  await waitTimePromise(time);
-};
+const User: React.FC = () => {
+  const [createVisible, setCreateVisible] = useState(false);
+  const [updateVisible, setUpdateVisible] = useState(false);
+  const [currentUser, setCurrentUser] = useState<API.User | null>(null);
+  const actionRef = useRef<ActionType>(null);
+  const intl = useIntl();
 
-type GithubIssueItem = {
-  url: string;
-  id: number;
-  number: number;
-  title: string;
-  labels: {
-    name: string;
-    color: string;
-  }[];
-  state: string;
-  comments: number;
-  created_at: string;
-  updated_at: string;
-  closed_at?: string;
-};
-
-const columns: ProColumns<GithubIssueItem>[] = [
-  {
-    dataIndex: 'index',
-    valueType: 'indexBorder',
-    width: 48,
-  },
-  {
-    title: 'Title',
-    dataIndex: 'title',
-    copyable: true,
-    ellipsis: true,
-    tooltip: 'The title will shrink automatically if it is too long',
-    formItemProps: {
-      rules: [
-        {
-          required: true,
-          message: 'This field is required',
-        },
+  const columns: ProColumns<API.User>[] = [
+    {
+      dataIndex: 'index',
+      valueType: 'indexBorder',
+      width: 48,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.user.key.username',
+        defaultMessage: '用户名',
+      }),
+      dataIndex: 'username',
+      copyable: true,
+      ellipsis: true,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: 'This field is required',
+          },
+        ],
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.user.key.nickname',
+        defaultMessage: '昵称',
+      }),
+      dataIndex: 'nickname',
+      copyable: true,
+      ellipsis: true,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.user.key.email',
+        defaultMessage: '邮箱',
+      }),
+      dataIndex: 'email',
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: 'This field is required',
+          },
+        ],
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.user.key.phone',
+        defaultMessage: '手机',
+      }),
+      dataIndex: 'phone',
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.user.key.status',
+        defaultMessage: '状态',
+      }),
+      dataIndex: 'status',
+      search: false,
+      filters: true,
+      onFilter: true,
+      valueType: 'select',
+      valueEnum: {
+        0: { text: '待激活', status: 'NotActive' },
+        1: { text: '正常', status: 'Normal' },
+        2: { text: '禁用', status: 'Disabled' },
+      },
+      render: (_, record) => (
+        <Space>
+          {record.status === 0 ? (
+            <Tag color="gold">待激活</Tag>
+          ) : record.status === 1 ? (
+            <Tag color="green">正常</Tag>
+          ) : (
+            <Tag color="red">禁用</Tag>
+          )}
+        </Space>
+      )
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.user.key.roles',
+        defaultMessage: '角色',
+      }),
+      dataIndex: 'roles',
+      hideInSearch: true,
+      render: (roles) => (
+        <Space>
+          {roles?.map(role => (
+            <Tag key={role} color="blue">{role}</Tag>
+          )) || null}
+        </Space>
+      ),
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.user.key.createdAt',
+        defaultMessage: '创建时间',
+      }),
+      key: 'createdAt',
+      dataIndex: 'createdAt',
+      valueType: 'dateTime',
+      sorter: true,
+      hideInSearch: true,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.user.key.updatedAt',
+        defaultMessage: '更新时间',
+      }),
+      key: 'updatedAt',
+      dataIndex: 'updatedAt',
+      valueType: 'dateTime',
+      sorter: true,
+      hideInSearch: true,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.robot.table.column.actions',
+        defaultMessage: '操作',
+      }),
+      valueType: 'option',
+      key: 'option',
+      render: (text, record, _, action) => [
+        <a
+          key="edit"
+          onClick={() => {
+            console.log(record);
+            setCurrentUser(record);
+            setUpdateVisible(true);
+          }}
+        >
+          <FormattedMessage id="pages.admin.user.table.action.edit" defaultMessage="编辑" />
+        </a>,
+        <a
+          key="remove"
+          onClick={async () => {
+            if (record.id) {
+              await userDelete({ id: record.id });
+              message.success('删除成功');
+              action?.reload();
+            }
+          }}
+        >
+          <FormattedMessage id="pages.admin.user.table.action.remove" defaultMessage="删除" />
+        </a>,
       ],
     },
-  },
-  {
-    disable: true,
-    title: 'Status',
-    dataIndex: 'state',
-    filters: true,
-    onFilter: true,
-    ellipsis: true,
-    valueType: 'select',
-    valueEnum: {
-      all: { text: 'Very Long'.repeat(50) },
-      open: {
-        text: 'Unresolved',
-        status: 'Error',
-      },
-      closed: {
-        text: 'Resolved',
-        status: 'Success',
-        disabled: true,
-      },
-      processing: {
-        text: 'In Progress',
-        status: 'Processing',
-      },
-    },
-  },
-  {
-    disable: true,
-    title: 'Labels',
-    dataIndex: 'labels',
-    search: false,
-    renderFormItem: (_, { defaultRender }) => {
-      return defaultRender(_);
-    },
-    render: (_, record) => (
-      <Space>
-        {record.labels.map(({ name, color }) => (
-          <Tag color={color} key={name}>
-            {name}
-          </Tag>
-        ))}
-      </Space>
-    ),
-  },
-  {
-    title: 'Creation Time',
-    key: 'showTime',
-    dataIndex: 'created_at',
-    valueType: 'date',
-    sorter: true,
-    hideInSearch: true,
-  },
-  {
-    title: 'Creation Time',
-    dataIndex: 'created_at',
-    valueType: 'dateRange',
-    hideInTable: true,
-    search: {
-      transform: (value) => {
-        return {
-          startTime: value[0],
-          endTime: value[1],
-        };
-      },
-    },
-  },
-  {
-    title: 'Actions',
-    valueType: 'option',
-    key: 'option',
-    render: (text, record, _, action) => [
-      <a
-        key="editable"
-        onClick={() => {
-          action?.startEditable?.(record.id);
-        }}
-      >
-        Edit
-      </a>,
-      <a href={record.url} target="_blank" rel="noopener noreferrer" key="view">
-        View
-      </a>,
-      <TableDropdown
-        key="actionGroup"
-        onSelect={() => action?.reload()}
-        menus={[
-          { key: 'copy', name: 'Copy' },
-          { key: 'delete', name: 'Delete' },
-        ]}
-      />,
-    ],
-  },
-];
+  ];
 
-export default () => {
-  const actionRef = useRef<ActionType>();
   return (
-    <ProTable<GithubIssueItem>
-      columns={columns}
-      actionRef={actionRef}
-      cardBordered
-      request={async (params, sort, filter) => {
-        console.log(sort, filter);
-        await waitTime(2000);
-        return request<{
-          data: GithubIssueItem[];
-        }>('https://proapi.azurewebsites.net/github/issues', {
-          params,
-        });
-      }}
-      editable={{
-        type: 'multiple',
-      }}
-      columnsState={{
-        persistenceKey: 'pro-table-singe-demos',
-        persistenceType: 'localStorage',
-        defaultValue: {
-          option: { fixed: 'right', disable: true },
-        },
-        onChange(value) {
-          console.log('value: ', value);
-        },
-      }}
-      rowKey="id"
-      search={{
-        labelWidth: 'auto',
-      }}
-      options={{
-        setting: {
-          listsHeight: 400,
-        },
-      }}
-      form={{
-        // Since transform is configured, the submitted parameters are different from the defined ones, so they need to be transformed here
-        syncToUrl: (values, type) => {
-          if (type === 'get') {
-            return {
-              ...values,
-              created_at: [values.startTime, values.endTime],
-            };
-          }
-          return values;
-        },
-      }}
-      pagination={{
-        pageSize: 5,
-        onChange: (page) => console.log(page),
-      }}
-      dateFormatter="string"
-      headerTitle="Advanced Table"
-      toolBarRender={() => [
-        <Button
-          key="button"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            actionRef.current?.reload();
-          }}
-          type="primary"
-        >
-          New
-        </Button>,
-        <Dropdown
-          key="menu"
-          menu={{
-            items: [
-              {
-                label: '1st item',
-                key: '1',
-              },
-              {
-                label: '2nd item',
-                key: '2',
-              },
-              {
-                label: '3rd item',
-                key: '3',
-              },
-            ],
-          }}
-        >
-          <Button>
-            <EllipsisOutlined />
-          </Button>
-        </Dropdown>,
-      ]}
-    />
+    <div>
+      <ProTable<API.User>
+        columns={columns}
+        actionRef={actionRef}
+        cardBordered
+        request={async (params, sort, filter) => {
+          console.log(params, sort, filter);
+          const { current = 1, pageSize = 20, username, nickname, email, phone } = params;
+          const results = await searchUsers({
+            page: current,
+            pageSize,
+            username,
+            nickname,
+            email,
+            phone,
+          });
+          return results;
+        }}
+        editable={{
+          type: 'multiple',
+        }}
+        columnsState={{
+          persistenceKey: 'pro-table-user',
+          persistenceType: 'localStorage',
+          defaultValue: {
+            option: { fixed: 'right', disable: true },
+          },
+          onChange(value) {
+            console.log('value: ', value);
+          },
+        }}
+        rowKey="id"
+        search={{
+          labelWidth: 'auto',
+        }}
+        options={{
+          setting: {
+            listsHeight: 400,
+          },
+        }}
+        pagination={{
+          showSizeChanger: true,
+          showQuickJumper: true,
+        }}
+        dateFormatter="string"
+        headerTitle={intl.formatMessage({
+          id: 'pages.admin.user.table.title',
+          defaultMessage: '用户列表',
+        })}
+        toolBarRender={() => [
+          <Button
+            key="button"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              setCreateVisible(true);
+            }}
+            type="primary"
+          >
+            <FormattedMessage id="pages.admin.user.table.toolbar.newUser" defaultMessage="新增" />
+          </Button>,
+        ]}
+      />
+      <CreateForm
+        visible={createVisible}
+        onCancel={() => setCreateVisible(false)}
+        onSuccess={() => {
+          setCreateVisible(false);
+          actionRef.current?.reload();
+        }}
+      />
+      <UpdateForm
+        visible={updateVisible}
+        onCancel={() => setUpdateVisible(false)}
+        onSuccess={() => {
+          setUpdateVisible(false);
+          actionRef.current?.reload();
+        }}
+        initialValues={currentUser as API.User}
+      />
+    </div>
   );
 };
+
+export default User;

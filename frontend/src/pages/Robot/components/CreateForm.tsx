@@ -25,6 +25,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
       };
       await robotCreate(params as API.RobotRequest);
       message.success('新增成功');
+      form.resetFields();
       onSuccess();
     } catch (error) {
       if (error instanceof Error) {
