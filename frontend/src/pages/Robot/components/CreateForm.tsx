@@ -2,7 +2,7 @@ import { Checkbox, Form, Input, Modal, message } from 'antd';
 import { FormattedMessage } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState } from 'react';
-import { createRobot } from '@/services/backend/robot';
+import { robotCreate } from '@/services/backend/robot';
 
 interface CreateFormProps {
   visible: boolean; // 弹窗是否可见
@@ -23,7 +23,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
         ...values,
         enabled: values.enabled !== undefined ? values.enabled : true
       };
-      await createRobot(params as API.RobotRequest);
+      await robotCreate(params as API.RobotRequest);
       message.success('新增成功');
       onSuccess();
     } catch (error) {
@@ -54,6 +54,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
         form={form}
         layout="vertical"
         initialValues={{ enabled: true }}
+        style={{ marginTop: 24 }}
       >
 
         <Form.Item
@@ -68,7 +69,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
           name="desc"
           label="描述"
         >
-          <Input.TextArea placeholder="描述一下功能，比如它可以用来处理什么类型的任务" />
+          <Input.TextArea placeholder="简要描述功能，比如它可以用来做什么" />
         </Form.Item>
 
         <Form.Item
@@ -76,7 +77,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
           label="通知地址"
           rules={[{ type: 'url', message: '请输入正确的 URL' }]}
         >
-          <Input.TextArea />
+          <Input.TextArea placeholder="https://example.com/webhook" />
         </Form.Item>
 
         <Form.Item
@@ -84,13 +85,14 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
           label="回调地址"
           rules={[{ type: 'url', message: '请输入正确的 URL' }]}
         >
-          <Input.TextArea />
+          <Input.TextArea placeholder="https://example.com/callback" />
         </Form.Item>
 
         <Form.Item
           name="enabled"
           label="是否启用"
           valuePropName="checked"
+          rules={[{ required: true, message: '请勾选或取消' }]}
         >
           <Checkbox />
         </Form.Item>

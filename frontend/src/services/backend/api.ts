@@ -2,21 +2,24 @@
 /* eslint-disable */
 import { request } from '@umijs/max';
 
-/** 更新API 更新API信息 PUT /admin/api */
-export async function putAdminApi(body: API.ApiUpdateRequest, options?: { [key: string]: any }) {
-  return request<API.Response>(`/v1/admin/api`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
+/** 获取接口列表 搜索时支持分组名、名称、路径和方法筛选 GET /admin/apis */
+export async function listApis(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.ListApisParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.ApiSearchResponse>(`/v1/admin/apis`, {
+    method: 'GET',
+    params: {
+      ...params,
     },
-    data: body,
     ...(options || {}),
   });
 }
 
-/** 创建API 创建新的API POST /admin/api */
-export async function postAdminApi(body: API.ApiCreateRequest, options?: { [key: string]: any }) {
-  return request<API.Response>(`/v1/admin/api`, {
+/** 创建接口 创建一个新的接口 POST /admin/apis */
+export async function apiCreate(body: API.ApiRequest, options?: { [key: string]: any }) {
+  return request<API.Response>(`/v1/admin/apis`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -26,31 +29,50 @@ export async function postAdminApi(body: API.ApiCreateRequest, options?: { [key:
   });
 }
 
-/** 删除API 删除指定API DELETE /admin/api */
-export async function deleteAdminApi(
+/** 获取接口 获取指定ID的接口信息 GET /admin/apis/${param0} */
+export async function getApi(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.deleteAdminApiParams,
+  params: API.GetApiParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.Response>(`/v1/admin/api`, {
-    method: 'DELETE',
-    params: {
-      ...params,
-    },
+  const { id: param0, ...queryParams } = params;
+  return request<API.ApiResponse>(`/v1/admin/apis/${param0}`, {
+    method: 'GET',
+    params: { ...queryParams },
     ...(options || {}),
   });
 }
 
-/** 获取API列表 获取API列表 GET /admin/apis */
-export async function getAdminApis(
+/** 更新接口 更新接口数据 PUT /admin/apis/${param0} */
+export async function apiUpdate(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getAdminApisParams,
+  params: API.ApiUpdateParams,
+  body: API.ApiRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.ListApisResponse>(`/v1/admin/apis`, {
-    method: 'GET',
+  const { id: param0, ...queryParams } = params;
+  return request<API.Response>(`/v1/admin/apis/${param0}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...queryParams },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 删除接口 删除指定ID的接口 DELETE /admin/apis/${param0} */
+export async function apiDelete(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.ApiDeleteParams,
+  options?: { [key: string]: any },
+) {
+  const { id: param0, ...queryParams } = params;
+  return request<API.Response>(`/v1/admin/apis/${param0}`, {
+    method: 'DELETE',
     params: {
-      ...params,
+      ...queryParams,
     },
     ...(options || {}),
   });

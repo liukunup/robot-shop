@@ -642,6 +642,7 @@ paths:
       consumes:
       - application/json
       description: 搜索时支持分组名、名称、路径和方法筛选
+      operationId: ListApis
       parameters:
       - description: 页码
         in: query
@@ -1350,7 +1351,7 @@ paths:
       consumes:
       - application/json
       description: 获取当前用户的详细信息
-      operationId: GetCurrentUser
+      operationId: FetchCurrentUser
       produces:
       - application/json
       responses:
@@ -1368,7 +1369,7 @@ paths:
       consumes:
       - application/json
       description: 获取当前用户的菜单列表
-      operationId: GetUserMenu
+      operationId: FetchCurrentMenu
       produces:
       - application/json
       responses:
@@ -1386,7 +1387,7 @@ paths:
       consumes:
       - application/json
       description: 获取当前用户的权限列表
-      operationId: GetUserPermission
+      operationId: FetchCurrentPermission
       produces:
       - application/json
       responses:

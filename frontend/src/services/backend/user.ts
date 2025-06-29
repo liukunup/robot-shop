@@ -2,21 +2,24 @@
 /* eslint-disable */
 import { request } from '@umijs/max';
 
-/** 更新用户 更新用户 PUT /admin/user */
-export async function putAdminUser(body: API.UserUpdateRequest, options?: { [key: string]: any }) {
-  return request<API.Response>(`/v1/admin/user`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
+/** 获取用户列表 搜索时支持用户名、昵称、手机和邮箱筛选 GET /admin/users */
+export async function listUsers(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.ListUsersParams,
+  options?: { [key: string]: any },
+) {
+  return request<API.UserSearchResponse>(`/v1/admin/users`, {
+    method: 'GET',
+    params: {
+      ...params,
     },
-    data: body,
     ...(options || {}),
   });
 }
 
-/** 创建用户 创建用户 POST /admin/user */
-export async function postAdminUser(body: API.UserCreateRequest, options?: { [key: string]: any }) {
-  return request<API.Response>(`/v1/admin/user`, {
+/** 创建用户 创建一个新的用户 POST /admin/users */
+export async function userCreate(body: API.UserRequest, options?: { [key: string]: any }) {
+  return request<API.Response>(`/v1/admin/users`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -26,46 +29,43 @@ export async function postAdminUser(body: API.UserCreateRequest, options?: { [ke
   });
 }
 
-/** 删除用户 删除用户 DELETE /admin/user */
-export async function deleteAdminUser(
+/** 更新用户 更新用户信息 PUT /admin/users/${param0} */
+export async function userUpdate(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.deleteAdminUserParams,
+  params: API.UserUpdateParams,
+  body: API.UserRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.Response>(`/v1/admin/user`, {
+  const { id: param0, ...queryParams } = params;
+  return request<API.Response>(`/v1/admin/users/${param0}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    params: { ...queryParams },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 删除用户 删除指定ID的用户 DELETE /admin/users/${param0} */
+export async function userDelete(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.UserDeleteParams,
+  options?: { [key: string]: any },
+) {
+  const { id: param0, ...queryParams } = params;
+  return request<API.Response>(`/v1/admin/users/${param0}`, {
     method: 'DELETE',
     params: {
-      ...params,
+      ...queryParams,
     },
     ...(options || {}),
   });
 }
 
-/** 获取用户权限 获取当前用户的权限列表 GET /admin/user/permissions */
-export async function getAdminUserPermissions(options?: { [key: string]: any }) {
-  return request<API.GetUserPermissionsData>(`/v1/admin/user/permissions`, {
-    method: 'GET',
-    ...(options || {}),
-  });
-}
-
-/** 获取用户列表 获取用户列表 GET /admin/users */
-export async function getAdminUsers(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getAdminUsersParams,
-  options?: { [key: string]: any },
-) {
-  return request<API.ListUsersResponse>(`/v1/admin/users`, {
-    method: 'GET',
-    params: {
-      ...params,
-    },
-    ...(options || {}),
-  });
-}
-
-/** 账号登录 支持用户名或邮箱登录 POST /login */
-export async function login(body: API.LoginParams, options?: { [key: string]: any }) {
+/** 登录 支持用户名或邮箱登录 POST /login */
+export async function login(body: API.LoginRequest, options?: { [key: string]: any }) {
   return request<API.LoginResponse>(`/v1/login`, {
     method: 'POST',
     headers: {
@@ -76,8 +76,8 @@ export async function login(body: API.LoginParams, options?: { [key: string]: an
   });
 }
 
-/** 用户注册 目前只支持邮箱注册 POST /register */
-export async function register(body: API.RegisterParams, options?: { [key: string]: any }) {
+/** 注册 目前只支持通过邮箱进行注册 POST /register */
+export async function register(body: API.RegisterRequest, options?: { [key: string]: any }) {
   return request<API.Response>(`/v1/register`, {
     method: 'POST',
     headers: {
@@ -88,9 +88,25 @@ export async function register(body: API.RegisterParams, options?: { [key: strin
   });
 }
 
-/** 获取当前用户 获取当前用户的详细信息 GET /user */
-export async function queryCurrentUser(options?: { [key: string]: any }) {
-  return request<API.GetUserResponse>(`/v1/user`, {
+/** 获取当前用户 获取当前用户的详细信息 GET /users/me */
+export async function fetchCurrentUser(options?: { [key: string]: any }) {
+  return request<API.UserResponse>(`/v1/users/me`, {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** 获取用户菜单 获取当前用户的菜单列表 GET /users/me/menu */
+export async function fetchCurrentMenu(options?: { [key: string]: any }) {
+  return request<API.MenuSearchResponse>(`/v1/users/me/menu`, {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** 获取用户权限 获取当前用户的权限列表 GET /users/me/permission */
+export async function fetchCurrentPermission(options?: { [key: string]: any }) {
+  return request<API.UserPermissionResponse>(`/v1/users/me/permission`, {
     method: 'GET',
     ...(options || {}),
   });

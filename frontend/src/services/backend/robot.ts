@@ -2,7 +2,7 @@
 /* eslint-disable */
 import { request } from '@umijs/max';
 
-/** 批量搜索机器人 GET /robots */
+/** 获取机器人列表 搜索时支持名称、描述和所有者筛选 GET /robots */
 export async function listRobots(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.ListRobotsParams,
@@ -17,8 +17,8 @@ export async function listRobots(
   });
 }
 
-/** 创建机器人 POST /robots */
-export async function createRobot(body: API.RobotRequest, options?: { [key: string]: any }) {
+/** 创建机器人 创建一个新的机器人 POST /robots */
+export async function robotCreate(body: API.RobotRequest, options?: { [key: string]: any }) {
   return request<API.Response>(`/v1/robots`, {
     method: 'POST',
     headers: {
@@ -29,7 +29,7 @@ export async function createRobot(body: API.RobotRequest, options?: { [key: stri
   });
 }
 
-/** 查找机器人 GET /robots/${param0} */
+/** 获取机器人 获取指定ID的机器人信息 GET /robots/${param0} */
 export async function getRobot(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.GetRobotParams,
@@ -43,10 +43,10 @@ export async function getRobot(
   });
 }
 
-/** 更新机器人 PUT /robots/${param0} */
-export async function updateRobot(
+/** 更新机器人 更新机器人数据 PUT /robots/${param0} */
+export async function robotUpdate(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.UpdateRobotParams,
+  params: API.RobotUpdateParams,
   body: API.RobotRequest,
   options?: { [key: string]: any },
 ) {
@@ -62,10 +62,10 @@ export async function updateRobot(
   });
 }
 
-/** 删除机器人 DELETE /robots/${param0} */
-export async function deleteRobot(
+/** 删除机器人 删除指定ID的机器人 DELETE /robots/${param0} */
+export async function robotDelete(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.DeleteRobotParams,
+  params: API.RobotDeleteParams,
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;

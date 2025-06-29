@@ -42,6 +42,7 @@ const docTemplate = `{
                     "API"
                 ],
                 "summary": "获取接口列表",
+                "operationId": "ListApis",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1146,7 +1147,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "获取当前用户",
-                "operationId": "GetCurrentUser",
+                "operationId": "FetchCurrentUser",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1175,7 +1176,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "获取用户菜单",
-                "operationId": "GetUserMenu",
+                "operationId": "FetchCurrentMenu",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1204,7 +1205,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "获取用户权限",
-                "operationId": "GetUserPermission",
+                "operationId": "FetchCurrentPermission",
                 "responses": {
                     "200": {
                         "description": "OK",

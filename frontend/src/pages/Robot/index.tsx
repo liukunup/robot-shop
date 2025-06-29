@@ -4,7 +4,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, Space, Tag, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useRef, useState } from 'react';
-import { listRobots, deleteRobot, createRobot } from '../../services/backend/robot';
+import { listRobots, robotDelete, robotCreate } from '../../services/backend/robot';
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
 
@@ -160,7 +160,7 @@ const Robot: React.FC = () => {
         <a
           key="duplicate"
           onClick={async () => {
-            await createRobot({
+            await robotCreate({
               name: record.name + '-副本',
               desc: record.desc,
               webhook: record.webhook,
@@ -178,11 +178,18 @@ const Robot: React.FC = () => {
           onSelect={() => action?.reload()}
           menus={[
             {
+              key: 'test',
+              name: '测试',
+              onClick: async () => {
+                message.warning('此功能尚未实现');
+              },
+            },
+            {
               key: 'delete',
               name: '删除',
               onClick: async () => {
                 if (record.id) {
-                  await deleteRobot({ id: record.id });
+                  await robotDelete({ id: record.id });
                   message.success('删除成功');
                   actionRef.current?.reload();
                 }

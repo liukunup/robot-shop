@@ -2,7 +2,7 @@ import { Checkbox, Form, Input, Modal, message } from 'antd';
 import { FormattedMessage } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState, useEffect } from 'react';
-import { updateRobot } from '@/services/backend/robot';
+import { robotUpdate } from '@/services/backend/robot';
 
 interface UpdateFormProps {
   visible: boolean; // 弹窗是否可见
@@ -28,7 +28,7 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
       if (!values.id) {
         throw new Error('更新操作时未找到记录ID');
       }
-      await updateRobot({id: values.id}, values as API.RobotRequest);
+      await robotUpdate({id: values.id}, values as API.RobotRequest);
       message.success('更新成功');
       onSuccess();
     } catch (error) {
@@ -56,7 +56,12 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
       confirmLoading={loading}
       destroyOnHidden={true}
     >
-      <Form form={form} layout="vertical" initialValues={initialValues}>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={initialValues}
+        style={{ marginTop: 24 }}
+      >
 
         <Form.Item name="id" label="ID" hidden>
           <Input disabled />
@@ -82,7 +87,7 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
           label="通知地址"
           rules={[{ type: 'url', message: '请输入正确的 URL' }]}
         >
-          <Input.TextArea />
+          <Input.TextArea placeholder="https://example.com/webhook" />
         </Form.Item>
 
         <Form.Item
@@ -90,13 +95,14 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
           label="回调地址"
           rules={[{ type: 'url', message: '请输入正确的 URL' }]}
         >
-          <Input.TextArea />
+          <Input.TextArea placeholder="https://example.com/callback" />
         </Form.Item>
 
         <Form.Item
           name="enabled"
           label="是否启用"
           valuePropName="checked"
+          rules={[{ required: true, message: '请勾选或取消' }]}
         >
           <Checkbox />
         </Form.Item>

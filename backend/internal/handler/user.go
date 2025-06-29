@@ -160,7 +160,7 @@ func (h *UserHandler) UserDelete(ctx *gin.Context) {
 // @Security Bearer
 // @Success 200 {object} v1.UserResponse
 // @Router /users/me [get]
-// @ID GetCurrentUser
+// @ID FetchCurrentUser
 func (h *UserHandler) GetCurrentUser(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
@@ -187,7 +187,7 @@ func (h *UserHandler) GetCurrentUser(ctx *gin.Context) {
 // @Security Bearer
 // @Success 200 {object} v1.UserPermissionResponse
 // @Router /users/me/permission [get]
-// @ID GetUserPermission
+// @ID FetchCurrentPermission
 func (h *UserHandler) GetUserPermission(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
@@ -214,7 +214,7 @@ func (h *UserHandler) GetUserPermission(ctx *gin.Context) {
 // @Security Bearer
 // @Success 200 {object} v1.MenuSearchResponse
 // @Router /users/me/menu [get]
-// @ID GetUserMenu
+// @ID FetchCurrentMenu
 func (h *UserHandler) GetUserMenu(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {

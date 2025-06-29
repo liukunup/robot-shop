@@ -42,6 +42,7 @@ func NewApiHandler(
 // @Param method query string false "方法"
 // @Success 200 {object} v1.ApiSearchResponse
 // @Router /admin/apis [get]
+// @ID ListApis
 func (h *ApiHandler) ListApis(ctx *gin.Context) {
 	var req v1.ApiSearchRequest
 	if err := ctx.ShouldBind(&req); err != nil {
