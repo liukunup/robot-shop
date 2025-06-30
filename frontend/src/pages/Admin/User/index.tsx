@@ -8,24 +8,6 @@ import { listUsers, userDelete } from '@/services/backend/user';
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
 
-// 搜索用户
-const searchUsers = async (params: {
-  page: number;
-  pageSize: number;
-  username?: string;
-  nickname?: string;
-  email?: string;
-  phone?: string;
-}) => {
-  try {
-    const result = await listUsers(params as API.ListUsersParams);
-    return { data: result.data?.list || [], success: result.success, total: result.data?.total };
-  } catch (error) {
-    message.error('获取列表失败');
-    return { data: [], success: false, total: 0 };
-  }
-};
-
 const User: React.FC = () => {
   const [createVisible, setCreateVisible] = useState(false);
   const [updateVisible, setUpdateVisible] = useState(false);
@@ -185,6 +167,23 @@ const User: React.FC = () => {
     },
   ];
 
+  const search = async (params: {
+    page: number;
+    pageSize: number;
+    username?: string;
+    nickname?: string;
+    email?: string;
+    phone?: string;
+  }) => {
+    try {
+      const result = await listUsers(params as API.ListUsersParams);
+      return { data: result.data?.list || [], success: result.success, total: result.data?.total };
+    } catch (error) {
+      message.error('获取列表失败');
+      return { data: [], success: false, total: 0 };
+    }
+  };
+
   return (
     <div>
       <ProTable<API.User>
@@ -194,7 +193,7 @@ const User: React.FC = () => {
         request={async (params, sort, filter) => {
           console.log(params, sort, filter);
           const { current = 1, pageSize = 20, username, nickname, email, phone } = params;
-          const results = await searchUsers({
+          const results = await search({
             page: current,
             pageSize,
             username,

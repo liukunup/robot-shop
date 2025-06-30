@@ -1,4 +1,4 @@
-import { Select, Form, Input, Modal, message } from 'antd';
+import { Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState } from 'react';
@@ -62,40 +62,24 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
           name="name"
           label={<FormattedMessage id="pages.admin.role.key.name" defaultMessage="名称" />}
           rules={[
-            { required: true, message: intl.formatMessage({
-              id: 'pages.admin.role.form.name.required',
-              defaultMessage: '请输入名称' }) },
-            { pattern: /^[a-zA-Z][a-zA-Z0-9]*$/, message: intl.formatMessage({
-              id: 'pages.admin.role.form.name.pattern',
-              defaultMessage: '以字母开头，支持字母大小写、数字' }) },
-            { max: 20, message: intl.formatMessage({
-              id: 'pages.admin.role.form.name.maxlen',
-              defaultMessage: '名称不能超过20个字符' }) },
+            { required: true, message: intl.formatMessage({ id: 'pages.admin.role.form.name.required', defaultMessage: '请输入名称' }) },
+            { pattern: /^[a-zA-Z][a-zA-Z0-9]*$/, message: intl.formatMessage({ id: 'pages.admin.role.form.name.pattern', defaultMessage: '以字母开头，支持字母大小写、数字' }) },
+            { max: 20, message: intl.formatMessage({ id: 'pages.admin.role.form.name.maxlen', defaultMessage: '名称不能超过20个字符' }) },
           ]}
         >
-          <Input placeholder={intl.formatMessage({
-            id: 'pages.admin.role.form.name.placeholder',
-            defaultMessage: '以字母开头，支持字母大小写、数字，不超过20个字符' })} />
+          <Input placeholder={intl.formatMessage({ id: 'pages.admin.role.form.name.placeholder', defaultMessage: '以字母开头，支持字母大小写、数字，不超过20个字符' })} />
         </Form.Item>
 
         <Form.Item
           name="role"
           label={<FormattedMessage id="pages.admin.user.key.role" defaultMessage="标识" />}
           rules={[
-            { required: true, message: intl.formatMessage({
-              id: 'pages.admin.role.form.role.required',
-              defaultMessage: '请输入标识' }) },
-            { pattern: /^[a-zA-Z][a-zA-Z0-9]*$/, message: intl.formatMessage({
-              id: 'pages.admin.role.form.role.pattern',
-              defaultMessage: '以字母开头，支持字母大小写、数字' }) },
-            { max: 20, message: intl.formatMessage({
-              id: 'pages.admin.role.form.role.maxlen',
-              defaultMessage: '标识不能超过20个字符' }) },
+            { required: true, message: intl.formatMessage({ id: 'pages.admin.role.form.role.required', defaultMessage: '请输入标识' }) },
+            { pattern: /^[a-zA-Z][a-zA-Z0-9]*$/, message: intl.formatMessage({ id: 'pages.admin.role.form.role.pattern', defaultMessage: '以字母开头，支持字母大小写、数字' }) },
+            { max: 20, message: intl.formatMessage({ id: 'pages.admin.role.form.role.maxlen', defaultMessage: '标识不能超过20个字符' }) },
           ]}
         >
-          <Input placeholder={intl.formatMessage({
-            id: 'pages.admin.role.form.role.placeholder',
-            defaultMessage: '请输入标识' })} />
+          <Input placeholder={intl.formatMessage({ id: 'pages.admin.role.form.role.placeholder', defaultMessage: '请输入标识' })} />
         </Form.Item>
       </Form>
     </Modal>

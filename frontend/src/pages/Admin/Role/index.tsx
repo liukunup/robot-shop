@@ -1,27 +1,12 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { Button, Space, Tag, message } from 'antd';
+import { Button, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useRef, useState } from 'react';
 import { listRoles, roleDelete } from '@/services/backend/role';
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
-
-const searchRoles = async (params: {
-  page: number;
-  pageSize: number;
-  name?: string;
-  role?: string;
-}) => {
-  try {
-    const result = await listRoles(params as API.ListRolesParams);
-    return { data: result.data?.list || [], success: result.success, total: result.data?.total };
-  } catch (error) {
-    message.error('获取列表失败');
-    return { data: [], success: false, total: 0 };
-  }
-};
 
 const Role: React.FC = () => {
   const [createVisible, setCreateVisible] = useState(false);
@@ -123,6 +108,21 @@ const Role: React.FC = () => {
       ],
     },
   ];
+
+  const searchRoles = async (params: {
+    page: number;
+    pageSize: number;
+    name?: string;
+    role?: string;
+  }) => {
+    try {
+      const result = await listRoles(params as API.ListRolesParams);
+      return { data: result.data?.list || [], success: result.success, total: result.data?.total };
+    } catch (error) {
+      message.error('获取列表失败');
+      return { data: [], success: false, total: 0 };
+    }
+  };
 
   return (
     <div>

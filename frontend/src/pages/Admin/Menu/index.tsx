@@ -1,242 +1,208 @@
-import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
+import { ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { ProTable, TableDropdown } from '@ant-design/pro-components';
-import { Button, Dropdown, Space, Tag } from 'antd';
-import { useRef } from 'react';
-import request from 'umi-request';
-export const waitTimePromise = async (time: number = 100) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true);
-    }, time);
-  });
-};
+import { Button, message } from 'antd';
+import { FormattedMessage, useIntl } from '@umijs/max';
+import { useRef, useState } from 'react';
+import { listMenus, menuDelete } from '@/services/backend/menu';
+import CreateForm from './components/CreateForm';
+import UpdateForm from './components/UpdateForm';
 
-export const waitTime = async (time: number = 100) => {
-  await waitTimePromise(time);
-};
+const Menu: React.FC = () => {
+  const [createVisible, setCreateVisible] = useState(false);
+  const [updateVisible, setUpdateVisible] = useState(false);
+  const [currentMenu, setCurrentMenu] = useState<API.Menu | null>(null);
+  const actionRef = useRef<ActionType>(null);
+  const intl = useIntl();
 
-type GithubIssueItem = {
-  url: string;
-  id: number;
-  number: number;
-  title: string;
-  labels: {
-    name: string;
-    color: string;
-  }[];
-  state: string;
-  comments: number;
-  created_at: string;
-  updated_at: string;
-  closed_at?: string;
-};
-
-const columns: ProColumns<GithubIssueItem>[] = [
-  {
-    dataIndex: 'index',
-    valueType: 'indexBorder',
-    width: 48,
-  },
-  {
-    title: 'Title',
-    dataIndex: 'title',
-    copyable: true,
-    ellipsis: true,
-    tooltip: 'The title will shrink automatically if it is too long',
-    formItemProps: {
-      rules: [
-        {
-          required: true,
-          message: 'This field is required',
-        },
+  const columns: ProColumns<API.Menu>[] = [
+    {
+      dataIndex: 'index',
+      valueType: 'indexBorder',
+      width: 48,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.role.key.name',
+        defaultMessage: '名称',
+      }),
+      dataIndex: 'name',
+      ellipsis: true,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: 'This field is required',
+          },
+        ],
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.role.key.role',
+        defaultMessage: '标识',
+      }),
+      dataIndex: 'role',
+      ellipsis: true,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: 'This field is required',
+          },
+        ],
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.role.key.createdAt',
+        defaultMessage: '创建时间',
+      }),
+      key: 'createdAt',
+      dataIndex: 'createdAt',
+      valueType: 'dateTime',
+      sorter: true,
+      hideInSearch: true,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.role.key.updatedAt',
+        defaultMessage: '更新时间',
+      }),
+      key: 'updatedAt',
+      dataIndex: 'updatedAt',
+      valueType: 'dateTime',
+      sorter: true,
+      hideInSearch: true,
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.robot.table.column.actions',
+        defaultMessage: '操作',
+      }),
+      valueType: 'option',
+      key: 'option',
+      render: (text, record, _, action) => [
+        <a
+          key="edit"
+          onClick={() => {
+            setCurrentMenu(record);
+            setUpdateVisible(true);
+          }}
+        >
+          <FormattedMessage id="pages.admin.role.table.action.edit" defaultMessage="编辑" />
+        </a>,
+        <a
+          key="remove"
+          onClick={async () => {
+            if (record.id) {
+              await menuDelete({ id: record.id });
+              message.success('删除成功');
+              action?.reload();
+            }
+          }}
+        >
+          <FormattedMessage id="pages.admin.role.table.action.remove" defaultMessage="删除" />
+        </a>,
       ],
     },
-  },
-  {
-    disable: true,
-    title: 'Status',
-    dataIndex: 'state',
-    filters: true,
-    onFilter: true,
-    ellipsis: true,
-    valueType: 'select',
-    valueEnum: {
-      all: { text: 'Very Long'.repeat(50) },
-      open: {
-        text: 'Unresolved',
-        status: 'Error',
-      },
-      closed: {
-        text: 'Resolved',
-        status: 'Success',
-        disabled: true,
-      },
-      processing: {
-        text: 'In Progress',
-        status: 'Processing',
-      },
-    },
-  },
-  {
-    disable: true,
-    title: 'Labels',
-    dataIndex: 'labels',
-    search: false,
-    renderFormItem: (_, { defaultRender }) => {
-      return defaultRender(_);
-    },
-    render: (_, record) => (
-      <Space>
-        {record.labels.map(({ name, color }) => (
-          <Tag color={color} key={name}>
-            {name}
-          </Tag>
-        ))}
-      </Space>
-    ),
-  },
-  {
-    title: 'Creation Time',
-    key: 'showTime',
-    dataIndex: 'created_at',
-    valueType: 'date',
-    sorter: true,
-    hideInSearch: true,
-  },
-  {
-    title: 'Creation Time',
-    dataIndex: 'created_at',
-    valueType: 'dateRange',
-    hideInTable: true,
-    search: {
-      transform: (value) => {
-        return {
-          startTime: value[0],
-          endTime: value[1],
-        };
-      },
-    },
-  },
-  {
-    title: 'Actions',
-    valueType: 'option',
-    key: 'option',
-    render: (text, record, _, action) => [
-      <a
-        key="editable"
-        onClick={() => {
-          action?.startEditable?.(record.id);
-        }}
-      >
-        Edit
-      </a>,
-      <a href={record.url} target="_blank" rel="noopener noreferrer" key="view">
-        View
-      </a>,
-      <TableDropdown
-        key="actionGroup"
-        onSelect={() => action?.reload()}
-        menus={[
-          { key: 'copy', name: 'Copy' },
-          { key: 'delete', name: 'Delete' },
-        ]}
-      />,
-    ],
-  },
-];
+  ];
 
-export default () => {
-  const actionRef = useRef<ActionType>();
+  const search = async (params: {
+    page: number;
+    pageSize: number;
+    name?: string;
+    role?: string;
+  }) => {
+    try {
+      const result = await listMenus(params as API.ListRolesParams);
+      return { data: result.data?.list || [], success: result.success, total: result.data?.total };
+    } catch (error) {
+      message.error('获取列表失败');
+      return { data: [], success: false, total: 0 };
+    }
+  };
+
   return (
-    <ProTable<GithubIssueItem>
-      columns={columns}
-      actionRef={actionRef}
-      cardBordered
-      request={async (params, sort, filter) => {
-        console.log(sort, filter);
-        await waitTime(2000);
-        return request<{
-          data: GithubIssueItem[];
-        }>('https://proapi.azurewebsites.net/github/issues', {
-          params,
-        });
-      }}
-      editable={{
-        type: 'multiple',
-      }}
-      columnsState={{
-        persistenceKey: 'pro-table-singe-demos',
-        persistenceType: 'localStorage',
-        defaultValue: {
-          option: { fixed: 'right', disable: true },
-        },
-        onChange(value) {
-          console.log('value: ', value);
-        },
-      }}
-      rowKey="id"
-      search={{
-        labelWidth: 'auto',
-      }}
-      options={{
-        setting: {
-          listsHeight: 400,
-        },
-      }}
-      form={{
-        // Since transform is configured, the submitted parameters are different from the defined ones, so they need to be transformed here
-        syncToUrl: (values, type) => {
-          if (type === 'get') {
-            return {
-              ...values,
-              created_at: [values.startTime, values.endTime],
-            };
-          }
-          return values;
-        },
-      }}
-      pagination={{
-        pageSize: 5,
-        onChange: (page) => console.log(page),
-      }}
-      dateFormatter="string"
-      headerTitle="Advanced Table"
-      toolBarRender={() => [
-        <Button
-          key="button"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            actionRef.current?.reload();
-          }}
-          type="primary"
-        >
-          New
-        </Button>,
-        <Dropdown
-          key="menu"
-          menu={{
-            items: [
-              {
-                label: '1st item',
-                key: '1',
-              },
-              {
-                label: '2nd item',
-                key: '2',
-              },
-              {
-                label: '3rd item',
-                key: '3',
-              },
-            ],
-          }}
-        >
-          <Button>
-            <EllipsisOutlined />
-          </Button>
-        </Dropdown>,
-      ]}
-    />
+    <div>
+      <ProTable<API.Role>
+        columns={columns}
+        actionRef={actionRef}
+        cardBordered
+        request={async (params, sort, filter) => {
+          console.log(params, sort, filter);
+          const { current = 1, pageSize = 20, name, role } = params;
+          const results = await search({
+            page: current,
+            pageSize,
+            name,
+            role,
+          });
+          return results;
+        }}
+        editable={{
+          type: 'multiple',
+        }}
+        columnsState={{
+          persistenceKey: 'pro-table-role',
+          persistenceType: 'localStorage',
+          defaultValue: {
+            option: { fixed: 'right', disable: true },
+          },
+          onChange(value) {
+            console.log('value: ', value);
+          },
+        }}
+        rowKey="id"
+        search={{
+          labelWidth: 'auto',
+        }}
+        options={{
+          setting: {
+            listsHeight: 400,
+          },
+        }}
+        pagination={{
+          showSizeChanger: true,
+          showQuickJumper: true,
+        }}
+        dateFormatter="string"
+        headerTitle={intl.formatMessage({
+          id: 'pages.admin.role.table.title',
+          defaultMessage: '角色列表',
+        })}
+        toolBarRender={() => [
+          <Button
+            key="button"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              setCreateVisible(true);
+            }}
+            type="primary"
+          >
+            <FormattedMessage id="pages.admin.user.table.toolbar.newUser" defaultMessage="新增" />
+          </Button>,
+        ]}
+      />
+      <CreateForm
+        visible={createVisible}
+        onCancel={() => setCreateVisible(false)}
+        onSuccess={() => {
+          setCreateVisible(false);
+          actionRef.current?.reload();
+        }}
+      />
+      <UpdateForm
+        visible={updateVisible}
+        onCancel={() => setUpdateVisible(false)}
+        onSuccess={() => {
+          setUpdateVisible(false);
+          actionRef.current?.reload();
+        }}
+        initialValues={currentMenu as API.Menu}
+      />
+    </div>
   );
 };
+
+export default Menu;

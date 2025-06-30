@@ -7,12 +7,13 @@ export default {
   'pages.common.object.update.success': '更新成功',
   'pages.common.object.update.failed': '更新失败',
   'pages.common.object.remove': '删除',
+  'pages.common.object.remove.success': '删除成功',
   'pages.common.object.duplicate': '复制',
   'pages.common.object.fetchList.error': '获取列表失败',
   'pages.common.object.key.id': 'ID',
   'pages.common.object.key.createdAt': '创建时间',
   'pages.common.object.key.updatedAt': '更新时间',
-  'pages.common.table.action': '操作',
+  'pages.common.table.key.action': '操作',
   'pages.layouts.userLayout.title': 'Ant Design 是西湖区最具影响力的 Web 设计规范',
   'pages.login.accountLogin.tab': '账户密码登录',
   'pages.login.accountLogin.errorMessage': '错误的用户名和密码(admin/ant.design)',
@@ -78,6 +79,38 @@ export default {
   'pages.searchTable.tenThousand': '万',
   'pages.searchTable.batchDeletion': '批量删除',
   'pages.searchTable.batchApproval': '批量审批',
+  'pages.admin.api.table.title': '接口列表',
+  'pages.admin.api.key.group': '分组',
+  'pages.admin.api.key.name': '名称',
+  'pages.admin.api.key.path': '路径',
+  'pages.admin.api.key.method': '方法',
+  'pages.admin.api.modal.createForm.title': '新建接口',
+  'pages.admin.api.modal.updateForm.title': '编辑接口',
+  'pages.admin.api.form.group.required': '请输入分组',
+  'pages.admin.api.form.group.placeholder': '请输入分组',
+  'pages.admin.api.form.name.required': '请输入名称',
+  'pages.admin.api.form.name.placeholder': '请输入名称',
+  'pages.admin.api.form.path.required': '请输入路径',
+  'pages.admin.api.form.path.placeholder': '请输入路径',
+  'pages.admin.api.form.method.required': '请输入方法',
+  'pages.admin.api.form.method.placeholder': '请输入方法',
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   'pages.admin.user.key.username': '用户名',
   'pages.admin.user.key.nickname': '昵称',
   'pages.admin.user.key.avatar': '头像',
