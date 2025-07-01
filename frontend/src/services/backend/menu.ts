@@ -3,9 +3,16 @@
 import { request } from '@umijs/max';
 
 /** 获取菜单列表 获取所有菜单 GET /admin/menus */
-export async function listMenus(options?: { [key: string]: any }) {
+export async function listMenus(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.ListMenusParams,
+  options?: { [key: string]: any },
+) {
   return request<API.MenuSearchResponse>(`/v1/admin/menus`, {
     method: 'GET',
+    params: {
+      ...params,
+    },
     ...(options || {}),
   });
 }

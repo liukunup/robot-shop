@@ -33,11 +33,20 @@ func NewMenuHandler(
 // @Accept json
 // @Produce json
 // @Security Bearer
+// @Param page query int true "页码"
+// @Param pageSize query int true "分页大小"
 // @Success 200 {object} v1.MenuSearchResponse
 // @Router /admin/menus [get]
 // @ID ListMenus
 func (h *MenuHandler) ListMenus(ctx *gin.Context) {
-	data, err := h.menuService.ListMenus(ctx)
+	var req v1.MenuSearchRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		h.logger.WithContext(ctx).Error("ListMenus bind error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+
+	data, err := h.menuService.ListMenus(ctx, &req)
 	if err != nil {
 		h.logger.WithContext(ctx).Error("menuService.ListMenus error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": err.Error()})

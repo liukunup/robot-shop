@@ -11,7 +11,7 @@ import (
 )
 
 type MenuService interface {
-	ListMenus(ctx context.Context) (*v1.MenuSearchResponseData, error)
+	ListMenus(ctx context.Context, req *v1.MenuSearchRequest) (*v1.MenuSearchResponseData, error)
 	MenuCreate(ctx context.Context, req *v1.MenuRequest) error
 	MenuUpdate(ctx context.Context, id uint, req *v1.MenuRequest) error
 	MenuDelete(ctx context.Context, id uint) error
@@ -32,8 +32,8 @@ type menuService struct {
 	menuRepository repository.MenuRepository
 }
 
-func (s *menuService) ListMenus(ctx context.Context) (*v1.MenuSearchResponseData, error) {
-	list, total, err := s.menuRepository.ListMenus(ctx)
+func (s *menuService) ListMenus(ctx context.Context, req *v1.MenuSearchRequest) (*v1.MenuSearchResponseData, error) {
+	list, total, err := s.menuRepository.ListMenus(ctx, req)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("List error", zap.Error(err))
 		return nil, err

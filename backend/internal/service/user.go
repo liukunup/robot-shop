@@ -37,11 +37,13 @@ type UserService interface {
 func NewUserService(
 	service *Service,
 	userRepository repository.UserRepository,
+	roleRepository repository.RoleRepository,
 	menuRepository repository.MenuRepository,
 ) UserService {
 	return &userService{
 		Service:        service,
 		userRepository: userRepository,
+		roleRepository: roleRepository,
 		menuRepository: menuRepository,
 	}
 }
@@ -49,6 +51,7 @@ func NewUserService(
 type userService struct {
 	*Service
 	userRepository repository.UserRepository
+	roleRepository repository.RoleRepository
 	menuRepository repository.MenuRepository
 }
 
@@ -70,7 +73,22 @@ func (s *userService) ListUsers(ctx context.Context, req *v1.UserSearchRequest) 
 			s.logger.Error("userRepository.GetUserRoles error", zap.Error(err))
 			continue
 		}
-
+		// 转成角色对象
+		roleList := make([]v1.RoleDataItem, 0)
+		if len(roles) > 0 {
+			for _, role := range roles {
+				m, err2 := s.roleRepository.GetRoleByCasbinRole(ctx, role)
+				if err2 != nil {
+					s.logger.Error("roleRepository.GetRoleByCasbinRole error", zap.Error(err2))
+					continue
+				}
+				roleList = append(roleList, v1.RoleDataItem{
+					ID:   m.ID,
+					Name: m.Name,
+					Role: m.Role,
+				})
+			}
+		}
 		data.List = append(data.List, v1.UserDataItem{
 			ID:        user.ID,
 			CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
@@ -81,7 +99,7 @@ func (s *userService) ListUsers(ctx context.Context, req *v1.UserSearchRequest) 
 			Email:     user.Email,
 			Phone:     user.Phone,
 			Status:    user.Status,
-			Roles:     roles,
+			Roles:     roleList,
 		})
 	}
 
@@ -184,7 +202,22 @@ func (s *userService) GetUser(ctx context.Context, uid uint) (*v1.UserDataItem, 
 		s.logger.WithContext(ctx).Error("userRepository.GetRoles error", zap.Error(err))
 		return nil, err
 	}
-
+	// 转成角色对象
+	roleList := make([]v1.RoleDataItem, 0)
+	if len(roles) > 0 {
+		for _, role := range roles {
+			m, err2 := s.roleRepository.GetRoleByCasbinRole(ctx, role)
+			if err2 != nil {
+				s.logger.Error("roleRepository.GetRoleByCasbinRole error", zap.Error(err2))
+				continue
+			}
+			roleList = append(roleList, v1.RoleDataItem{
+				ID:   m.ID,
+				Name: m.Name,
+				Role: m.Role,
+			})
+		}
+	}
 	return &v1.UserDataItem{
 		ID:        user.ID,
 		CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
@@ -195,13 +228,13 @@ func (s *userService) GetUser(ctx context.Context, uid uint) (*v1.UserDataItem, 
 		Email:     user.Email,
 		Phone:     user.Phone,
 		Status:    user.Status,
-		Roles:     roles,
+		Roles:     roleList,
 	}, nil
 }
 
 func (s *userService) GetUserMenu(ctx context.Context, uid uint) (*v1.MenuSearchResponseData, error) {
 	// 获取菜单列表
-	menuList, total, err := s.menuRepository.ListMenus(ctx)
+	menuList, total, err := s.menuRepository.ListMenus(ctx, nil)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("menuRepository.List error", zap.Error(err))
 		return nil, err

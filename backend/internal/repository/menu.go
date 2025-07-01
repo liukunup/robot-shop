@@ -1,12 +1,13 @@
 package repository
 
 import (
+	v1 "backend/api/v1"
 	"backend/internal/model"
 	"context"
 )
 
 type MenuRepository interface {
-	ListMenus(ctx context.Context) ([]model.Menu, int64, error)
+	ListMenus(ctx context.Context, req *v1.MenuSearchRequest) ([]model.Menu, int64, error)
 	MenuCreate(ctx context.Context, m *model.Menu) error
 	MenuUpdate(ctx context.Context, id uint, data map[string]interface{}) error
 	MenuDelete(ctx context.Context, id uint) error
@@ -25,13 +26,17 @@ type menuRepository struct {
 	*Repository
 }
 
-func (r *menuRepository) ListMenus(ctx context.Context) ([]model.Menu, int64, error) {
+func (r *menuRepository) ListMenus(ctx context.Context, req *v1.MenuSearchRequest) ([]model.Menu, int64, error) {
 	var list []model.Menu
 	var total int64
-	if err := r.DB(ctx).Model(&model.Menu{}).Count(&total).Error; err != nil {
+	scope := r.DB(ctx).Model(&model.Menu{})
+	if err := scope.Count(&total).Error; err != nil {
 		return nil, total, err
 	}
-	if err := r.DB(ctx).Model(&model.Menu{}).Order("`weight` DESC").Find(&list).Error; err != nil {
+	if nil != req {
+		scope = scope.Offset((req.Page - 1) * req.PageSize).Limit(req.PageSize)
+	}
+	if err := scope.Order("`weight` DESC").Find(&list).Error; err != nil {
 		return nil, total, err
 	}
 	return list, total, nil

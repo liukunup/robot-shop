@@ -17,6 +17,7 @@ type RoleRepository interface {
 	GetRole(ctx context.Context, id uint) (model.Role, error)
 
 	GetRoleByCasbinRole(ctx context.Context, role string) (model.Role, error)
+	CasbinRoleDelete(ctx context.Context, role string) (bool, error)
 
 	GetRolePermission(ctx context.Context, role string) ([][]string, error)
 	UpdateRolePermission(ctx context.Context, role string, permissions map[string]struct{}) error
@@ -62,23 +63,7 @@ func (r *roleRepository) RoleUpdate(ctx context.Context, m *model.Role) error {
 }
 
 func (r *roleRepository) RoleDelete(ctx context.Context, id uint) error {
-	return r.Transaction(ctx, func(ctx context.Context) error {
-		db := r.DB(ctx)
-		// 获取角色
-		var role model.Role
-		if err := db.Where("id = ?", id).First(&role).Error; err != nil {
-			return err
-		}
-		// 删除角色对应的权限
-		if _, err := r.e.DeleteRole(role.Role); err != nil {
-			return err
-		}
-		// 删除角色
-		if err := db.Where("id = ?", id).Delete(&model.Role{}).Error; err != nil {
-			return err
-		}
-		return nil
-	})
+	return r.DB(ctx).Where("id = ?", id).Delete(&model.Role{}).Error
 }
 
 func (r *roleRepository) GetRole(ctx context.Context, id uint) (model.Role, error) {
@@ -89,6 +74,10 @@ func (r *roleRepository) GetRole(ctx context.Context, id uint) (model.Role, erro
 func (r *roleRepository) GetRoleByCasbinRole(ctx context.Context, role string) (model.Role, error) {
 	m := model.Role{}
 	return m, r.DB(ctx).Where("role = ?", role).First(&m).Error
+}
+
+func (r *roleRepository) CasbinRoleDelete(ctx context.Context, role string) (bool, error) {
+	return r.e.DeleteRole(role)
 }
 
 func (r *roleRepository) GetRolePermission(ctx context.Context, role string) ([][]string, error) {

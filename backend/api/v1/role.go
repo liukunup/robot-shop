@@ -8,11 +8,11 @@ type RoleSearchRequest struct {
 	Role     string `form:"role" example:"1"`                         // 筛选项: Role 精确匹配
 }
 type RoleDataItem struct {
-	ID        uint   `json:"id"`        // ID
-	CreatedAt string `json:"createdAt"` // 创建时间
-	UpdatedAt string `json:"updatedAt"` // 更新时间
-	Name      string `json:"name"`      // 角色名
-	Role      string `json:"role"`      // Casbin Role
+	ID        uint   `json:"id"`                  // ID
+	CreatedAt string `json:"createdAt,omitempty"` // 创建时间
+	UpdatedAt string `json:"updatedAt,omitempty"` // 更新时间
+	Name      string `json:"name"`                // 角色名
+	Role      string `json:"role"`                // Casbin Role
 } // @name Role
 type RoleSearchResponseData struct {
 	List  []RoleDataItem `json:"list"`

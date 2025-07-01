@@ -39,7 +39,7 @@ const Menu: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.admin.role.key.role',
+        id: 'pages.admin.menu.key.role',
         defaultMessage: '标识',
       }),
       dataIndex: 'role',
@@ -111,8 +111,6 @@ const Menu: React.FC = () => {
   const search = async (params: {
     page: number;
     pageSize: number;
-    name?: string;
-    role?: string;
   }) => {
     try {
       const result = await listMenus(params as API.ListRolesParams);
@@ -131,12 +129,10 @@ const Menu: React.FC = () => {
         cardBordered
         request={async (params, sort, filter) => {
           console.log(params, sort, filter);
-          const { current = 1, pageSize = 20, name, role } = params;
+          const { current = 1, pageSize = 20 } = params;
           const results = await search({
             page: current,
             pageSize,
-            name,
-            role,
           });
           return results;
         }}
@@ -144,7 +140,7 @@ const Menu: React.FC = () => {
           type: 'multiple',
         }}
         columnsState={{
-          persistenceKey: 'pro-table-role',
+          persistenceKey: 'pro-table-menu',
           persistenceType: 'localStorage',
           defaultValue: {
             option: { fixed: 'right', disable: true },

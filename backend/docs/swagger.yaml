@@ -205,10 +205,8 @@ definitions:
         type: string
       roles:
         description: 角色
-        example:
-        - ""
         items:
-          type: string
+          $ref: '#/definitions/Role'
         type: array
       status:
         description: 状态 0:待激活 1:正常 2:禁用
@@ -786,6 +784,17 @@ paths:
       - application/json
       description: 获取所有菜单
       operationId: ListMenus
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: integer
       produces:
       - application/json
       responses:

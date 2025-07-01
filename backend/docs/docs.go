@@ -264,6 +264,22 @@ const docTemplate = `{
                 ],
                 "summary": "获取菜单列表",
                 "operationId": "ListMenus",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "分页大小",
+                        "name": "pageSize",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1503,11 +1519,8 @@ const docTemplate = `{
                     "description": "角色",
                     "type": "array",
                     "items": {
-                        "type": "string"
-                    },
-                    "example": [
-                        ""
-                    ]
+                        "$ref": "#/definitions/Role"
+                    }
                 },
                 "status": {
                     "description": "状态 0:待激活 1:正常 2:禁用",

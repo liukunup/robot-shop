@@ -6,9 +6,9 @@ import { userCreate } from '@/services/backend/user';
 import { listRoles } from '@/services/backend/role';
 
 interface CreateFormProps {
-  visible: boolean; // 弹窗是否可见
-  onCancel: () => void; // 取消回调
-  onSuccess: () => void; // 成功回调
+  visible: boolean;
+  onCancel: () => void;
+  onSuccess: () => void;
 }
 
 const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
@@ -18,19 +18,23 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
   const [form] = useForm<API.UserRequest>();
   const intl = useIntl();
 
-  // 获取角色列表
   const fetchRoles = async () => {
     setRoleLoading(true);
     try {
       const response = await listRoles({
         page: 1,
-        pageSize: 100, // 正常情况下，不应该超过100个角色
-      });
+        pageSize: 1000, // 正常情况下，不应该超过1000个角色
+      } as API.ListRolesParams);
       if (response.success) {
         setRoles(response.data?.list || []);
       }
     } catch (error) {
-      message.error(intl.formatMessage({ id: 'pages.admin.user.message.fetchRolesFailed', defaultMessage: '获取角色列表失败' }));
+      const msg = intl.formatMessage({ id: 'pages.admin.user.fetchRoles.failure', defaultMessage: '获取角色列表失败' });
+      if (error instanceof Error) {
+        message.error(error.message || msg);
+      } else {
+        message.error(msg);
+      }
     } finally {
       setRoleLoading(false);
     }
@@ -45,16 +49,12 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
     setLoading(true);
     try {
       const values = await form.validateFields();
-      const params = {
-        ...values,
-        status: 0, // 默认待激活
-      };
-      await userCreate(params as API.UserRequest);
-      message.success(intl.formatMessage({ id: 'pages.admin.user.message.newUserSuccess', defaultMessage: '新增成功' }));
+      await userCreate(values as API.UserRequest);
+      message.success(intl.formatMessage({ id: 'pages.common.new.success', defaultMessage: '新建成功' }));
       form.resetFields();
       onSuccess();
     } catch (error) {
-      const msg = intl.formatMessage({ id: 'pages.admin.user.message.newUserFailed', defaultMessage: '新增失败' });
+      const msg = intl.formatMessage({ id: 'pages.common.new.failure', defaultMessage: '新建失败' });
       if (error instanceof Error) {
         message.error(error.message || msg);
       } else {
@@ -77,7 +77,6 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
       onOk={handleOk}
       onCancel={handleCancel}
       confirmLoading={loading}
-      width={600}
     >
       <Form
         form={form}
@@ -88,74 +87,50 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
           name="username"
           label={<FormattedMessage id="pages.admin.user.key.username" defaultMessage="用户名" />}
           rules={[
-            { required: true, message: intl.formatMessage({
-              id: 'pages.admin.user.form.username.required',
-              defaultMessage: '请输入用户名' }) },
-            { pattern: /^[a-zA-Z][a-zA-Z0-9]*$/, message: intl.formatMessage({
-              id: 'pages.admin.user.form.username.pattern',
-              defaultMessage: '以字母开头，支持字母大小写、数字' }) },
-            { max: 20, message: intl.formatMessage({
-              id: 'pages.admin.user.form.username.maxlen',
-              defaultMessage: '用户名不能超过20个字符' }) },
+            { required: true, message: intl.formatMessage({ id: 'pages.admin.user.form.username.required', defaultMessage: '用户名不能为空' }) },
+            { max: 20, message: intl.formatMessage({ id: 'pages.admin.user.form.username.maxlen', defaultMessage: '用户名不能超过20个字符' }) },
+            { pattern: /^[a-zA-Z][a-zA-Z0-9]*$/, message: intl.formatMessage({ id: 'pages.admin.user.form.username.pattern', defaultMessage: '以字母开头，支持字母大小写、数字' }) },
           ]}
         >
-          <Input placeholder={intl.formatMessage({
-            id: 'pages.admin.user.form.username.placeholder',
-            defaultMessage: '以字母开头，支持字母大小写、数字，不超过20个字符' })} />
+          <Input placeholder={intl.formatMessage({ id: 'pages.admin.user.form.username.placeholder', defaultMessage: '以字母开头，支持字母大小写、数字，不超过20个字符' })} />
         </Form.Item>
 
         <Form.Item
           name="nickname"
           label={<FormattedMessage id="pages.admin.user.key.nickname" defaultMessage="昵称" />}
           rules={[
-            { max: 20, message: intl.formatMessage({
-              id: 'pages.admin.user.form.nickname.maxlen',
-              defaultMessage: '昵称不能超过20个字符' }) },
+            { max: 20, message: intl.formatMessage({ id: 'pages.admin.user.form.nickname.maxlen', defaultMessage: '昵称不能超过20个字符' }) },
           ]}
         >
-          <Input placeholder={intl.formatMessage({
-            id: 'pages.admin.user.form.nickname.placeholder',
-            defaultMessage: '请输入昵称' })} />
+          <Input placeholder={intl.formatMessage({ id: 'pages.admin.user.form.nickname.placeholder', defaultMessage: '请输入昵称' })} />
         </Form.Item>
 
         <Form.Item
           name="email"
           label={<FormattedMessage id="pages.admin.user.key.email" defaultMessage="邮箱" />}
           rules={[
-            { required: true, message: intl.formatMessage({
-              id: 'pages.admin.user.form.email.required',
-              defaultMessage: '请输入邮箱地址' }) },
-            { type: 'email', message: intl.formatMessage({
-              id: 'pages.admin.user.form.email.pattern',
-              defaultMessage: '请输入正确的邮箱地址' }) },
+            { required: true, message: intl.formatMessage({ id: 'pages.admin.user.form.email.required', defaultMessage: '邮箱不能为空' }) },
+            { type: 'email', message: intl.formatMessage({ id: 'pages.admin.user.form.email.pattern', defaultMessage: '请输入正确的邮箱地址' }) },
         ]}
         >
-          <Input placeholder={intl.formatMessage({
-            id: 'pages.admin.user.form.email.placeholder',
-            defaultMessage: '请输入邮箱地址' })} />
+          <Input placeholder={intl.formatMessage({ id: 'pages.admin.user.form.email.placeholder', defaultMessage: '请输入邮箱地址' })} />
         </Form.Item>
 
         <Form.Item
           name="phone"
           label={<FormattedMessage id="pages.admin.user.key.phone" defaultMessage="手机" />}
           rules={[
-            { pattern: /^(\+?\d{1,3}[- ]?)?\d{10}$/, message: intl.formatMessage({
-              id: 'pages.admin.user.form.phone.pattern',
-              defaultMessage: '请输入正确的手机号码' }) },
+            { pattern: /^(\+?\d{1,3}[- ]?)?\d{10}$/, message: intl.formatMessage({ id: 'pages.admin.user.form.phone.pattern', defaultMessage: '请输入正确的手机号码' }) },
           ]}
         >
-          <Input placeholder={intl.formatMessage({
-            id: 'pages.admin.user.form.phone.placeholder',
-            defaultMessage: '请输入手机号码' })} />
+          <Input placeholder={intl.formatMessage({ id: 'pages.admin.user.form.phone.placeholder', defaultMessage: '请输入手机号码' })} />
         </Form.Item>
 
         <Form.Item
           name="roles"
           label={<FormattedMessage id="pages.admin.user.key.roles" defaultMessage="角色" />}
           rules={[
-            { required: true, message: intl.formatMessage({
-              id: 'pages.admin.user.form.roles.required',
-              defaultMessage: '请选择角色' }) },
+            { required: true, message: intl.formatMessage({ id: 'pages.admin.user.form.roles.required', defaultMessage: '角色不能为空' }) },
           ]}
         >
           <Select
@@ -163,10 +138,11 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
             placeholder={intl.formatMessage({ id: 'pages.admin.user.form.roles.placeholder', defaultMessage: '请选择角色' })}
             loading={roleLoading}
             style={{ width: '100%' }}
+            optionLabelProp="label"
           >
             {roles.map(role => (
-              <Select.Option key={role.id} value={role.id}>
-                {role.name}
+              <Select.Option key={role.id} value={role.role} label={role.name}>
+                {role.name} ({role.role})
               </Select.Option>
             ))}
           </Select>

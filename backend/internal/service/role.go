@@ -85,6 +85,13 @@ func (s *roleService) RoleUpdate(ctx context.Context, id uint, req *v1.RoleReque
 }
 
 func (s *roleService) RoleDelete(ctx context.Context, id uint) error {
+	old, err := s.roleRepository.GetRole(ctx, id)
+	if err != nil {
+		return err
+	}
+	if _, err := s.roleRepository.CasbinRoleDelete(ctx, old.Role); err != nil {
+		return err
+	}
 	return s.roleRepository.RoleDelete(ctx, id)
 }
 

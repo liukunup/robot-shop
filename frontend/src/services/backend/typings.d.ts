@@ -116,6 +116,13 @@ declare namespace API {
     method?: string;
   };
 
+  type ListMenusParams = {
+    /** 页码 */
+    page: number;
+    /** 分页大小 */
+    pageSize: number;
+  };
+
   type ListRobotsParams = {
     /** 页码 */
     page: number;
@@ -421,7 +428,7 @@ declare namespace API {
     /** 手机 */
     phone?: string;
     /** 角色 */
-    roles?: string[];
+    roles?: Role[];
     /** 状态 0:待激活 1:正常 2:禁用 */
     status?: number;
     /** 更新时间 */

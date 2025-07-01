@@ -5,10 +5,10 @@ import { useState, useEffect } from 'react';
 import { roleUpdate } from '@/services/backend/role';
 
 interface UpdateFormProps {
-  visible: boolean; // 弹窗是否可见
-  onCancel: () => void; // 取消回调
-  onSuccess: () => void; // 成功回调
-  initialValues?: Partial<API.Role>; // 初始值
+  visible: boolean;
+  onCancel: () => void;
+  onSuccess: () => void;
+  initialValues?: Partial<API.Role>;
 }
 
 const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormProps) => {
@@ -16,7 +16,6 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
   const [form] = useForm<API.Role>();
   const intl = useIntl();
 
-  // 初始化表单
   useEffect(() => {
     if (visible && initialValues) {
       form.setFieldsValue(initialValues);
@@ -28,14 +27,14 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
     try {
       const values = await form.validateFields();
       if (!values.id) {
-        throw new Error('更新操作时未找到记录ID');
+        throw new Error('Record ID not found during update operation');
       }
       await roleUpdate({id: values.id}, values as API.RoleRequest);
-      message.success(intl.formatMessage({ id: 'pages.admin.user.message.updateUserSuccess', defaultMessage: '更新成功' }));
+      message.success(intl.formatMessage({ id: 'pages.common.update.success', defaultMessage: '更新成功' }));
       form.resetFields();
       onSuccess();
     } catch (error) {
-      const msg = intl.formatMessage({ id: 'pages.admin.user.message.updateUserFailed', defaultMessage: '更新失败' });
+      const msg = intl.formatMessage({ id: 'pages.common.update.failure', defaultMessage: '更新失败' });
       if (error instanceof Error) {
         message.error(error.message || msg);
       } else {
@@ -53,13 +52,12 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
 
   return (
     <Modal
-      title={<FormattedMessage id="pages.admin.role.modal.updateForm.title" defaultMessage="更新角色" />}
+      title={<FormattedMessage id="pages.admin.role.modal.updateForm.title" defaultMessage="编辑角色" />}
       open={visible}
       onOk={handleOk}
       onCancel={handleCancel}
       confirmLoading={loading}
       destroyOnHidden={true}
-      width={600}
     >
       <Form
         form={form}
@@ -74,24 +72,23 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
           name="name"
           label={<FormattedMessage id="pages.admin.role.key.name" defaultMessage="名称" />}
           rules={[
-            { required: true, message: intl.formatMessage({ id: 'pages.admin.role.form.name.required', defaultMessage: '请输入名称' }) },
-            { pattern: /^[a-zA-Z][a-zA-Z0-9]*$/, message: intl.formatMessage({ id: 'pages.admin.role.form.name.pattern', defaultMessage: '以字母开头，支持字母大小写、数字' }) },
+            { required: true, message: intl.formatMessage({ id: 'pages.admin.role.form.name.required', defaultMessage: '名称不能为空' }) },
             { max: 20, message: intl.formatMessage({ id: 'pages.admin.role.form.name.maxlen', defaultMessage: '名称不能超过20个字符' }) },
           ]}
         >
-          <Input placeholder={intl.formatMessage({ id: 'pages.admin.role.form.name.placeholder', defaultMessage: '以字母开头，支持字母大小写、数字，不超过20个字符' })} />
+          <Input placeholder={intl.formatMessage({ id: 'pages.admin.role.form.name.placeholder', defaultMessage: '请输入角色的名称' })} />
         </Form.Item>
 
         <Form.Item
           name="role"
-          label={<FormattedMessage id="pages.admin.user.key.role" defaultMessage="标识" />}
+          label={<FormattedMessage id="pages.admin.role.key.role" defaultMessage="标识" />}
           rules={[
-            { required: true, message: intl.formatMessage({ id: 'pages.admin.role.form.role.required', defaultMessage: '请输入标识' }) },
-            { pattern: /^[a-zA-Z][a-zA-Z0-9]*$/, message: intl.formatMessage({ id: 'pages.admin.role.form.role.pattern', defaultMessage: '以字母开头，支持字母大小写、数字' }) },
+            { required: true, message: intl.formatMessage({ id: 'pages.admin.role.form.role.required', defaultMessage: '标识不能为空' }) },
             { max: 20, message: intl.formatMessage({ id: 'pages.admin.role.form.role.maxlen', defaultMessage: '标识不能超过20个字符' }) },
+            { pattern: /^[a-zA-Z][a-zA-Z0-9]*$/, message: intl.formatMessage({ id: 'pages.admin.role.form.role.pattern', defaultMessage: '以字母开头，支持字母大小写、数字' }) },
           ]}
         >
-          <Input placeholder={intl.formatMessage({ id: 'pages.admin.role.form.role.placeholder', defaultMessage: '请输入标识' })} />
+          <Input placeholder={intl.formatMessage({ id: 'pages.admin.role.form.role.placeholder', defaultMessage: '请输入角色的标识' })} disabled />
         </Form.Item>
       </Form>
     </Modal>

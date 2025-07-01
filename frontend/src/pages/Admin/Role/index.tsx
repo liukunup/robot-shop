@@ -32,7 +32,10 @@ const Role: React.FC = () => {
         rules: [
           {
             required: true,
-            message: 'This field is required',
+            message: intl.formatMessage({
+              id: 'pages.admin.role.form.name.required',
+              defaultMessage: '名称不能为空',
+            }),
           },
         ],
       },
@@ -48,14 +51,17 @@ const Role: React.FC = () => {
         rules: [
           {
             required: true,
-            message: 'This field is required',
+            message: intl.formatMessage({
+              id: 'pages.admin.role.form.role.required',
+              defaultMessage: '标识不能为空',
+            }),
           },
         ],
       },
     },
     {
       title: intl.formatMessage({
-        id: 'pages.admin.role.key.createdAt',
+        id: 'pages.common.key.createdAt',
         defaultMessage: '创建时间',
       }),
       key: 'createdAt',
@@ -66,7 +72,7 @@ const Role: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.admin.role.key.updatedAt',
+        id: 'pages.common.key.updatedAt',
         defaultMessage: '更新时间',
       }),
       key: 'updatedAt',
@@ -77,7 +83,7 @@ const Role: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.actions',
+        id: 'pages.common.table.key.actions',
         defaultMessage: '操作',
       }),
       valueType: 'option',
@@ -86,40 +92,45 @@ const Role: React.FC = () => {
         <a
           key="edit"
           onClick={() => {
-            console.log(record);
             setCurrentRole(record);
             setUpdateVisible(true);
           }}
         >
-          <FormattedMessage id="pages.admin.role.table.action.edit" defaultMessage="编辑" />
+          <FormattedMessage id="pages.common.edit" defaultMessage="编辑" />
         </a>,
         <a
           key="remove"
           onClick={async () => {
             if (record.id) {
               await roleDelete({ id: record.id });
-              message.success('删除成功');
+              message.success(intl.formatMessage({
+                id: 'pages.common.remove.success',
+                defaultMessage: '删除成功',
+              }));
               action?.reload();
             }
           }}
         >
-          <FormattedMessage id="pages.admin.role.table.action.remove" defaultMessage="删除" />
+          <FormattedMessage id="pages.common.remove" defaultMessage="删除" />
         </a>,
       ],
     },
   ];
 
-  const searchRoles = async (params: {
+  const search = async (params: {
     page: number;
     pageSize: number;
     name?: string;
     role?: string;
   }) => {
     try {
-      const result = await listRoles(params as API.ListRolesParams);
-      return { data: result.data?.list || [], success: result.success, total: result.data?.total };
+      const response = await listRoles(params as API.ListRolesParams);
+      return { data: response.data?.list || [], success: response.success, total: response.data?.total };
     } catch (error) {
-      message.error('获取列表失败');
+      message.error(intl.formatMessage({
+        id: 'pages.common.fetchData.failure',
+        defaultMessage: '获取数据失败',
+      }));
       return { data: [], success: false, total: 0 };
     }
   };
@@ -133,7 +144,7 @@ const Role: React.FC = () => {
         request={async (params, sort, filter) => {
           console.log(params, sort, filter);
           const { current = 1, pageSize = 20, name, role } = params;
-          const results = await searchRoles({
+          const results = await search({
             page: current,
             pageSize,
             name,
@@ -149,9 +160,6 @@ const Role: React.FC = () => {
           persistenceType: 'localStorage',
           defaultValue: {
             option: { fixed: 'right', disable: true },
-          },
-          onChange(value) {
-            console.log('value: ', value);
           },
         }}
         rowKey="id"
@@ -181,7 +189,7 @@ const Role: React.FC = () => {
             }}
             type="primary"
           >
-            <FormattedMessage id="pages.admin.user.table.toolbar.newUser" defaultMessage="新增" />
+            <FormattedMessage id="pages.common.new" defaultMessage="新建" />
           </Button>,
         ]}
       />

@@ -10,16 +10,16 @@ type UserSearchRequest struct {
 	Email    string `form:"email" binding:"" example:"zhangsan@example.com"` // 邮箱
 }
 type UserDataItem struct {
-	ID        uint     `json:"id"`                                                            // ID
-	CreatedAt string   `json:"createdAt"`                                                     // 创建时间
-	UpdatedAt string   `json:"updatedAt"`                                                     // 更新时间
-	Username  string   `json:"username" binding:"required" example:"zhangsan"`                // 用户名
-	Nickname  string   `json:"nickname" binding:"required" example:"Jackal"`                  // 昵称
-	Avatar    string   `json:"avatar" example:"https://example.com/avatar.jpg"`               // 头像
-	Email     string   `json:"email" binding:"required,email" example:"zhangsan@example.com"` // 邮箱
-	Phone     string   `json:"phone" binding:"" example:"+86-13966668888"`                    // 手机
-	Status    int      `json:"status" example:"1"`                                            // 状态 0:待激活 1:正常 2:禁用
-	Roles     []string `json:"roles" example:""`                                              // 角色
+	ID        uint           `json:"id"`                                                            // ID
+	CreatedAt string         `json:"createdAt"`                                                     // 创建时间
+	UpdatedAt string         `json:"updatedAt"`                                                     // 更新时间
+	Username  string         `json:"username" binding:"required" example:"zhangsan"`                // 用户名
+	Nickname  string         `json:"nickname" binding:"required" example:"Jackal"`                  // 昵称
+	Avatar    string         `json:"avatar" example:"https://example.com/avatar.jpg"`               // 头像
+	Email     string         `json:"email" binding:"required,email" example:"zhangsan@example.com"` // 邮箱
+	Phone     string         `json:"phone" binding:"" example:"+86-13966668888"`                    // 手机
+	Status    int            `json:"status" example:"1"`                                            // 状态 0:待激活 1:正常 2:禁用
+	Roles     []RoleDataItem `json:"roles"`                                                         // 角色
 } // @name User
 type UserSearchResponseData struct {
 	List  []UserDataItem `json:"list"`  // 列表

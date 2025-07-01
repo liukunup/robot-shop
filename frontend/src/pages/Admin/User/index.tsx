@@ -24,16 +24,18 @@ const User: React.FC = () => {
     {
       title: intl.formatMessage({
         id: 'pages.admin.user.key.username',
-        defaultMessage: '用户名',
+        defaultMessage: '用户名'
       }),
       dataIndex: 'username',
-      copyable: true,
       ellipsis: true,
       formItemProps: {
         rules: [
           {
             required: true,
-            message: 'This field is required',
+            message: intl.formatMessage({
+              id: 'pages.admin.user.form.username.required',
+              defaultMessage: '用户名不能为空',
+            }),
           },
         ],
       },
@@ -44,7 +46,6 @@ const User: React.FC = () => {
         defaultMessage: '昵称',
       }),
       dataIndex: 'nickname',
-      copyable: true,
       ellipsis: true,
     },
     {
@@ -53,11 +54,15 @@ const User: React.FC = () => {
         defaultMessage: '邮箱',
       }),
       dataIndex: 'email',
+      copyable: true,
       formItemProps: {
         rules: [
           {
             required: true,
-            message: 'This field is required',
+            message: intl.formatMessage({
+              id: 'pages.admin.user.form.email.required',
+              defaultMessage: '邮箱不能为空',
+            }),
           },
         ],
       },
@@ -68,6 +73,7 @@ const User: React.FC = () => {
         defaultMessage: '手机',
       }),
       dataIndex: 'phone',
+      copyable: true,
     },
     {
       title: intl.formatMessage({
@@ -80,18 +86,42 @@ const User: React.FC = () => {
       onFilter: true,
       valueType: 'select',
       valueEnum: {
-        0: { text: '待激活', status: 'NotActive' },
-        1: { text: '正常', status: 'Normal' },
-        2: { text: '禁用', status: 'Disabled' },
+        0: {
+          text: intl.formatMessage({
+            id: 'pages.admin.user.status.inactive',
+            defaultMessage: '待激活'
+          }),
+          status: 'Inactive'
+        },
+        1: {
+          text: intl.formatMessage({
+            id: 'pages.admin.user.status.normal',
+            defaultMessage: '正常'
+          }),
+          status: 'Normal'
+        },
+        2: {
+          text: intl.formatMessage({
+            id: 'pages.admin.user.status.disabled',
+            defaultMessage: '禁用'
+          }),
+          status: 'Disabled'
+        },
       },
       render: (_, record) => (
         <Space>
           {record.status === 0 ? (
-            <Tag color="gold">待激活</Tag>
+            <Tag color="gold">
+              <FormattedMessage id="pages.admin.user.status.inactive" defaultMessage="待激活" />
+            </Tag>
           ) : record.status === 1 ? (
-            <Tag color="green">正常</Tag>
+            <Tag color="green">
+              <FormattedMessage id="pages.admin.user.status.normal" defaultMessage="正常" />
+            </Tag>
           ) : (
-            <Tag color="red">禁用</Tag>
+            <Tag color="red">
+              <FormattedMessage id="pages.admin.user.status.disabled" defaultMessage="禁用" />
+            </Tag>
           )}
         </Space>
       )
@@ -105,15 +135,15 @@ const User: React.FC = () => {
       hideInSearch: true,
       render: (roles) => (
         <Space>
-          {roles?.map(role => (
-            <Tag key={role} color="blue">{role}</Tag>
+          {roles?.map((role: { id: number; name: string; role: string }) => (
+            <Tag key={role.id} color="blue">{role.name}</Tag>
           )) || null}
         </Space>
       ),
     },
     {
       title: intl.formatMessage({
-        id: 'pages.admin.user.key.createdAt',
+        id: 'pages.common.key.createdAt',
         defaultMessage: '创建时间',
       }),
       key: 'createdAt',
@@ -124,7 +154,7 @@ const User: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.admin.user.key.updatedAt',
+        id: 'pages.common.key.updatedAt',
         defaultMessage: '更新时间',
       }),
       key: 'updatedAt',
@@ -135,7 +165,7 @@ const User: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.actions',
+        id: 'pages.common.table.key.actions',
         defaultMessage: '操作',
       }),
       valueType: 'option',
@@ -144,24 +174,26 @@ const User: React.FC = () => {
         <a
           key="edit"
           onClick={() => {
-            console.log(record);
             setCurrentUser(record);
             setUpdateVisible(true);
           }}
         >
-          <FormattedMessage id="pages.admin.user.table.action.edit" defaultMessage="编辑" />
+          <FormattedMessage id="pages.common.edit" defaultMessage="编辑" />
         </a>,
         <a
           key="remove"
           onClick={async () => {
             if (record.id) {
               await userDelete({ id: record.id });
-              message.success('删除成功');
+              message.success(intl.formatMessage({
+                id: 'pages.common.remove.success',
+                defaultMessage: '删除成功',
+              }));
               action?.reload();
             }
           }}
         >
-          <FormattedMessage id="pages.admin.user.table.action.remove" defaultMessage="删除" />
+          <FormattedMessage id="pages.common.remove" defaultMessage="删除" />
         </a>,
       ],
     },
@@ -179,7 +211,10 @@ const User: React.FC = () => {
       const result = await listUsers(params as API.ListUsersParams);
       return { data: result.data?.list || [], success: result.success, total: result.data?.total };
     } catch (error) {
-      message.error('获取列表失败');
+      message.error(intl.formatMessage({
+        id: 'pages.common.fetchData.failure',
+        defaultMessage: '获取数据失败',
+      }));
       return { data: [], success: false, total: 0 };
     }
   };
@@ -212,9 +247,6 @@ const User: React.FC = () => {
           defaultValue: {
             option: { fixed: 'right', disable: true },
           },
-          onChange(value) {
-            console.log('value: ', value);
-          },
         }}
         rowKey="id"
         search={{
@@ -243,7 +275,7 @@ const User: React.FC = () => {
             }}
             type="primary"
           >
-            <FormattedMessage id="pages.admin.user.table.toolbar.newUser" defaultMessage="新增" />
+            <FormattedMessage id="pages.common.new" defaultMessage="新建" />
           </Button>,
         ]}
       />

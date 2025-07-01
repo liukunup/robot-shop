@@ -1,6 +1,10 @@
 package v1
 
 // for Search
+type MenuSearchRequest struct {
+	Page     int `form:"page" binding:"required" example:"1"`      // 页码
+	PageSize int `form:"pageSize" binding:"required" example:"10"` // 分页大小
+}
 type MenuDataItem struct {
 	ID         uint   `json:"id,omitempty"`         // 唯一id，使用整数表示
 	ParentID   uint   `json:"parentId,omitempty"`   // 父级菜单的id，使用整数表示
