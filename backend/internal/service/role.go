@@ -13,14 +13,16 @@ import (
 )
 
 type RoleService interface {
-	// CRUD
-	ListRoles(ctx context.Context, req *v1.RoleSearchRequest) (*v1.RoleSearchResponseData, error)
-	RoleCreate(ctx context.Context, req *v1.RoleRequest) error
-	RoleUpdate(ctx context.Context, id uint, req *v1.RoleRequest) error
-	RoleDelete(ctx context.Context, id uint) error
-	// Permission
-	GetRolePermission(ctx context.Context, role string) (*v1.GetRolePermissionResponseData, error)
-	UpdateRolePermission(ctx context.Context, req *v1.UpdateRolePermissionRequest) error
+	// Base CRUD operations
+	List(ctx context.Context, req *v1.RoleSearchRequest) (*v1.RoleSearchResponseData, error)
+	Create(ctx context.Context, req *v1.RoleRequest) error
+	Update(ctx context.Context, id uint, req *v1.RoleRequest) error
+	Delete(ctx context.Context, id uint) error
+	// Extra operations
+	ListAll(ctx context.Context) (*v1.RoleSearchResponseData, error)
+	// Permission related operations
+	GetPermissions(ctx context.Context, role string) (*v1.GetRolePermissionResponseData, error)
+	UpdatePermissions(ctx context.Context, req *v1.UpdateRolePermissionRequest) error
 }
 
 func NewRoleService(
@@ -38,8 +40,8 @@ type roleService struct {
 	roleRepository repository.RoleRepository
 }
 
-func (s *roleService) ListRoles(ctx context.Context, req *v1.RoleSearchRequest) (*v1.RoleSearchResponseData, error) {
-	list, total, err := s.roleRepository.ListRoles(ctx, req)
+func (s *roleService) List(ctx context.Context, req *v1.RoleSearchRequest) (*v1.RoleSearchResponseData, error) {
+	list, total, err := s.roleRepository.List(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -49,24 +51,24 @@ func (s *roleService) ListRoles(ctx context.Context, req *v1.RoleSearchRequest) 
 	}
 	for _, role := range list {
 		data.List = append(data.List, v1.RoleDataItem{
-			ID:        role.ID,
-			CreatedAt: role.CreatedAt.Format(constant.DateTimeLayout),
-			UpdatedAt: role.UpdatedAt.Format(constant.DateTimeLayout),
-			Name:      role.Name,
-			Role:      role.Role,
+			ID:         role.ID,
+			CreatedAt:  role.CreatedAt.Format(constant.DateTimeLayout),
+			UpdatedAt:  role.UpdatedAt.Format(constant.DateTimeLayout),
+			Name:       role.Name,
+			CasbinRole: role.CasbinRole,
 		})
 
 	}
 	return data, nil
 }
 
-func (s *roleService) RoleCreate(ctx context.Context, req *v1.RoleRequest) error {
-	_, err := s.roleRepository.GetRoleByCasbinRole(ctx, req.Role)
+func (s *roleService) Create(ctx context.Context, req *v1.RoleRequest) error {
+	_, err := s.roleRepository.GetByCasbinRole(ctx, req.CasbinRole)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return s.roleRepository.RoleCreate(ctx, &model.Role{
-				Name: req.Name,
-				Role: req.Role,
+			return s.roleRepository.Create(ctx, &model.Role{
+				Name:       req.Name,
+				CasbinRole: req.CasbinRole,
 			})
 		} else {
 			return err
@@ -75,8 +77,8 @@ func (s *roleService) RoleCreate(ctx context.Context, req *v1.RoleRequest) error
 	return nil
 }
 
-func (s *roleService) RoleUpdate(ctx context.Context, id uint, req *v1.RoleRequest) error {
-	return s.roleRepository.RoleUpdate(ctx, &model.Role{
+func (s *roleService) Update(ctx context.Context, id uint, req *v1.RoleRequest) error {
+	return s.roleRepository.Update(ctx, &model.Role{
 		Model: gorm.Model{
 			ID: id,
 		},
@@ -84,20 +86,39 @@ func (s *roleService) RoleUpdate(ctx context.Context, id uint, req *v1.RoleReque
 	})
 }
 
-func (s *roleService) RoleDelete(ctx context.Context, id uint) error {
-	old, err := s.roleRepository.GetRole(ctx, id)
+func (s *roleService) Delete(ctx context.Context, id uint) error {
+	old, err := s.roleRepository.Get(ctx, id)
 	if err != nil {
 		return err
 	}
-	if _, err := s.roleRepository.CasbinRoleDelete(ctx, old.Role); err != nil {
+	if _, err := s.roleRepository.DeleteCasbinRole(ctx, old.CasbinRole); err != nil {
 		return err
 	}
-	return s.roleRepository.RoleDelete(ctx, id)
+	return s.roleRepository.Delete(ctx, id)
 }
 
-func (s *roleService) GetRolePermission(ctx context.Context, role string) (*v1.GetRolePermissionResponseData, error) {
+func (s *roleService) ListAll(ctx context.Context) (*v1.RoleSearchResponseData, error) {
+	list, err := s.roleRepository.ListAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	data := &v1.RoleSearchResponseData{
+		List: make([]v1.RoleDataItem, 0),
+	}
+	for _, role := range list {
+		data.List = append(data.List, v1.RoleDataItem{
+			ID:         role.ID,
+			Name:       role.Name,
+			CasbinRole: role.CasbinRole,
+		})
+	}
+	return data, nil
+}
+
+func (s *roleService) GetPermissions(ctx context.Context, role string) (*v1.GetRolePermissionResponseData, error) {
 	// 获取角色对应的权限列表
-	list, err := s.roleRepository.GetRolePermission(ctx, role)
+	list, err := s.roleRepository.GetPermissions(ctx, role)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +136,7 @@ func (s *roleService) GetRolePermission(ctx context.Context, role string) (*v1.G
 	return data, nil
 }
 
-func (s *roleService) UpdateRolePermission(ctx context.Context, req *v1.UpdateRolePermissionRequest) error {
+func (s *roleService) UpdatePermissions(ctx context.Context, req *v1.UpdateRolePermissionRequest) error {
 	permissions := map[string]struct{}{}
 	for _, v := range req.List {
 		perm := strings.Split(v, constant.PermSep)
@@ -124,5 +145,5 @@ func (s *roleService) UpdateRolePermission(ctx context.Context, req *v1.UpdateRo
 		}
 
 	}
-	return s.roleRepository.UpdateRolePermission(ctx, req.Role, permissions)
+	return s.roleRepository.UpdatePermissions(ctx, req.CasbinRole, permissions)
 }

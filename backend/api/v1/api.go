@@ -10,13 +10,13 @@ type ApiSearchRequest struct {
 	Method   string `form:"method" example:"GET"`                     // 筛选项: 方法 精确匹配
 }
 type ApiDataItem struct {
-	ID        uint   `json:"id" example:"1"`                          // ID
-	CreatedAt string `json:"createdAt" example:"2006-01-02 15:04:05"` // 创建时间
-	UpdatedAt string `json:"updatedAt" example:"2006-01-02 15:04:05"` // 更新时间
-	Group     string `json:"group" example:"PermManagement"`          // 分组名
-	Name      string `json:"name" example:"MenuList"`                 // 名称
-	Path      string `json:"path" example:"/v1/xxx"`                  // 路径
-	Method    string `json:"method" example:"GET"`                    // 方法
+	ID        uint   `json:"id" example:"1"`                                    // ID
+	CreatedAt string `json:"createdAt,omitempty" example:"2006-01-02 15:04:05"` // 创建时间
+	UpdatedAt string `json:"updatedAt,omitempty" example:"2006-01-02 15:04:05"` // 更新时间
+	Group     string `json:"group" example:"PermManagement"`                    // 分组名
+	Name      string `json:"name" example:"MenuList"`                           // 名称
+	Path      string `json:"path" example:"/v1/xxx"`                            // 路径
+	Method    string `json:"method" example:"GET"`                              // 方法
 } // @name Api
 type ApiSearchResponseData struct {
 	List   []ApiDataItem `json:"list"`   // 列表

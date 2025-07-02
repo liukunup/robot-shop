@@ -154,29 +154,36 @@ definitions:
     type: object
   Role:
     properties:
+      casbinRole:
+        description: Casbin Role
+        example: admin
+        type: string
       createdAt:
         description: 创建时间
+        example: "2006-01-02 15:04:05"
         type: string
       id:
         description: ID
         type: integer
       name:
         description: 角色名
-        type: string
-      role:
-        description: Casbin Role
+        example: admin
         type: string
       updatedAt:
         description: 更新时间
+        example: "2006-01-02 15:04:05"
         type: string
     type: object
   RoleList:
     properties:
       list:
+        description: 列表
         items:
           $ref: '#/definitions/Role'
         type: array
       total:
+        description: 总数
+        example: 10
         type: integer
     type: object
   User:
@@ -187,6 +194,7 @@ definitions:
         type: string
       createdAt:
         description: 创建时间
+        example: "2006-01-02 15:04:05"
         type: string
       email:
         description: 邮箱
@@ -201,7 +209,7 @@ definitions:
         type: string
       phone:
         description: 手机
-        example: +86-13966668888
+        example: "13966668888"
         type: string
       roles:
         description: 角色
@@ -214,15 +222,12 @@ definitions:
         type: integer
       updatedAt:
         description: 更新时间
+        example: "2006-01-02 15:04:05"
         type: string
       username:
         description: 用户名
         example: zhangsan
         type: string
-    required:
-    - email
-    - nickname
-    - username
     type: object
   UserList:
     properties:
@@ -268,6 +273,8 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.ApiSearchResponse:
@@ -284,6 +291,8 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.GetRolePermissionResponse:
@@ -300,6 +309,8 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.GetRolePermissionResponseData:
@@ -311,6 +322,7 @@ definitions:
         type: array
       total:
         description: 总数
+        example: 10
         type: integer
     type: object
   backend_api_v1.LoginRequest:
@@ -339,6 +351,8 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.LoginResponseData:
@@ -399,6 +413,8 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.RegisterRequest:
@@ -428,6 +444,8 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.RobotRequest:
@@ -471,6 +489,8 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.RobotSearchResponse:
@@ -487,21 +507,23 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.RoleRequest:
     properties:
+      casbinRole:
+        description: Casbin Role
+        example: admin
+        type: string
       name:
         description: 角色名
         example: admin
         type: string
-      role:
-        description: Casbin Role
-        example: "1"
-        type: string
     required:
+    - casbinRole
     - name
-    - role
     type: object
   backend_api_v1.RoleSearchResponse:
     properties:
@@ -517,24 +539,24 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.UpdateRolePermissionRequest:
     properties:
+      casbinRole:
+        description: Casbin Role
+        example: admin
+        type: string
       list:
         description: 权限列表
-        example:
-        - ""
         items:
           type: string
         type: array
-      role:
-        description: 角色名
-        example: admin
-        type: string
     required:
+    - casbinRole
     - list
-    - role
     type: object
   backend_api_v1.UserPermissionResponse:
     properties:
@@ -550,6 +572,8 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.UserPermissionResponseData:
@@ -570,11 +594,9 @@ definitions:
         example: Jackal
         type: string
       phone:
-        example: +86-13966668888
+        example: "13966668888"
         type: string
       roles:
-        example:
-        - ""
         items:
           type: string
         type: array
@@ -603,6 +625,8 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
   backend_api_v1.UserSearchResponse:
@@ -619,6 +643,8 @@ definitions:
         description: 前端展示方式
         type: integer
       success:
+        description: 是否成功
+        example: true
         type: boolean
     type: object
 host: localhost:8000
@@ -925,7 +951,7 @@ paths:
       consumes:
       - application/json
       description: 创建一个新的角色
-      operationId: RoleCreate
+      operationId: CreateRole
       parameters:
       - description: 角色数据
         in: body
@@ -950,7 +976,7 @@ paths:
       consumes:
       - application/json
       description: 删除指定ID的角色
-      operationId: RoleDelete
+      operationId: DeleteRole
       parameters:
       - description: 角色ID
         in: path
@@ -973,7 +999,7 @@ paths:
       consumes:
       - application/json
       description: 目前只允许更新角色名称
-      operationId: RoleUpdate
+      operationId: UpdateRole
       parameters:
       - description: 角色ID
         in: path
@@ -1003,7 +1029,7 @@ paths:
       consumes:
       - application/json
       description: 获取指定角色的权限列表
-      operationId: GetRolePermission
+      operationId: GetRolePermissions
       parameters:
       - description: 角色名
         in: query
@@ -1026,7 +1052,7 @@ paths:
       consumes:
       - application/json
       description: 更新指定角色的权限列表
-      operationId: UpdateRolePermission
+      operationId: UpdateRolePermissions
       parameters:
       - description: 更新参数
         in: body

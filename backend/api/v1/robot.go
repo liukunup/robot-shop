@@ -9,15 +9,15 @@ type RobotSearchRequest struct {
 	Owner    string `form:"owner" example:"Billy"`                    // 筛选项: 所有者 精确匹配
 }
 type RobotDataItem struct {
-	Id        uint   `json:"id" example:"1"`                                  // ID
-	CreatedAt string `json:"createdAt" example:"2006-01-02 15:04:05"`         // 创建时间
-	UpdatedAt string `json:"updatedAt" example:"2006-01-02 15:04:05"`         // 更新时间
-	Name      string `json:"name" example:"bot"`                              // 名称
-	Desc      string `json:"desc" example:"It's a robot"`                     // 描述
-	Webhook   string `json:"webhook" example:"https://example.com/webhook"`   // 通知地址
-	Callback  string `json:"callback" example:"https://example.com/callback"` // 回调地址
-	Enabled   bool   `json:"enabled" example:"true"`                          // 是否启用
-	Owner     string `json:"owner" example:"Billy"`                           // 所有者
+	Id        uint   `json:"id" example:"1"`                                            // ID
+	CreatedAt string `json:"createdAt,omitempty" example:"2006-01-02 15:04:05"`         // 创建时间
+	UpdatedAt string `json:"updatedAt,omitempty" example:"2006-01-02 15:04:05"`         // 更新时间
+	Name      string `json:"name" example:"bot"`                                        // 名称
+	Desc      string `json:"desc,omitempty" example:"It's a robot"`                     // 描述
+	Webhook   string `json:"webhook,omitempty" example:"https://example.com/webhook"`   // 通知地址
+	Callback  string `json:"callback,omitempty" example:"https://example.com/callback"` // 回调地址
+	Enabled   bool   `json:"enabled" example:"true"`                                    // 是否启用
+	Owner     string `json:"owner,omitempty" example:"Billy"`                           // 所有者
 } // @name Robot
 type RobotSearchResponseData struct {
 	List  []RobotDataItem `json:"list"`  // 列表

@@ -80,11 +80,11 @@ func NewHTTPServer(
 
 			// Role
 			strictAuthRouter.GET("/admin/roles", roleHandler.ListRoles)
-			strictAuthRouter.POST("/admin/roles", roleHandler.RoleCreate)
-			strictAuthRouter.PUT("/admin/roles/:id", roleHandler.RoleUpdate)
-			strictAuthRouter.DELETE("/admin/roles/:id", roleHandler.RoleDelete)
-			strictAuthRouter.GET("/admin/roles/permission", roleHandler.GetRolePermission)
-			strictAuthRouter.PUT("/admin/roles/permission", roleHandler.UpdateRolePermission)
+			strictAuthRouter.POST("/admin/roles", roleHandler.CreateRole)
+			strictAuthRouter.PUT("/admin/roles/:id", roleHandler.UpdateRole)
+			strictAuthRouter.DELETE("/admin/roles/:id", roleHandler.DeleteRole)
+			strictAuthRouter.GET("/admin/roles/permissions", roleHandler.GetRolePermissions)
+			strictAuthRouter.PUT("/admin/roles/permissions", roleHandler.UpdateRolePermissions)
 
 			// Menu
 			strictAuthRouter.GET("/admin/menus", menuHandler.ListMenus)

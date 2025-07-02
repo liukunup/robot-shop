@@ -8,7 +8,7 @@ import (
 )
 
 type Response struct {
-	Success       bool        `json:"success"`
+	Success       bool        `json:"success" example:"true"` // 是否成功
 	Data          interface{} `json:"data"`
 	ErrorCode     int         `json:"errorCode,omitempty"`     // 错误码
 	ErrorMessage  string      `json:"errorMessage,omitempty"`  // 报错信息

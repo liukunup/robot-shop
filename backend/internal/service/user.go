@@ -77,7 +77,7 @@ func (s *userService) ListUsers(ctx context.Context, req *v1.UserSearchRequest) 
 		roleList := make([]v1.RoleDataItem, 0)
 		if len(roles) > 0 {
 			for _, role := range roles {
-				m, err2 := s.roleRepository.GetRoleByCasbinRole(ctx, role)
+				m, err2 := s.roleRepository.GetByCasbinRole(ctx, role)
 				if err2 != nil {
 					s.logger.Error("roleRepository.GetRoleByCasbinRole error", zap.Error(err2))
 					continue
@@ -85,7 +85,7 @@ func (s *userService) ListUsers(ctx context.Context, req *v1.UserSearchRequest) 
 				roleList = append(roleList, v1.RoleDataItem{
 					ID:   m.ID,
 					Name: m.Name,
-					Role: m.Role,
+					CasbinRole: m.CasbinRole,
 				})
 			}
 		}
@@ -206,7 +206,7 @@ func (s *userService) GetUser(ctx context.Context, uid uint) (*v1.UserDataItem, 
 	roleList := make([]v1.RoleDataItem, 0)
 	if len(roles) > 0 {
 		for _, role := range roles {
-			m, err2 := s.roleRepository.GetRoleByCasbinRole(ctx, role)
+			m, err2 := s.roleRepository.GetByCasbinRole(ctx, role)
 			if err2 != nil {
 				s.logger.Error("roleRepository.GetRoleByCasbinRole error", zap.Error(err2))
 				continue
@@ -214,7 +214,7 @@ func (s *userService) GetUser(ctx context.Context, uid uint) (*v1.UserDataItem, 
 			roleList = append(roleList, v1.RoleDataItem{
 				ID:   m.ID,
 				Name: m.Name,
-				Role: m.Role,
+				CasbinRole: m.CasbinRole,
 			})
 		}
 	}

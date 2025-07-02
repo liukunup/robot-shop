@@ -97,7 +97,7 @@ func (m *MigrateServer) initialUser(ctx context.Context) error {
 		Password: string(hashedPassword),
 		Nickname: "超级管理员",
 		Email:    "admin@example.com",
-		Phone:    "+86 12345678901",
+		Phone:    "12345678901",
 	}).Error
 	return m.db.Create(&model.User{
 		Model:    gorm.Model{ID: 2},
@@ -105,15 +105,15 @@ func (m *MigrateServer) initialUser(ctx context.Context) error {
 		Password: string(hashedPassword),
 		Nickname: "运营人员",
 		Email:    "operator@example.com",
-		Phone:    "+86 12345678901",
+		Phone:    "12345678901",
 	}).Error
 }
 
 func (m *MigrateServer) initialRBAC(ctx context.Context) error {
 	roles := []model.Role{
-		{Role: constant.AdminRole, Name: "超级管理员"},
-		{Role: "1001", Name: "运营人员"},
-		{Role: "1002", Name: "访客"},
+		{CasbinRole: constant.AdminRole, Name: "超级管理员"},
+		{CasbinRole: "operator", Name: "运营人员"},
+		{CasbinRole: "guest", Name: "访客"},
 	}
 	if err := m.db.Create(&roles).Error; err != nil {
 		return err

@@ -484,7 +484,7 @@ const docTemplate = `{
                     "Role"
                 ],
                 "summary": "创建角色",
-                "operationId": "RoleCreate",
+                "operationId": "CreateRole",
                 "parameters": [
                     {
                         "description": "角色数据",
@@ -524,7 +524,7 @@ const docTemplate = `{
                     "Role"
                 ],
                 "summary": "获取角色权限",
-                "operationId": "GetRolePermission",
+                "operationId": "GetRolePermissions",
                 "parameters": [
                     {
                         "type": "string",
@@ -560,7 +560,7 @@ const docTemplate = `{
                     "Role"
                 ],
                 "summary": "更新角色权限",
-                "operationId": "UpdateRolePermission",
+                "operationId": "UpdateRolePermissions",
                 "parameters": [
                     {
                         "description": "更新参数",
@@ -600,7 +600,7 @@ const docTemplate = `{
                     "Role"
                 ],
                 "summary": "更新角色",
-                "operationId": "RoleUpdate",
+                "operationId": "UpdateRole",
                 "parameters": [
                     {
                         "type": "integer",
@@ -645,7 +645,7 @@ const docTemplate = `{
                     "Role"
                 ],
                 "summary": "删除角色",
-                "operationId": "RoleDelete",
+                "operationId": "DeleteRole",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1443,9 +1443,15 @@ const docTemplate = `{
         "Role": {
             "type": "object",
             "properties": {
+                "casbinRole": {
+                    "description": "Casbin Role",
+                    "type": "string",
+                    "example": "admin"
+                },
                 "createdAt": {
                     "description": "创建时间",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
                 },
                 "id": {
                     "description": "ID",
@@ -1453,15 +1459,13 @@ const docTemplate = `{
                 },
                 "name": {
                     "description": "角色名",
-                    "type": "string"
-                },
-                "role": {
-                    "description": "Casbin Role",
-                    "type": "string"
+                    "type": "string",
+                    "example": "admin"
                 },
                 "updatedAt": {
                     "description": "更新时间",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
                 }
             }
         },
@@ -1469,23 +1473,21 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "list": {
+                    "description": "列表",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Role"
                     }
                 },
                 "total": {
-                    "type": "integer"
+                    "description": "总数",
+                    "type": "integer",
+                    "example": 10
                 }
             }
         },
         "User": {
             "type": "object",
-            "required": [
-                "email",
-                "nickname",
-                "username"
-            ],
             "properties": {
                 "avatar": {
                     "description": "头像",
@@ -1494,7 +1496,8 @@ const docTemplate = `{
                 },
                 "createdAt": {
                     "description": "创建时间",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
                 },
                 "email": {
                     "description": "邮箱",
@@ -1513,7 +1516,7 @@ const docTemplate = `{
                 "phone": {
                     "description": "手机",
                     "type": "string",
-                    "example": "+86-13966668888"
+                    "example": "13966668888"
                 },
                 "roles": {
                     "description": "角色",
@@ -1529,7 +1532,8 @@ const docTemplate = `{
                 },
                 "updatedAt": {
                     "description": "更新时间",
-                    "type": "string"
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
                 },
                 "username": {
                     "description": "用户名",
@@ -1598,7 +1602,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -1621,7 +1627,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -1644,7 +1652,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -1660,7 +1670,8 @@ const docTemplate = `{
                 },
                 "total": {
                     "description": "总数",
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 10
                 }
             }
         },
@@ -1700,7 +1711,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -1784,7 +1797,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -1824,7 +1839,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -1882,7 +1899,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -1905,26 +1924,28 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
         "backend_api_v1.RoleRequest": {
             "type": "object",
             "required": [
-                "name",
-                "role"
+                "casbinRole",
+                "name"
             ],
             "properties": {
+                "casbinRole": {
+                    "description": "Casbin Role",
+                    "type": "string",
+                    "example": "admin"
+                },
                 "name": {
                     "description": "角色名",
                     "type": "string",
                     "example": "admin"
-                },
-                "role": {
-                    "description": "Casbin Role",
-                    "type": "string",
-                    "example": "1"
                 }
             }
         },
@@ -1947,31 +1968,30 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
         "backend_api_v1.UpdateRolePermissionRequest": {
             "type": "object",
             "required": [
-                "list",
-                "role"
+                "casbinRole",
+                "list"
             ],
             "properties": {
+                "casbinRole": {
+                    "description": "Casbin Role",
+                    "type": "string",
+                    "example": "admin"
+                },
                 "list": {
                     "description": "权限列表",
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "example": [
-                        ""
-                    ]
-                },
-                "role": {
-                    "description": "角色名",
-                    "type": "string",
-                    "example": "admin"
+                    }
                 }
             }
         },
@@ -1994,7 +2014,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -2029,16 +2051,13 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string",
-                    "example": "+86-13966668888"
+                    "example": "13966668888"
                 },
                 "roles": {
                     "type": "array",
                     "items": {
                         "type": "string"
-                    },
-                    "example": [
-                        ""
-                    ]
+                    }
                 },
                 "status": {
                     "description": "状态 0:待激活 1:正常 2:禁用",
@@ -2070,7 +2089,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -2093,7 +2114,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "success": {
-                    "type": "boolean"
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
                 }
             }
         }
