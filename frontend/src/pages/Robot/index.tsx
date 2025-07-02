@@ -8,23 +8,6 @@ import { listRobots, robotDelete, robotCreate } from '../../services/backend/rob
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
 
-// 搜索机器人
-const searchRobots = async (params: {
-  page: number;
-  pageSize: number;
-  name?: string;
-  desc?: string;
-  owner?: string;
-}) => {
-  try {
-    const result = await listRobots(params as API.ListRobotsParams);
-    return { data: result.data?.list || [], success: result.success, total: result.data?.total };
-  } catch (error) {
-    message.error('获取列表失败');
-    return { data: [], success: false, total: 0 };
-  }
-};
-
 const Robot: React.FC = () => {
   const [createVisible, setCreateVisible] = useState(false);
   const [updateVisible, setUpdateVisible] = useState(false);
@@ -40,7 +23,7 @@ const Robot: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.name',
+        id: 'pages.robot.key.name',
         defaultMessage: '名称',
       }),
       dataIndex: 'name',
@@ -57,7 +40,7 @@ const Robot: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.desc',
+        id: 'pages.robot.key.desc',
         defaultMessage: '描述',
       }),
       dataIndex: 'desc',
@@ -66,7 +49,7 @@ const Robot: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.webhook',
+        id: 'pages.robot.key.webhook',
         defaultMessage: 'Webhook',
       }),
       dataIndex: 'webhook',
@@ -77,7 +60,7 @@ const Robot: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.callback',
+        id: 'pages.robot.key.callback',
         defaultMessage: 'Callback',
       }),
       dataIndex: 'callback',
@@ -88,7 +71,7 @@ const Robot: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.enabled',
+        id: 'pages.robot.key.enabled',
         defaultMessage: '是否启用',
       }),
       dataIndex: 'enabled',
@@ -112,14 +95,14 @@ const Robot: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.owner',
+        id: 'pages.robot.key.owner',
         defaultMessage: '所有者',
       }),
       dataIndex: 'owner',
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.createdAt',
+        id: 'pages.common.key.createdAt',
         defaultMessage: '创建时间',
       }),
       key: 'createdAt',
@@ -130,7 +113,7 @@ const Robot: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.updatedAt',
+        id: 'pages.common.key.updatedAt',
         defaultMessage: '更新时间',
       }),
       key: 'updatedAt',
@@ -141,7 +124,7 @@ const Robot: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.actions',
+        id: 'pages.common.table.key.actions',
         defaultMessage: '操作',
       }),
       valueType: 'option',
@@ -155,13 +138,13 @@ const Robot: React.FC = () => {
             setUpdateVisible(true);
           }}
         >
-          <FormattedMessage id="pages.robot.table.column.action.edit" defaultMessage="编辑" />
+          <FormattedMessage id="pages.common.edit" defaultMessage="编辑" />
         </a>,
         <a
           key="duplicate"
           onClick={async () => {
             await robotCreate({
-              name: record.name + '-副本',
+              name: record.name + '-Copy',
               desc: record.desc,
               webhook: record.webhook,
               callback: record.callback,
@@ -171,7 +154,7 @@ const Robot: React.FC = () => {
             actionRef.current?.reload();
           }}
         >
-          <FormattedMessage id="pages.robot.table.column.action.duplicate" defaultMessage="复制" />
+          <FormattedMessage id="pages.common.duplicate" defaultMessage="复制" />
         </a>,
         <TableDropdown
           key="actionGroup"
@@ -201,6 +184,22 @@ const Robot: React.FC = () => {
     },
   ];
 
+  const search = async (params: {
+    page: number;
+    pageSize: number;
+    name?: string;
+    desc?: string;
+    owner?: string;
+  }) => {
+    try {
+      const result = await listRobots(params as API.ListRobotsParams);
+      return { data: result.data?.list || [], success: result.success, total: result.data?.total };
+    } catch (error) {
+      message.error('获取列表失败');
+      return { data: [], success: false, total: 0 };
+    }
+  };
+
   return (
     <div>
       <ProTable<API.Robot>
@@ -209,8 +208,8 @@ const Robot: React.FC = () => {
         cardBordered
         request={async (params, sort, filter) => {
           console.log(params, sort, filter);
-          const { current = 1, pageSize = 10, name, desc, owner } = params;
-          const results = await searchRobots({
+          const { current = 1, pageSize = 20, name, desc, owner } = params;
+          const results = await search({
             page: current,
             pageSize,
             name,
@@ -259,7 +258,7 @@ const Robot: React.FC = () => {
             }}
             type="primary"
           >
-            <FormattedMessage id="pages.robot.table.toolbar.new" defaultMessage="新增" />
+            <FormattedMessage id="pages.common.new" defaultMessage="新建" />
           </Button>,
         ]}
       />

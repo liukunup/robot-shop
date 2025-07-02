@@ -1,19 +1,20 @@
 import { Checkbox, Form, Input, Modal, message } from 'antd';
-import { FormattedMessage } from '@umijs/max';
+import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState, useEffect } from 'react';
 import { robotUpdate } from '@/services/backend/robot';
 
 interface UpdateFormProps {
-  visible: boolean; // 弹窗是否可见
-  onCancel: () => void; // 取消回调
-  onSuccess: () => void; // 成功回调
-  initialValues?: Partial<API.Robot>; // 初始值
+  visible: boolean;
+  onCancel: () => void;
+  onSuccess: () => void;
+  initialValues?: Partial<API.Robot>;
 }
 
 const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormProps) => {
   const [loading, setLoading] = useState(false);
   const [form] = useForm<API.Robot>();
+  const intl = useIntl();
 
   useEffect(() => {
     if (visible && initialValues) {
@@ -29,13 +30,15 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
         throw new Error('更新操作时未找到记录ID');
       }
       await robotUpdate({id: values.id}, values as API.RobotRequest);
-      message.success('更新成功');
+      message.success(intl.formatMessage({ id: 'pages.common.update.success', defaultMessage: '更新成功' }));
+      form.resetFields();
       onSuccess();
     } catch (error) {
+      const msg = intl.formatMessage({ id: 'pages.common.update.failure', defaultMessage: '更新失败' });
       if (error instanceof Error) {
-        message.error(error.message || '更新失败');
+        message.error(error.message || msg);
       } else {
-        message.error('更新失败');
+        message.error(msg);
       }
     } finally {
       setLoading(false);
@@ -49,7 +52,7 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
 
   return (
     <Modal
-      title={<FormattedMessage id="pages.robot.table.updateForm.editRobot" defaultMessage="编辑机器人" />}
+      title={<FormattedMessage id="pages.robot.modal.updateForm.title" defaultMessage="编辑机器人" />}
       open={visible}
       onOk={handleOk}
       onCancel={handleCancel}
@@ -62,54 +65,55 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
         initialValues={initialValues}
         style={{ marginTop: 24 }}
       >
-
         <Form.Item name="id" label="ID" hidden>
           <Input disabled />
         </Form.Item>
 
         <Form.Item
           name="name"
-          label="名称"
-          rules={[{ required: true, message: '请输入名称' }]}
+          label={<FormattedMessage id="pages.robot.key.name" defaultMessage="名称" />}
+          rules={[
+            { required: true, message: intl.formatMessage({ id: 'pages.robot.form.name.required', defaultMessage: '名称不能为空' }) },
+            { max: 20, message: intl.formatMessage({ id: 'pages.robot.form.name.maxlen', defaultMessage: '名称不能超过20个字符' }) },
+          ]}
         >
-          <Input placeholder="取一个有意义的名字吧" />
+          <Input placeholder={intl.formatMessage({ id: 'pages.robot.form.name.placeholder', defaultMessage: '取一个有意义的名字吧' })} />
         </Form.Item>
 
         <Form.Item
           name="desc"
-          label="描述"
+          label={<FormattedMessage id="pages.robot.key.desc" defaultMessage="描述" />}
         >
-          <Input.TextArea placeholder="描述一下功能，比如它可以用来处理什么类型的任务" />
+          <Input.TextArea placeholder={intl.formatMessage({ id: 'pages.robot.form.desc.placeholder', defaultMessage: '简要描述功能，比如它可以用来做什么' })} />
         </Form.Item>
 
         <Form.Item
           name="webhook"
-          label="通知地址"
-          rules={[{ type: 'url', message: '请输入正确的 URL' }]}
+          label={<FormattedMessage id="pages.robot.key.webhook" defaultMessage="Webhook" />}
+          rules={[{ type: 'url', message: intl.formatMessage({ id: 'pages.robot.form.webhook.url', defaultMessage: '请输入正确的 URL' }) }]}
         >
-          <Input.TextArea placeholder="https://example.com/webhook" />
+          <Input.TextArea placeholder={intl.formatMessage({ id: 'pages.robot.form.webhook.placeholder', defaultMessage: 'https://example.com/webhook' })} />
         </Form.Item>
 
         <Form.Item
           name="callback"
-          label="回调地址"
-          rules={[{ type: 'url', message: '请输入正确的 URL' }]}
+          label={<FormattedMessage id="pages.robot.key.callback" defaultMessage="Callback" />}
+          rules={[{ type: 'url', message: intl.formatMessage({ id: 'pages.robot.form.callback.url', defaultMessage: '请输入正确的 URL' }) }]}
         >
-          <Input.TextArea placeholder="https://example.com/callback" />
+          <Input.TextArea placeholder={intl.formatMessage({ id: 'pages.robot.form.callback.placeholder', defaultMessage: 'https://example.com/callback' })} />
         </Form.Item>
 
         <Form.Item
           name="enabled"
-          label="是否启用"
+          label={<FormattedMessage id="pages.robot.key.enabled" defaultMessage="启用状态" />}
           valuePropName="checked"
-          rules={[{ required: true, message: '请勾选或取消' }]}
         >
           <Checkbox />
         </Form.Item>
 
         <Form.Item
           name="owner"
-          label="所有者"
+          label={<FormattedMessage id="pages.robot.key.owner" defaultMessage="所有者" />}
         >
           <Input />
         </Form.Item>

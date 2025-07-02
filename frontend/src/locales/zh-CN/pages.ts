@@ -120,11 +120,7 @@ export default {
   'pages.admin.role.form.role.pattern': '以字母开头，支持字母大小写、数字',
   'pages.admin.role.form.role.maxlen': '标识不能超过20个字符',
   'pages.admin.role.form.role.placeholder': '请输入角色的标识',
-
   'pages.admin.menu.table.title': '菜单列表',
-
-
-
   'pages.admin.api.table.title': '接口列表',
   'pages.admin.api.key.group': '分组',
   'pages.admin.api.key.name': '名称',
@@ -140,39 +136,22 @@ export default {
   'pages.admin.api.form.path.placeholder': '请输入路径',
   'pages.admin.api.form.method.required': '请输入方法',
   'pages.admin.api.form.method.placeholder': '请输入方法',
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   'pages.robot.table.title': '机器人列表',
-  'pages.robot.table.toolbar.new': '新增',
-  'pages.robot.table.column.name': '名称',
-  'pages.robot.table.column.desc': '描述',
-  'pages.robot.table.column.webhook': 'Webhook',
-  'pages.robot.table.column.callback': 'Callback',
-  'pages.robot.table.column.enabled': '启用状态',
-  'pages.robot.table.column.owner': '所有者',
-  'pages.robot.table.column.createdAt': '创建时间',
-  'pages.robot.table.column.updatedAt': '更新时间',
-  'pages.robot.table.column.actions': '操作',
-  'pages.robot.table.column.action.edit': '编辑',
-  'pages.robot.table.column.action.duplicate': '复制',
-  'pages.robot.table.column.action.test': '测试',
-  'pages.robot.table.column.action.delete': '删除',
-  'pages.robot.table.createForm.newRobot': '新建机器人',
-  'pages.robot.table.updateForm.editRobot': '编辑机器人',
+  'pages.robot.key.name': '名称',
+  'pages.robot.key.desc': '描述',
+  'pages.robot.key.webhook': 'Webhook',
+  'pages.robot.key.callback': 'Callback',
+  'pages.robot.key.enabled': '启用状态',
+  'pages.robot.key.owner': '所有者',
+  'pages.robot.table.action.test': '测试',
+  'pages.robot.modal.createForm.title': '新建机器人',
+  'pages.robot.modal.updateForm.title': '编辑机器人',
+  'pages.robot.form.name.required': '名称不能为空',
+  'pages.robot.form.name.maxlen': '名称不能超过20个字符',
+  'pages.robot.form.name.placeholder': '取一个有意义的名字吧',
+  'pages.robot.form.desc.placeholder': '简要描述功能，比如它可以用来做什么',
+  'pages.robot.form.webhook.url': '请输入正确的 URL',
+  'pages.robot.form.webhook.placeholder': 'https://example.com/webhook',
+  'pages.robot.form.callback.url': '请输入正确的 URL',
+  'pages.robot.form.callback.placeholder': 'https://example.com/callback',
 };
