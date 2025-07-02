@@ -48,7 +48,13 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
 
   useEffect(() => {
     if (visible && initialValues) {
-      form.setFieldsValue(initialValues);
+      const values = {
+        ...initialValues,
+        roles: Array.isArray(initialValues.roles)
+          ? initialValues.roles.map((r: any) => (typeof r === 'object' && r !== null ? r.role : r))
+          : [],
+      };
+      form.setFieldsValue(values);
     }
   }, [visible, initialValues, form]);
 
@@ -59,7 +65,17 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
       if (!values.id) {
         throw new Error('Record ID not found during update operation');
       }
-      await userUpdate({id: values.id}, values as API.UserRequest);
+      // roles: id 陣列 => role.role 字符串陣列
+      const submitValues = {
+        ...values,
+        roles: Array.isArray(values.roles)
+          ? values.roles.map((id: any) => {
+              const found = roles.find(r => r.id === id);
+              return found ? found.role : id;
+            })
+          : [],
+      };
+      await userUpdate({ id: values.id }, submitValues as API.UserRequest);
       message.success(intl.formatMessage({ id: 'pages.common.update.success', defaultMessage: '更新成功' }));
       form.resetFields();
       onSuccess();
@@ -155,13 +171,12 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
             loading={roleLoading}
             style={{ width: '100%' }}
             optionLabelProp="label"
-            options={roles.map(role => ({
-              key: role.id,
-              label: `${role.name} (${role.role})`,
-              value: role.role,
-            }))}
-            value={initialValues?.roles?.map(role => roles.find(r => r.id === role.id)?.role)}
           >
+            {roles.map(role => (
+              <Select.Option key={role.id} value={role.role} label={role.name}>
+                {role.name} ({role.role})
+              </Select.Option>
+            ))}
           </Select>
         </Form.Item>
       </Form>
