@@ -6,7 +6,7 @@ definitions:
         example: "2006-01-02 15:04:05"
         type: string
       group:
-        description: 分组名
+        description: 分组
         example: PermManagement
         type: string
       id:
@@ -33,7 +33,7 @@ definitions:
   ApiList:
     properties:
       groups:
-        description: 分组名列表
+        description: 分组列表
         items:
           type: string
         type: array
@@ -243,7 +243,7 @@ definitions:
   backend_api_v1.ApiRequest:
     properties:
       group:
-        description: 分组名
+        description: 分组
         example: PermManagement
         type: string
       method:
@@ -678,7 +678,7 @@ paths:
         name: pageSize
         required: true
         type: integer
-      - description: 分组名
+      - description: 分组
         in: query
         name: group
         type: string
@@ -710,7 +710,7 @@ paths:
       consumes:
       - application/json
       description: 创建一个新的接口
-      operationId: ApiCreate
+      operationId: CreateApi
       parameters:
       - description: 接口数据
         in: body
@@ -735,7 +735,7 @@ paths:
       consumes:
       - application/json
       description: 删除指定ID的接口
-      operationId: ApiDelete
+      operationId: DeleteApi
       parameters:
       - description: 接口ID
         in: query
@@ -779,7 +779,7 @@ paths:
       consumes:
       - application/json
       description: 更新接口数据
-      operationId: ApiUpdate
+      operationId: UpdateApi
       parameters:
       - description: 接口ID
         in: path
@@ -837,7 +837,7 @@ paths:
       consumes:
       - application/json
       description: 创建一个新的菜单
-      operationId: MenuCreate
+      operationId: CreateMenu
       parameters:
       - description: 菜单数据
         in: body
@@ -862,7 +862,7 @@ paths:
       consumes:
       - application/json
       description: 删除指定ID的菜单
-      operationId: MenuDelete
+      operationId: DeleteMenu
       parameters:
       - description: 菜单ID
         in: path
@@ -885,7 +885,7 @@ paths:
       consumes:
       - application/json
       description: 更新菜单数据
-      operationId: MenuUpdate
+      operationId: UpdateMenu
       parameters:
       - description: 菜单ID
         in: path
@@ -933,7 +933,7 @@ paths:
         type: string
       - description: Casbin Role
         in: query
-        name: role
+        name: casbinRole
         type: string
       produces:
       - application/json
@@ -1024,7 +1024,7 @@ paths:
       summary: 更新角色
       tags:
       - Role
-  /admin/roles/permission:
+  /admin/roles/permissions:
     get:
       consumes:
       - application/json
@@ -1121,7 +1121,7 @@ paths:
       consumes:
       - application/json
       description: 创建一个新的用户
-      operationId: UserCreate
+      operationId: CreateUser
       parameters:
       - description: 用户信息
         in: body
@@ -1146,7 +1146,7 @@ paths:
       consumes:
       - application/json
       description: 删除指定ID的用户
-      operationId: UserDelete
+      operationId: DeleteUser
       parameters:
       - description: 用户ID
         in: query
@@ -1169,7 +1169,7 @@ paths:
       consumes:
       - application/json
       description: 更新用户信息
-      operationId: UserUpdate
+      operationId: UpdateUser
       parameters:
       - description: 用户ID
         in: path
@@ -1285,7 +1285,7 @@ paths:
       consumes:
       - application/json
       description: 创建一个新的机器人
-      operationId: RobotCreate
+      operationId: CreateRobot
       parameters:
       - description: 机器人数据
         in: body
@@ -1310,7 +1310,7 @@ paths:
       consumes:
       - application/json
       description: 删除指定ID的机器人
-      operationId: RobotDelete
+      operationId: DeleteRobot
       parameters:
       - description: 机器人ID
         in: path
@@ -1356,7 +1356,7 @@ paths:
       consumes:
       - application/json
       description: 更新机器人数据
-      operationId: RobotUpdate
+      operationId: UpdateRobot
       parameters:
       - description: 机器人ID
         in: path
@@ -1386,7 +1386,7 @@ paths:
       consumes:
       - application/json
       description: 获取当前用户的详细信息
-      operationId: FetchCurrentUser
+      operationId: GetCurrentUser
       produces:
       - application/json
       responses:
@@ -1399,12 +1399,12 @@ paths:
       summary: 获取当前用户
       tags:
       - User
-  /users/me/menu:
+  /users/me/menus:
     get:
       consumes:
       - application/json
       description: 获取当前用户的菜单列表
-      operationId: FetchCurrentMenu
+      operationId: GetUserMenus
       produces:
       - application/json
       responses:
@@ -1417,12 +1417,12 @@ paths:
       summary: 获取用户菜单
       tags:
       - User
-  /users/me/permission:
+  /users/me/permissions:
     get:
       consumes:
       - application/json
       description: 获取当前用户的权限列表
-      operationId: FetchCurrentPermission
+      operationId: GetUserPermissions
       produces:
       - application/json
       responses:

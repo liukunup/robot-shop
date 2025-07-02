@@ -18,7 +18,7 @@ export async function listRoles(
 }
 
 /** 创建角色 创建一个新的角色 POST /admin/roles */
-export async function roleCreate(body: API.RoleRequest, options?: { [key: string]: any }) {
+export async function createRole(body: API.RoleRequest, options?: { [key: string]: any }) {
   return request<API.Response>(`/v1/admin/roles`, {
     method: 'POST',
     headers: {
@@ -30,9 +30,9 @@ export async function roleCreate(body: API.RoleRequest, options?: { [key: string
 }
 
 /** 更新角色 目前只允许更新角色名称 PUT /admin/roles/${param0} */
-export async function roleUpdate(
+export async function updateRole(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.RoleUpdateParams,
+  params: API.UpdateRoleParams,
   body: API.RoleRequest,
   options?: { [key: string]: any },
 ) {
@@ -49,9 +49,9 @@ export async function roleUpdate(
 }
 
 /** 删除角色 删除指定ID的角色 DELETE /admin/roles/${param0} */
-export async function roleDelete(
+export async function deleteRole(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.RoleDeleteParams,
+  params: API.DeleteRoleParams,
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;
@@ -62,13 +62,13 @@ export async function roleDelete(
   });
 }
 
-/** 获取角色权限 获取指定角色的权限列表 GET /admin/roles/permission */
-export async function getRolePermission(
+/** 获取角色权限 获取指定角色的权限列表 GET /admin/roles/permissions */
+export async function getRolePermissions(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.GetRolePermissionParams,
+  params: API.GetRolePermissionsParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.GetRolePermissionResponse>(`/v1/admin/roles/permission`, {
+  return request<API.GetRolePermissionResponse>(`/v1/admin/roles/permissions`, {
     method: 'GET',
     params: {
       ...params,
@@ -77,12 +77,12 @@ export async function getRolePermission(
   });
 }
 
-/** 更新角色权限 更新指定角色的权限列表 PUT /admin/roles/permission */
-export async function updateRolePermission(
+/** 更新角色权限 更新指定角色的权限列表 PUT /admin/roles/permissions */
+export async function updateRolePermissions(
   body: API.UpdateRolePermissionRequest,
   options?: { [key: string]: any },
 ) {
-  return request<API.Response>(`/v1/admin/roles/permission`, {
+  return request<API.Response>(`/v1/admin/roles/permissions`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',

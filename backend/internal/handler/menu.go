@@ -46,16 +46,16 @@ func (h *MenuHandler) ListMenus(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.menuService.ListMenus(ctx, &req)
+	data, err := h.menuService.List(ctx, &req)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("menuService.ListMenus error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("menuService.List error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, data)
 }
 
-// MenuCreate godoc
+// CreateMenu godoc
 // @Summary 创建菜单
 // @Schemes
 // @Description 创建一个新的菜单
@@ -66,24 +66,24 @@ func (h *MenuHandler) ListMenus(ctx *gin.Context) {
 // @Param request body v1.MenuRequest true "菜单数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/menus [post]
-// @ID MenuCreate
-func (h *MenuHandler) MenuCreate(ctx *gin.Context) {
+// @ID CreateMenu
+func (h *MenuHandler) CreateMenu(ctx *gin.Context) {
 	var req v1.MenuRequest
 	if err := ctx.ShouldBind(&req); err != nil {
-		h.logger.WithContext(ctx).Error("MenuCreate bind error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("CreateMenu bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
-	if err := h.menuService.MenuCreate(ctx, &req); err != nil {
-		h.logger.WithContext(ctx).Error("menuService.MenuCreate error", zap.Error(err))
+	if err := h.menuService.Create(ctx, &req); err != nil {
+		h.logger.WithContext(ctx).Error("menuService.Create error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
 }
 
-// MenuUpdate godoc
+// UpdateMenu godoc
 // @Summary 更新菜单
 // @Schemes
 // @Description 更新菜单数据
@@ -95,32 +95,32 @@ func (h *MenuHandler) MenuCreate(ctx *gin.Context) {
 // @Param request body v1.MenuRequest true "菜单数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/menus/{id} [put]
-// @ID MenuUpdate
-func (h *MenuHandler) MenuUpdate(ctx *gin.Context) {
+// @ID UpdateMenu
+func (h *MenuHandler) UpdateMenu(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("MenuUpdate parse id error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("UpdateMenu parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
 	var req v1.MenuRequest
 	if err := ctx.ShouldBind(&req); err != nil {
-		h.logger.WithContext(ctx).Error("MenuUpdate bind error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("UpdateMenu bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
-	if err := h.menuService.MenuUpdate(ctx, uint(id), &req); err != nil {
-		h.logger.WithContext(ctx).Error("menuService.MenuUpdate error", zap.Error(err))
+	if err := h.menuService.Update(ctx, uint(id), &req); err != nil {
+		h.logger.WithContext(ctx).Error("menuService.Update error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
 }
 
-// MenuDelete godoc
+// DeleteMenu godoc
 // @Summary 删除菜单
 // @Schemes
 // @Description 删除指定ID的菜单
@@ -131,18 +131,18 @@ func (h *MenuHandler) MenuUpdate(ctx *gin.Context) {
 // @Param id path uint true "菜单ID"
 // @Success 200 {object} v1.Response
 // @Router /admin/menus/{id} [delete]
-// @ID MenuDelete
-func (h *MenuHandler) MenuDelete(ctx *gin.Context) {
+// @ID DeleteMenu
+func (h *MenuHandler) DeleteMenu(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("MenuDelete parse id error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("DeleteMenu parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	if err := h.menuService.MenuDelete(ctx, uint(id)); err != nil {
-		h.logger.WithContext(ctx).Error("menuService.MenuDelete error", zap.Error(err))
+	if err := h.menuService.Delete(ctx, uint(id)); err != nil {
+		h.logger.WithContext(ctx).Error("menuService.Delete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 

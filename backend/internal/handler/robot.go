@@ -50,16 +50,16 @@ func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.robotService.ListRobots(ctx, &req)
+	data, err := h.robotService.List(ctx, &req)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("robotService.ListRobots error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("robotService.List error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, data)
 }
 
-// RobotCreate godoc
+// CreateRobot godoc
 // @Summary 创建机器人
 // @Schemes
 // @Description 创建一个新的机器人
@@ -70,25 +70,25 @@ func (h *RobotHandler) ListRobots(ctx *gin.Context) {
 // @Param request body v1.RobotRequest true "机器人数据"
 // @Success 200 {object} v1.Response
 // @Router /robots [post]
-// @ID RobotCreate
-func (h *RobotHandler) RobotCreate(ctx *gin.Context) {
+// @ID CreateRobot
+func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 	var req v1.RobotRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		h.logger.WithContext(ctx).Error("RobotCreate bind error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("CreateRobot bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
-	err := h.robotService.RobotCreate(ctx, &req)
+	err := h.robotService.Create(ctx, &req)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("robotService.RobotCreate error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("robotService.Create error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
 }
 
-// RobotUpdate godoc
+// UpdateRobot godoc
 // @Summary 更新机器人
 // @Schemes
 // @Description 更新机器人数据
@@ -100,32 +100,32 @@ func (h *RobotHandler) RobotCreate(ctx *gin.Context) {
 // @Param request body v1.RobotRequest true "机器人数据"
 // @Success 200 {object} v1.Response
 // @Router /robots/{id} [put]
-// @ID RobotUpdate
-func (h *RobotHandler) RobotUpdate(ctx *gin.Context) {
+// @ID UpdateRobot
+func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("RobotUpdate parse id error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("UpdateRobot parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
 	var req v1.RobotRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		h.logger.WithContext(ctx).Error("RobotUpdate bind error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("UpdateRobot bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
-	if err := h.robotService.RobotUpdate(ctx, uint(id), &req); err != nil {
-		h.logger.WithContext(ctx).Error("robotService.RobotUpdate error", zap.Error(err))
+	if err := h.robotService.Update(ctx, uint(id), &req); err != nil {
+		h.logger.WithContext(ctx).Error("robotService.Update error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
 }
 
-// RobotDelete godoc
+// DeleteRobot godoc
 // @Summary 删除机器人
 // @Schemes
 // @Description 删除指定ID的机器人
@@ -136,18 +136,18 @@ func (h *RobotHandler) RobotUpdate(ctx *gin.Context) {
 // @Param id path uint true "机器人ID"
 // @Success 200 {object} v1.Response
 // @Router /robots/{id} [delete]
-// @ID RobotDelete
-func (h *RobotHandler) RobotDelete(ctx *gin.Context) {
+// @ID DeleteRobot
+func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("RobotDelete parse id error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("DeleteRobot parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	if err := h.robotService.RobotDelete(ctx, uint(id)); err != nil {
-		h.logger.WithContext(ctx).Error("robotService.RobotDelete error", zap.Error(err))
+	if err := h.robotService.Delete(ctx, uint(id)); err != nil {
+		h.logger.WithContext(ctx).Error("robotService.Delete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -175,9 +175,9 @@ func (h *RobotHandler) GetRobot(ctx *gin.Context) {
 		return
 	}
 
-	robot, err := h.robotService.GetRobot(ctx, uint(id))
+	robot, err := h.robotService.Get(ctx, uint(id))
 	if err != nil {
-		h.logger.WithContext(ctx).Error("robotService.GetRobot error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("robotService.Get error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

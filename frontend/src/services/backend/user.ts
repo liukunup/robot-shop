@@ -18,7 +18,7 @@ export async function listUsers(
 }
 
 /** 创建用户 创建一个新的用户 POST /admin/users */
-export async function userCreate(body: API.UserRequest, options?: { [key: string]: any }) {
+export async function createUser(body: API.UserRequest, options?: { [key: string]: any }) {
   return request<API.Response>(`/v1/admin/users`, {
     method: 'POST',
     headers: {
@@ -30,9 +30,9 @@ export async function userCreate(body: API.UserRequest, options?: { [key: string
 }
 
 /** 更新用户 更新用户信息 PUT /admin/users/${param0} */
-export async function userUpdate(
+export async function updateUser(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.UserUpdateParams,
+  params: API.UpdateUserParams,
   body: API.UserRequest,
   options?: { [key: string]: any },
 ) {
@@ -49,9 +49,9 @@ export async function userUpdate(
 }
 
 /** 删除用户 删除指定ID的用户 DELETE /admin/users/${param0} */
-export async function userDelete(
+export async function deleteUser(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.UserDeleteParams,
+  params: API.DeleteUserParams,
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;
@@ -89,24 +89,24 @@ export async function register(body: API.RegisterRequest, options?: { [key: stri
 }
 
 /** 获取当前用户 获取当前用户的详细信息 GET /users/me */
-export async function fetchCurrentUser(options?: { [key: string]: any }) {
+export async function getCurrentUser(options?: { [key: string]: any }) {
   return request<API.UserResponse>(`/v1/users/me`, {
     method: 'GET',
     ...(options || {}),
   });
 }
 
-/** 获取用户菜单 获取当前用户的菜单列表 GET /users/me/menu */
-export async function fetchCurrentMenu(options?: { [key: string]: any }) {
-  return request<API.MenuSearchResponse>(`/v1/users/me/menu`, {
+/** 获取用户菜单 获取当前用户的菜单列表 GET /users/me/menus */
+export async function getUserMenus(options?: { [key: string]: any }) {
+  return request<API.MenuSearchResponse>(`/v1/users/me/menus`, {
     method: 'GET',
     ...(options || {}),
   });
 }
 
-/** 获取用户权限 获取当前用户的权限列表 GET /users/me/permission */
-export async function fetchCurrentPermission(options?: { [key: string]: any }) {
-  return request<API.UserPermissionResponse>(`/v1/users/me/permission`, {
+/** 获取用户权限 获取当前用户的权限列表 GET /users/me/permissions */
+export async function getUserPermissions(options?: { [key: string]: any }) {
+  return request<API.UserPermissionResponse>(`/v1/users/me/permissions`, {
     method: 'GET',
     ...(options || {}),
   });

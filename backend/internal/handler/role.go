@@ -36,7 +36,7 @@ func NewRoleHandler(
 // @Param page query int true "页码"
 // @Param pageSize query int true "分页大小"
 // @Param name query string false "角色名"
-// @Param role query string false "Casbin Role"
+// @Param casbinRole query string false "Casbin Role"
 // @Success 200 {object} v1.RoleSearchResponse
 // @Router /admin/roles [get]
 // @ID ListRoles
@@ -161,7 +161,7 @@ func (h *RoleHandler) DeleteRole(ctx *gin.Context) {
 // @Security Bearer
 // @Param role query string true "角色名"
 // @Success 200 {object} v1.GetRolePermissionResponse
-// @Router /admin/roles/permission [get]
+// @Router /admin/roles/permissions [get]
 // @ID GetRolePermissions
 func (h *RoleHandler) GetRolePermissions(ctx *gin.Context) {
 	var req v1.GetRolePermissionRequest
@@ -190,7 +190,7 @@ func (h *RoleHandler) GetRolePermissions(ctx *gin.Context) {
 // @Security Bearer
 // @Param request body v1.UpdateRolePermissionRequest true "更新参数"
 // @Success 200 {object} v1.Response
-// @Router /admin/roles/permission [put]
+// @Router /admin/roles/permissions [put]
 // @ID UpdateRolePermissions
 func (h *RoleHandler) UpdateRolePermissions(ctx *gin.Context) {
 	var req v1.UpdateRolePermissionRequest

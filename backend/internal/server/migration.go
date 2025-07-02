@@ -149,22 +149,22 @@ func (m *MigrateServer) initialRBAC(ctx context.Context) error {
 	}
 
 	// 添加运营人员权限
-	_, err = m.e.AddRoleForUser("2", "1001")
+	_, err = m.e.AddRoleForUser("2", constant.OperatorRole)
 	if err != nil {
 		m.log.Error("m.e.AddRoleForUser error", zap.Error(err))
 		return err
 	}
-	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/profile/basic", "read")
-	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/profile/advanced", "read")
-	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/profile", "read")
-	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/dashboard", "read")
-	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/dashboard/workplace", "read")
-	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/dashboard/analysis", "read")
-	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/account/settings", "read")
-	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/account/center", "read")
-	m.addPermissionForRole("1001", constant.MenuResourcePrefix+"/account", "read")
-	m.addPermissionForRole("1001", constant.ApiResourcePrefix+"/v1/menus", http.MethodGet)
-	m.addPermissionForRole("1001", constant.ApiResourcePrefix+"/v1/admin/user", http.MethodGet)
+	m.addPermissionForRole(constant.OperatorRole, constant.MenuResourcePrefix+"/profile/basic", "read")
+	m.addPermissionForRole(constant.OperatorRole, constant.MenuResourcePrefix+"/profile/advanced", "read")
+	m.addPermissionForRole(constant.OperatorRole, constant.MenuResourcePrefix+"/profile", "read")
+	m.addPermissionForRole(constant.OperatorRole, constant.MenuResourcePrefix+"/dashboard", "read")
+	m.addPermissionForRole(constant.OperatorRole, constant.MenuResourcePrefix+"/dashboard/workplace", "read")
+	m.addPermissionForRole(constant.OperatorRole, constant.MenuResourcePrefix+"/dashboard/analysis", "read")
+	m.addPermissionForRole(constant.OperatorRole, constant.MenuResourcePrefix+"/account/settings", "read")
+	m.addPermissionForRole(constant.OperatorRole, constant.MenuResourcePrefix+"/account/center", "read")
+	m.addPermissionForRole(constant.OperatorRole, constant.MenuResourcePrefix+"/account", "read")
+	m.addPermissionForRole(constant.OperatorRole, constant.ApiResourcePrefix+"/v1/menus", http.MethodGet)
+	m.addPermissionForRole(constant.OperatorRole, constant.ApiResourcePrefix+"/v1/admin/user", http.MethodGet)
 
 	return nil
 }

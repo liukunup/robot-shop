@@ -3,8 +3,9 @@ import { ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, Space, Tag, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
-import { useRef, useState } from 'react';
-import { listUsers, userDelete } from '@/services/backend/user';
+import { useRef, useEffect, useState } from 'react';
+import { listUsers, deleteUser } from '@/services/backend/user';
+import { listRoles } from '@/services/backend/role';
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
 
@@ -12,8 +13,28 @@ const User: React.FC = () => {
   const [createVisible, setCreateVisible] = useState(false);
   const [updateVisible, setUpdateVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState<API.User | null>(null);
+  const [roleOptions, setRoleOptions] = useState<API.Role[]>([]);
   const actionRef = useRef<ActionType>(null);
   const intl = useIntl();
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await listRoles({ page: 1, pageSize: 1000 });
+        if (response.success) {
+          setRoleOptions(response.data?.list || []);
+        }
+      } catch (error) {
+        const msg = intl.formatMessage({ id: 'pages.admin.user.fetchRoles.failure', defaultMessage: '获取角色列表失败' });
+        if (error instanceof Error) {
+          message.error(error.message || msg);
+        } else {
+          message.error(msg);
+        }
+      }
+    };
+    fetchRoles();
+  }, []);
 
   const columns: ProColumns<API.User>[] = [
     {
@@ -132,12 +153,15 @@ const User: React.FC = () => {
         defaultMessage: '角色',
       }),
       dataIndex: 'roles',
+      ellipsis: true,
       hideInSearch: true,
-      render: (roles) => (
+      filters: roleOptions?.map(({ id, name }) => ({ text: name as string, value: id as number })) || [],
+      onFilter: (value, record) => record.roles?.some(({ id }) => id === value) ?? false,
+      render: (_, record) => (
         <Space>
-          {roles?.map((role: { id: number; name: string; role: string }) => (
-            <Tag key={role.id} color="blue">{role.name}</Tag>
-          )) || null}
+          {record.roles?.map((r) => (
+            <Tag key={r.id} color="blue">{r.name}</Tag>
+          ))}
         </Space>
       ),
     },
@@ -184,7 +208,7 @@ const User: React.FC = () => {
           key="remove"
           onClick={async () => {
             if (record.id) {
-              await userDelete({ id: record.id });
+              await deleteUser({ id: record.id });
               message.success(intl.formatMessage({
                 id: 'pages.common.remove.success',
                 defaultMessage: '删除成功',

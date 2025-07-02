@@ -2,7 +2,7 @@ declare namespace API {
   type Api = {
     /** 创建时间 */
     createdAt?: string;
-    /** 分组名 */
+    /** 分组 */
     group?: string;
     /** ID */
     id?: number;
@@ -16,13 +16,8 @@ declare namespace API {
     updatedAt?: string;
   };
 
-  type ApiDeleteParams = {
-    /** 接口ID */
-    id: number;
-  };
-
   type ApiList = {
-    /** 分组名列表 */
+    /** 分组列表 */
     groups?: string[];
     /** 列表 */
     list?: Api[];
@@ -31,7 +26,7 @@ declare namespace API {
   };
 
   type ApiRequest = {
-    /** 分组名 */
+    /** 分组 */
     group?: string;
     /** 方法 */
     method?: string;
@@ -49,6 +44,7 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
   };
 
@@ -60,11 +56,32 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
   };
 
-  type ApiUpdateParams = {
+  type DeleteApiParams = {
     /** 接口ID */
+    id: number;
+  };
+
+  type DeleteMenuParams = {
+    /** 菜单ID */
+    id: number;
+  };
+
+  type DeleteRobotParams = {
+    /** 机器人ID */
+    id: number;
+  };
+
+  type DeleteRoleParams = {
+    /** 角色ID */
+    id: number;
+  };
+
+  type DeleteUserParams = {
+    /** 用户ID */
     id: number;
   };
 
@@ -78,11 +95,6 @@ declare namespace API {
     id: number;
   };
 
-  type GetRolePermissionParams = {
-    /** 角色名 */
-    role: string;
-  };
-
   type GetRolePermissionResponse = {
     data?: GetRolePermissionResponseData;
     /** 错误码 */
@@ -91,6 +103,7 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
   };
 
@@ -101,12 +114,17 @@ declare namespace API {
     total?: number;
   };
 
+  type GetRolePermissionsParams = {
+    /** 角色名 */
+    role: string;
+  };
+
   type ListApisParams = {
     /** 页码 */
     page: number;
     /** 分页大小 */
     pageSize: number;
-    /** 分组名 */
+    /** 分组 */
     group?: string;
     /** 名称 */
     name?: string;
@@ -144,7 +162,7 @@ declare namespace API {
     /** 角色名 */
     name?: string;
     /** Casbin Role */
-    role?: string;
+    casbinRole?: string;
   };
 
   type ListUsersParams = {
@@ -175,6 +193,7 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
   };
 
@@ -211,11 +230,6 @@ declare namespace API {
     url?: string;
     /** 排序权重 */
     weight?: number;
-  };
-
-  type MenuDeleteParams = {
-    /** 菜单ID */
-    id: number;
   };
 
   type MenuList = {
@@ -260,12 +274,8 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
-  };
-
-  type MenuUpdateParams = {
-    /** 菜单ID */
-    id: number;
   };
 
   type RegisterRequest = {
@@ -283,6 +293,7 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
   };
 
@@ -305,11 +316,6 @@ declare namespace API {
     updatedAt?: string;
     /** 通知地址 */
     webhook?: string;
-  };
-
-  type RobotDeleteParams = {
-    /** 机器人ID */
-    id: number;
   };
 
   type RobotList = {
@@ -342,6 +348,7 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
   };
 
@@ -353,42 +360,35 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
   };
 
-  type RobotUpdateParams = {
-    /** 机器人ID */
-    id: number;
-  };
-
   type Role = {
+    /** Casbin Role */
+    casbinRole?: string;
     /** 创建时间 */
     createdAt?: string;
     /** ID */
     id?: number;
     /** 角色名 */
     name?: string;
-    /** Casbin Role */
-    role?: string;
     /** 更新时间 */
     updatedAt?: string;
   };
 
-  type RoleDeleteParams = {
-    /** 角色ID */
-    id: number;
-  };
-
   type RoleList = {
+    /** 列表 */
     list?: Role[];
+    /** 总数 */
     total?: number;
   };
 
   type RoleRequest = {
+    /** Casbin Role */
+    casbinRole: string;
     /** 角色名 */
     name: string;
-    /** Casbin Role */
-    role: string;
   };
 
   type RoleSearchResponse = {
@@ -399,19 +399,40 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
   };
 
-  type RoleUpdateParams = {
+  type UpdateApiParams = {
+    /** 接口ID */
+    id: number;
+  };
+
+  type UpdateMenuParams = {
+    /** 菜单ID */
+    id: number;
+  };
+
+  type UpdateRobotParams = {
+    /** 机器人ID */
+    id: number;
+  };
+
+  type UpdateRoleParams = {
     /** 角色ID */
     id: number;
   };
 
   type UpdateRolePermissionRequest = {
+    /** Casbin Role */
+    casbinRole: string;
     /** 权限列表 */
     list: string[];
-    /** 角色名 */
-    role: string;
+  };
+
+  type UpdateUserParams = {
+    /** 用户ID */
+    id: number;
   };
 
   type User = {
@@ -420,11 +441,11 @@ declare namespace API {
     /** 创建时间 */
     createdAt?: string;
     /** 邮箱 */
-    email: string;
+    email?: string;
     /** ID */
     id?: number;
     /** 昵称 */
-    nickname: string;
+    nickname?: string;
     /** 手机 */
     phone?: string;
     /** 角色 */
@@ -434,12 +455,7 @@ declare namespace API {
     /** 更新时间 */
     updatedAt?: string;
     /** 用户名 */
-    username: string;
-  };
-
-  type UserDeleteParams = {
-    /** 用户ID */
-    id: number;
+    username?: string;
   };
 
   type UserList = {
@@ -457,6 +473,7 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
   };
 
@@ -483,6 +500,7 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
   };
 
@@ -494,11 +512,7 @@ declare namespace API {
     errorMessage?: string;
     /** 前端展示方式 */
     errorShowType?: number;
+    /** 是否成功 */
     success?: boolean;
-  };
-
-  type UserUpdateParams = {
-    /** 用户ID */
-    id: number;
   };
 }

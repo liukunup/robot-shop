@@ -19,7 +19,7 @@ type UserDataItem struct {
 	Email     string         `json:"email" example:"zhangsan@example.com"`                      // 邮箱
 	Phone     string         `json:"phone,omitempty" example:"13966668888"`                     // 手机
 	Status    int            `json:"status" example:"1"`                                        // 状态 0:待激活 1:正常 2:禁用
-	Roles     []RoleDataItem `json:"roles"`                                                     // 角色
+	Roles     []RoleDataItem `json:"roles,omitempty"`                                           // 角色
 } // @name User
 type UserSearchResponseData struct {
 	List  []UserDataItem `json:"list"`  // 列表

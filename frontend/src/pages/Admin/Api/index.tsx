@@ -4,7 +4,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useRef, useState } from 'react';
-import { listApis, apiDelete } from '@/services/backend/api';
+import { listApis, deleteApi } from '@/services/backend/api';
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
 
@@ -87,7 +87,7 @@ const Api: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.common.object.key.createdAt',
+        id: 'pages.common.key.createdAt',
         defaultMessage: '创建时间',
       }),
       key: 'createdAt',
@@ -98,7 +98,7 @@ const Api: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.common.object.key.updatedAt',
+        id: 'pages.common.key.updatedAt',
         defaultMessage: '更新时间',
       }),
       key: 'updatedAt',
@@ -109,7 +109,7 @@ const Api: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.common.table.key.action',
+        id: 'pages.common.table.key.actions',
         defaultMessage: '操作',
       }),
       valueType: 'option',
@@ -122,15 +122,15 @@ const Api: React.FC = () => {
             setUpdateVisible(true);
           }}
         >
-          <FormattedMessage id="pages.common.object.edit" defaultMessage="编辑" />
+          <FormattedMessage id="pages.common.edit" defaultMessage="编辑" />
         </a>,
         <a
           key="remove"
           onClick={async () => {
             if (record.id) {
-              await apiDelete({ id: record.id });
+              await deleteApi({ id: record.id });
               const msg = intl.formatMessage({
-                id: 'pages.common.object.remove.success',
+                id: 'pages.common.remove.success',
                 defaultMessage: '删除成功',
               });
               message.success(msg);
@@ -138,7 +138,7 @@ const Api: React.FC = () => {
             }
           }}
         >
-          <FormattedMessage id="pages.common.object.remove" defaultMessage="删除" />
+          <FormattedMessage id="pages.common.remove" defaultMessage="删除" />
         </a>,
       ],
     },
@@ -157,7 +157,7 @@ const Api: React.FC = () => {
       return { data: response.data?.list || [], success: response.success, total: response.data?.total };
     } catch (error) {
       const msg = intl.formatMessage({
-        id: 'pages.common.object.fetchList.error',
+        id: 'pages.common.fetchList.error',
         defaultMessage: '获取列表失败',
       });
       message.error(msg);
@@ -224,7 +224,7 @@ const Api: React.FC = () => {
             }}
             type="primary"
           >
-            <FormattedMessage id="pages.common.object.new" defaultMessage="新增" />
+            <FormattedMessage id="pages.common.new" defaultMessage="新增" />
           </Button>,
         ]}
       />

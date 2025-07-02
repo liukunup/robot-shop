@@ -2,7 +2,7 @@ import { Select, Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState, useEffect } from 'react';
-import { userUpdate } from '@/services/backend/user';
+import { updateUser } from '@/services/backend/user';
 import { listRoles } from '@/services/backend/role';
 
 interface UpdateFormProps {
@@ -19,28 +19,30 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
   const [form] = useForm<API.User>();
   const intl = useIntl();
 
-  const fetchRoles = async () => {
-    setRoleLoading(true);
-    try {
-      const response = await listRoles({
-        page: 1,
-        pageSize: 1000, // 正常情况下，不应该超过1000个角色
-      } as API.ListRolesParams);
-      if (response.success) {
-        setRoles(response.data?.list || []);
-      }
-    } catch (error) {
-      const msg = intl.formatMessage({ id: 'pages.admin.user.fetchRoles.failure', defaultMessage: '获取角色列表失败' });
-      if (error instanceof Error) {
-        message.error(error.message || msg);
-      } else {
-        message.error(msg);
-      }
-    } finally {
-      setRoleLoading(false);
-    }
-  };
   useEffect(() => {
+
+    const fetchRoles = async () => {
+      setRoleLoading(true);
+      try {
+        const response = await listRoles({
+          page: 1,
+          pageSize: 1000, // 正常情况下，不应该超过1000个角色
+        } as API.ListRolesParams);
+        if (response.success) {
+          setRoles(response.data?.list || []);
+        }
+      } catch (error) {
+        const msg = intl.formatMessage({ id: 'pages.admin.user.fetchRoles.failure', defaultMessage: '获取角色列表失败' });
+        if (error instanceof Error) {
+          message.error(error.message || msg);
+        } else {
+          message.error(msg);
+        }
+      } finally {
+        setRoleLoading(false);
+      }
+    };
+
     if (visible) {
       fetchRoles();
     }
@@ -48,13 +50,10 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
 
   useEffect(() => {
     if (visible && initialValues) {
-      const values = {
+      form.setFieldsValue({
         ...initialValues,
-        roles: Array.isArray(initialValues.roles)
-          ? initialValues.roles.map((r: any) => (typeof r === 'object' && r !== null ? r.role : r))
-          : [],
-      };
-      form.setFieldsValue(values);
+        roles: initialValues.roles?.map((r: any) => r.casbinRole) || []
+      });
     }
   }, [visible, initialValues, form]);
 
@@ -65,17 +64,16 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
       if (!values.id) {
         throw new Error('Record ID not found during update operation');
       }
-      // roles: id 陣列 => role.role 字符串陣列
       const submitValues = {
         ...values,
         roles: Array.isArray(values.roles)
           ? values.roles.map((id: any) => {
               const found = roles.find(r => r.id === id);
-              return found ? found.role : id;
+              return found ? found.casbinRole : id;
             })
           : [],
       };
-      await userUpdate({ id: values.id }, submitValues as API.UserRequest);
+      await updateUser({ id: values.id }, submitValues as API.UserRequest);
       message.success(intl.formatMessage({ id: 'pages.common.update.success', defaultMessage: '更新成功' }));
       form.resetFields();
       onSuccess();
@@ -158,6 +156,10 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
           <Input placeholder={intl.formatMessage({ id: 'pages.admin.user.form.phone.placeholder', defaultMessage: '请输入手机号码' })} />
         </Form.Item>
 
+        <Form.Item name="status" label={<FormattedMessage id="pages.admin.user.key.status" defaultMessage="状态" />} hidden>
+          <Input disabled />
+        </Form.Item>
+
         <Form.Item
           name="roles"
           label={<FormattedMessage id="pages.admin.user.key.roles" defaultMessage="角色" />}
@@ -172,9 +174,9 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
             style={{ width: '100%' }}
             optionLabelProp="label"
           >
-            {roles.map(role => (
-              <Select.Option key={role.id} value={role.role} label={role.name}>
-                {role.name} ({role.role})
+            {roles.map(r => (
+              <Select.Option key={r.id} value={r.casbinRole} label={r.name}>
+                {r.name} ({r.casbinRole})
               </Select.Option>
             ))}
           </Select>

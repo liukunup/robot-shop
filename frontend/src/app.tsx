@@ -1,5 +1,5 @@
 import { AvatarDropdown, AvatarName, Footer, Question, SelectLang } from '@/components';
-import { fetchCurrentUser } from '@/services/backend/user';
+import { getCurrentUser } from '@/services/backend/user';
 import { LinkOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
@@ -24,7 +24,7 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const result = await fetchCurrentUser({
+      const result = await getCurrentUser({
         skipErrorHandler: true,
       });
       return result.data;

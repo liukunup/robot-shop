@@ -2,7 +2,7 @@ import { Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState, useEffect } from 'react';
-import { apiUpdate } from '@/services/backend/api';
+import { updateApi } from '@/services/backend/api';
 
 interface UpdateFormProps {
   visible: boolean; // 弹窗是否可见
@@ -28,7 +28,7 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
       if (!values.id) {
         throw new Error('更新操作时未找到记录ID');
       }
-      await apiUpdate({id: values.id}, values as API.ApiRequest);
+      await updateApi({id: values.id}, values as API.ApiRequest);
       message.success(intl.formatMessage({ id: 'pages.common.object.update.success', defaultMessage: '更新成功' }));
       form.resetFields();
       onSuccess();

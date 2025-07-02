@@ -60,7 +60,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "分组名",
+                        "description": "分组",
                         "name": "group",
                         "in": "query"
                     },
@@ -109,7 +109,7 @@ const docTemplate = `{
                     "API"
                 ],
                 "summary": "创建接口",
-                "operationId": "ApiCreate",
+                "operationId": "CreateApi",
                 "parameters": [
                     {
                         "description": "接口数据",
@@ -180,7 +180,7 @@ const docTemplate = `{
                     "API"
                 ],
                 "summary": "更新接口",
-                "operationId": "ApiUpdate",
+                "operationId": "UpdateApi",
                 "parameters": [
                     {
                         "type": "integer",
@@ -225,7 +225,7 @@ const docTemplate = `{
                     "API"
                 ],
                 "summary": "删除接口",
-                "operationId": "ApiDelete",
+                "operationId": "DeleteApi",
                 "parameters": [
                     {
                         "type": "integer",
@@ -306,7 +306,7 @@ const docTemplate = `{
                     "Menu"
                 ],
                 "summary": "创建菜单",
-                "operationId": "MenuCreate",
+                "operationId": "CreateMenu",
                 "parameters": [
                     {
                         "description": "菜单数据",
@@ -346,7 +346,7 @@ const docTemplate = `{
                     "Menu"
                 ],
                 "summary": "更新菜单",
-                "operationId": "MenuUpdate",
+                "operationId": "UpdateMenu",
                 "parameters": [
                     {
                         "type": "integer",
@@ -391,7 +391,7 @@ const docTemplate = `{
                     "Menu"
                 ],
                 "summary": "删除菜单",
-                "operationId": "MenuDelete",
+                "operationId": "DeleteMenu",
                 "parameters": [
                     {
                         "type": "integer",
@@ -454,7 +454,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Casbin Role",
-                        "name": "role",
+                        "name": "casbinRole",
                         "in": "query"
                     }
                 ],
@@ -506,7 +506,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/roles/permission": {
+        "/admin/roles/permissions": {
             "get": {
                 "security": [
                     {
@@ -750,7 +750,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "创建用户",
-                "operationId": "UserCreate",
+                "operationId": "CreateUser",
                 "parameters": [
                     {
                         "description": "用户信息",
@@ -790,7 +790,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "更新用户",
-                "operationId": "UserUpdate",
+                "operationId": "UpdateUser",
                 "parameters": [
                     {
                         "type": "integer",
@@ -835,7 +835,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "删除用户",
-                "operationId": "UserDelete",
+                "operationId": "DeleteUser",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1004,7 +1004,7 @@ const docTemplate = `{
                     "Robot"
                 ],
                 "summary": "创建机器人",
-                "operationId": "RobotCreate",
+                "operationId": "CreateRobot",
                 "parameters": [
                     {
                         "description": "机器人数据",
@@ -1080,7 +1080,7 @@ const docTemplate = `{
                     "Robot"
                 ],
                 "summary": "更新机器人",
-                "operationId": "RobotUpdate",
+                "operationId": "UpdateRobot",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1125,7 +1125,7 @@ const docTemplate = `{
                     "Robot"
                 ],
                 "summary": "删除机器人",
-                "operationId": "RobotDelete",
+                "operationId": "DeleteRobot",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1163,7 +1163,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "获取当前用户",
-                "operationId": "FetchCurrentUser",
+                "operationId": "GetCurrentUser",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1174,7 +1174,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/me/menu": {
+        "/users/me/menus": {
             "get": {
                 "security": [
                     {
@@ -1192,7 +1192,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "获取用户菜单",
-                "operationId": "FetchCurrentMenu",
+                "operationId": "GetUserMenus",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1203,7 +1203,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/me/permission": {
+        "/users/me/permissions": {
             "get": {
                 "security": [
                     {
@@ -1221,7 +1221,7 @@ const docTemplate = `{
                     "User"
                 ],
                 "summary": "获取用户权限",
-                "operationId": "FetchCurrentPermission",
+                "operationId": "GetUserPermissions",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1243,7 +1243,7 @@ const docTemplate = `{
                     "example": "2006-01-02 15:04:05"
                 },
                 "group": {
-                    "description": "分组名",
+                    "description": "分组",
                     "type": "string",
                     "example": "PermManagement"
                 },
@@ -1278,7 +1278,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "groups": {
-                    "description": "分组名列表",
+                    "description": "分组列表",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -1562,7 +1562,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "group": {
-                    "description": "分组名",
+                    "description": "分组",
                     "type": "string",
                     "example": "PermManagement"
                 },

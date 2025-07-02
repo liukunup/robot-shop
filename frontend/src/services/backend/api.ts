@@ -18,7 +18,7 @@ export async function listApis(
 }
 
 /** 创建接口 创建一个新的接口 POST /admin/apis */
-export async function apiCreate(body: API.ApiRequest, options?: { [key: string]: any }) {
+export async function createApi(body: API.ApiRequest, options?: { [key: string]: any }) {
   return request<API.Response>(`/v1/admin/apis`, {
     method: 'POST',
     headers: {
@@ -44,9 +44,9 @@ export async function getApi(
 }
 
 /** 更新接口 更新接口数据 PUT /admin/apis/${param0} */
-export async function apiUpdate(
+export async function updateApi(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.ApiUpdateParams,
+  params: API.UpdateApiParams,
   body: API.ApiRequest,
   options?: { [key: string]: any },
 ) {
@@ -63,9 +63,9 @@ export async function apiUpdate(
 }
 
 /** 删除接口 删除指定ID的接口 DELETE /admin/apis/${param0} */
-export async function apiDelete(
+export async function deleteApi(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.ApiDeleteParams,
+  params: API.DeleteApiParams,
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;

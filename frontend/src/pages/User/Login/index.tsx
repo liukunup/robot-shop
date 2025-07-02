@@ -97,7 +97,7 @@ const Login: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (values: API.LoginParams) => {
+  const handleSubmit = async (values: API.LoginRequest) => {
     try {
       // 登录
       const resp = await login({ ...values });
@@ -157,7 +157,7 @@ const Login: React.FC = () => {
             autoLogin: true,
           }}
           onFinish={async (values) => {
-            await handleSubmit(values as API.LoginParams);
+            await handleSubmit(values as API.LoginRequest);
           }}
         >
           <Tabs

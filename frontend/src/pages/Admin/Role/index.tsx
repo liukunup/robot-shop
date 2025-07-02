@@ -1,10 +1,10 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { ProTable } from '@ant-design/pro-components';
 import type { ActionType, ProColumns } from '@ant-design/pro-components';
-import { Button, message } from 'antd';
+import { Button, Space, Tag, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useRef, useState } from 'react';
-import { listRoles, roleDelete } from '@/services/backend/role';
+import { listRoles, deleteRole } from '@/services/backend/role';
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
 
@@ -45,7 +45,7 @@ const Role: React.FC = () => {
         id: 'pages.admin.role.key.role',
         defaultMessage: '标识',
       }),
-      dataIndex: 'role',
+      dataIndex: 'casbinRole',
       ellipsis: true,
       formItemProps: {
         rules: [
@@ -58,6 +58,11 @@ const Role: React.FC = () => {
           },
         ],
       },
+      render: (_, record) => (
+        <Space>
+          <Tag color="blue" style={{ marginRight: 4 }}>{record.casbinRole}</Tag>
+        </Space>
+      ),
     },
     {
       title: intl.formatMessage({
@@ -102,7 +107,7 @@ const Role: React.FC = () => {
           key="remove"
           onClick={async () => {
             if (record.id) {
-              await roleDelete({ id: record.id });
+              await deleteRole({ id: record.id });
               message.success(intl.formatMessage({
                 id: 'pages.common.remove.success',
                 defaultMessage: '删除成功',
@@ -121,7 +126,7 @@ const Role: React.FC = () => {
     page: number;
     pageSize: number;
     name?: string;
-    role?: string;
+    casbinRole?: string;
   }) => {
     try {
       const response = await listRoles(params as API.ListRolesParams);
@@ -143,12 +148,12 @@ const Role: React.FC = () => {
         cardBordered
         request={async (params, sort, filter) => {
           console.log(params, sort, filter);
-          const { current = 1, pageSize = 20, name, role } = params;
+          const { current = 1, pageSize = 20, name, casbinRole } = params;
           const results = await search({
             page: current,
             pageSize,
             name,
-            role,
+            casbinRole,
           });
           return results;
         }}

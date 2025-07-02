@@ -2,7 +2,7 @@ import { Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState, useEffect } from 'react';
-import { roleUpdate } from '@/services/backend/role';
+import { updateRole } from '@/services/backend/role';
 
 interface UpdateFormProps {
   visible: boolean;
@@ -29,7 +29,7 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
       if (!values.id) {
         throw new Error('Record ID not found during update operation');
       }
-      await roleUpdate({id: values.id}, values as API.RoleRequest);
+      await updateRole({id: values.id}, values as API.RoleRequest);
       message.success(intl.formatMessage({ id: 'pages.common.update.success', defaultMessage: '更新成功' }));
       form.resetFields();
       onSuccess();
@@ -80,7 +80,7 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
         </Form.Item>
 
         <Form.Item
-          name="role"
+          name="casbinRole"
           label={<FormattedMessage id="pages.admin.role.key.role" defaultMessage="标识" />}
           rules={[
             { required: true, message: intl.formatMessage({ id: 'pages.admin.role.form.role.required', defaultMessage: '标识不能为空' }) },

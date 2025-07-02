@@ -2,7 +2,7 @@ import { Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState, useEffect } from 'react';
-import { menuUpdate } from '@/services/backend/menu';
+import { updateMenu } from '@/services/backend/menu';
 
 interface UpdateFormProps {
   visible: boolean; // 弹窗是否可见
@@ -30,7 +30,7 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
       if (!values.id) {
         throw new Error('更新操作时未找到记录ID');
       }
-      await menuUpdate({id: values.id}, values as API.MenuRequest);
+      await updateMenu({id: values.id}, values as API.MenuRequest);
       message.success(intl.formatMessage({ id: 'pages.common.object.update.success', defaultMessage: '更新成功' }));
       form.resetFields();
       onSuccess();

@@ -4,7 +4,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useRef, useState } from 'react';
-import { listMenus, menuDelete } from '@/services/backend/menu';
+import { listMenus, deleteMenu } from '@/services/backend/menu';
 import CreateForm from './components/CreateForm';
 import UpdateForm from './components/UpdateForm';
 
@@ -96,7 +96,7 @@ const Menu: React.FC = () => {
           key="remove"
           onClick={async () => {
             if (record.id) {
-              await menuDelete({ id: record.id });
+              await deleteMenu({ id: record.id });
               message.success('删除成功');
               action?.reload();
             }

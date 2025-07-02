@@ -2,7 +2,7 @@ import { Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState } from 'react';
-import { roleCreate } from '@/services/backend/role';
+import { createRole } from '@/services/backend/role';
 
 interface CreateFormProps {
   visible: boolean;
@@ -19,7 +19,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
     setLoading(true);
     try {
       const values = await form.validateFields();
-      await roleCreate(values as API.RoleRequest);
+      await createRole(values as API.RoleRequest);
       message.success(intl.formatMessage({ id: 'pages.common.new.success', defaultMessage: '新建成功' }));
       form.resetFields();
       onSuccess();
@@ -65,7 +65,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
         </Form.Item>
 
         <Form.Item
-          name="role"
+          name="casbinRole"
           label={<FormattedMessage id="pages.admin.role.key.role" defaultMessage="标识" />}
           rules={[
             { required: true, message: intl.formatMessage({ id: 'pages.admin.role.form.role.required', defaultMessage: '标识不能为空' }) },

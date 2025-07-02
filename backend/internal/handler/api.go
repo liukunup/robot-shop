@@ -36,7 +36,7 @@ func NewApiHandler(
 // @Security Bearer
 // @Param page query int true "页码"
 // @Param pageSize query int true "分页大小"
-// @Param group query string false "分组名"
+// @Param group query string false "分组"
 // @Param name query string false "名称"
 // @Param path query string false "路径"
 // @Param method query string false "方法"
@@ -51,16 +51,16 @@ func (h *ApiHandler) ListApis(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.apiService.ListApis(ctx, &req)
+	data, err := h.apiService.List(ctx, &req)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("apiService.ListApis error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("apiService.List error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, data)
 }
 
-// ApiCreate godoc
+// CreateApi godoc
 // @Summary 创建接口
 // @Schemes
 // @Description 创建一个新的接口
@@ -71,24 +71,24 @@ func (h *ApiHandler) ListApis(ctx *gin.Context) {
 // @Param request body v1.ApiRequest true "接口数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/apis [post]
-// @ID ApiCreate
-func (h *ApiHandler) ApiCreate(ctx *gin.Context) {
+// @ID CreateApi
+func (h *ApiHandler) CreateApi(ctx *gin.Context) {
 	var req v1.ApiRequest
 	if err := ctx.ShouldBind(&req); err != nil {
-		h.logger.WithContext(ctx).Error("ApiCreate bind error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("CreateApi bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
-	if err := h.apiService.ApiCreate(ctx, &req); err != nil {
-		h.logger.WithContext(ctx).Error("apiService.ApiCreate error", zap.Error(err))
+	if err := h.apiService.Create(ctx, &req); err != nil {
+		h.logger.WithContext(ctx).Error("apiService.Create error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
 }
 
-// ApiUpdate godoc
+// UpdateApi godoc
 // @Summary 更新接口
 // @Schemes
 // @Description 更新接口数据
@@ -100,32 +100,32 @@ func (h *ApiHandler) ApiCreate(ctx *gin.Context) {
 // @Param request body v1.ApiRequest true "接口数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/apis/{id} [put]
-// @ID ApiUpdate
-func (h *ApiHandler) ApiUpdate(ctx *gin.Context) {
+// @ID UpdateApi
+func (h *ApiHandler) UpdateApi(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("ApiUpdate parse id error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("UpdateApi parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
 	var req v1.ApiRequest
 	if err := ctx.ShouldBind(&req); err != nil {
-		h.logger.WithContext(ctx).Error("ApiUpdate bind error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("UpdateApi bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
-	if err := h.apiService.ApiUpdate(ctx, uint(id), &req); err != nil {
-		h.logger.WithContext(ctx).Error("apiService.ApiUpdate error", zap.Error(err))
+	if err := h.apiService.Update(ctx, uint(id), &req); err != nil {
+		h.logger.WithContext(ctx).Error("apiService.Update error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
 }
 
-// ApiDelete godoc
+// DeleteApi godoc
 // @Summary 删除接口
 // @Schemes
 // @Description 删除指定ID的接口
@@ -136,18 +136,18 @@ func (h *ApiHandler) ApiUpdate(ctx *gin.Context) {
 // @Param id query uint true "接口ID"
 // @Success 200 {object} v1.Response
 // @Router /admin/apis/{id} [delete]
-// @ID ApiDelete
-func (h *ApiHandler) ApiDelete(ctx *gin.Context) {
+// @ID DeleteApi
+func (h *ApiHandler) DeleteApi(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("ApiDelete parse id error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("DeleteApi parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	if err := h.apiService.ApiDelete(ctx, uint(id)); err != nil {
-		h.logger.WithContext(ctx).Error("apiService.ApiDelete error", zap.Error(err))
+	if err := h.apiService.Delete(ctx, uint(id)); err != nil {
+		h.logger.WithContext(ctx).Error("apiService.Delete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
@@ -174,9 +174,9 @@ func (h *ApiHandler) GetApi(ctx *gin.Context) {
 		return
 	}
 
-	api, err := h.apiService.GetApi(ctx, uint(id))
+	api, err := h.apiService.Get(ctx, uint(id))
 	if err != nil {
-		h.logger.WithContext(ctx).Error("apiService.GetApi error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("apiService.Get error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}

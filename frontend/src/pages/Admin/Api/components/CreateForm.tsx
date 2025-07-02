@@ -2,7 +2,7 @@ import { Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState } from 'react';
-import { apiCreate } from '@/services/backend/api';
+import { createApi } from '@/services/backend/api';
 
 interface CreateFormProps {
   visible: boolean; // 弹窗是否可见
@@ -19,7 +19,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
     setLoading(true);
     try {
       const values = await form.validateFields();
-      await apiCreate(values as API.ApiRequest);
+      await createApi(values as API.ApiRequest);
       message.success(intl.formatMessage({ id: 'pages.common.object.new.success', defaultMessage: '新增成功' }));
       form.resetFields();
       onSuccess();

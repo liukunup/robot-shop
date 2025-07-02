@@ -47,16 +47,16 @@ func (h *UserHandler) ListUsers(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.userService.ListUsers(ctx, &req)
+	data, err := h.userService.List(ctx, &req)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("userService.ListUsers error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("userService.List error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, data)
 }
 
-// UserCreate godoc
+// CreateUser godoc
 // @Summary 创建用户
 // @Schemes
 // @Description 创建一个新的用户
@@ -67,24 +67,24 @@ func (h *UserHandler) ListUsers(ctx *gin.Context) {
 // @Param request body v1.UserRequest true "用户信息"
 // @Success 200 {object} v1.Response
 // @Router /admin/users [post]
-// @ID UserCreate
-func (h *UserHandler) UserCreate(ctx *gin.Context) {
+// @ID CreateUser
+func (h *UserHandler) CreateUser(ctx *gin.Context) {
 	var req v1.UserRequest
 	if err := ctx.ShouldBind(&req); err != nil {
-		h.logger.WithContext(ctx).Error("UserCreate bind error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("CreateUser bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
-	if err := h.userService.UserCreate(ctx, &req); err != nil {
-		h.logger.WithContext(ctx).Error("userService.UserCreate error", zap.Error(err))
+	if err := h.userService.Create(ctx, &req); err != nil {
+		h.logger.WithContext(ctx).Error("userService.Create error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
 }
 
-// UserUpdate godoc
+// UpdateUser godoc
 // @Summary 更新用户
 // @Schemes
 // @Description 更新用户信息
@@ -96,32 +96,32 @@ func (h *UserHandler) UserCreate(ctx *gin.Context) {
 // @Param request body v1.UserRequest true "参数"
 // @Success 200 {object} v1.Response
 // @Router /admin/users/{id} [put]
-// @ID UserUpdate
-func (h *UserHandler) UserUpdate(ctx *gin.Context) {
+// @ID UpdateUser
+func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	uid, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("UserUpdate parse id error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("UpdateUser parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
 	var req v1.UserRequest
 	if err := ctx.ShouldBind(&req); err != nil {
-		h.logger.WithContext(ctx).Error("UserUpdate bind error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("UpdateUser bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
 
-	if err := h.userService.UserUpdate(ctx, uint(uid), &req); err != nil {
-		h.logger.WithContext(ctx).Error("userService.UserUpdate error", zap.Error(err))
+	if err := h.userService.Update(ctx, uint(uid), &req); err != nil {
+		h.logger.WithContext(ctx).Error("userService.Update error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
 }
 
-// UserDelete godoc
+// DeleteUser godoc
 // @Summary 删除用户
 // @Schemes
 // @Description 删除指定ID的用户
@@ -132,18 +132,18 @@ func (h *UserHandler) UserUpdate(ctx *gin.Context) {
 // @Param id query uint true "用户ID"
 // @Success 200 {object} v1.Response
 // @Router /admin/users/{id} [delete]
-// @ID UserDelete
-func (h *UserHandler) UserDelete(ctx *gin.Context) {
+// @ID DeleteUser
+func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	uid, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("UserDelete parse id error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("DeleteUser parse id error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	if err := h.userService.UserDelete(ctx, uint(uid)); err != nil {
-		h.logger.WithContext(ctx).Error("userService.UserDelete error", zap.Error(err))
+	if err := h.userService.Delete(ctx, uint(uid)); err != nil {
+		h.logger.WithContext(ctx).Error("userService.Delete error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
@@ -160,7 +160,7 @@ func (h *UserHandler) UserDelete(ctx *gin.Context) {
 // @Security Bearer
 // @Success 200 {object} v1.UserResponse
 // @Router /users/me [get]
-// @ID FetchCurrentUser
+// @ID GetCurrentUser
 func (h *UserHandler) GetCurrentUser(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
@@ -168,16 +168,16 @@ func (h *UserHandler) GetCurrentUser(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.userService.GetUser(ctx, uid)
+	data, err := h.userService.Get(ctx, uid)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("userService.GetUser error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("userService.Get error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
 		return
 	}
 	v1.HandleSuccess(ctx, data)
 }
 
-// GetUserPermission godoc
+// GetUserPermissions godoc
 // @Summary 获取用户权限
 // @Schemes
 // @Description 获取当前用户的权限列表
@@ -186,25 +186,25 @@ func (h *UserHandler) GetCurrentUser(ctx *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} v1.UserPermissionResponse
-// @Router /users/me/permission [get]
-// @ID FetchCurrentPermission
-func (h *UserHandler) GetUserPermission(ctx *gin.Context) {
+// @Router /users/me/permissions [get]
+// @ID GetUserPermissions
+func (h *UserHandler) GetUserPermissions(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
 		return
 	}
 
-	data, err := h.userService.GetUserPermission(ctx, uid)
+	data, err := h.userService.GetPermissions(ctx, uid)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("userService.GetUserPermission error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("userService.GetPermissions error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	v1.HandleSuccess(ctx, data)
 }
 
-// GetUserMenu godoc
+// GetUserMenus godoc
 // @Summary 获取用户菜单
 // @Schemes
 // @Description 获取当前用户的菜单列表
@@ -213,18 +213,18 @@ func (h *UserHandler) GetUserPermission(ctx *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} v1.MenuSearchResponse
-// @Router /users/me/menu [get]
-// @ID FetchCurrentMenu
-func (h *UserHandler) GetUserMenu(ctx *gin.Context) {
+// @Router /users/me/menus [get]
+// @ID GetUserMenus
+func (h *UserHandler) GetUserMenus(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
 		return
 	}
 
-	data, err := h.userService.GetUserMenu(ctx, uid)
+	data, err := h.userService.GetMenus(ctx, uid)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("menuService.GetUserMenu error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("menuService.GetMenus error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": err.Error()})
 		return
 	}

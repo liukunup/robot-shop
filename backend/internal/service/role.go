@@ -13,14 +13,13 @@ import (
 )
 
 type RoleService interface {
-	// Base CRUD operations
 	List(ctx context.Context, req *v1.RoleSearchRequest) (*v1.RoleSearchResponseData, error)
 	Create(ctx context.Context, req *v1.RoleRequest) error
 	Update(ctx context.Context, id uint, req *v1.RoleRequest) error
 	Delete(ctx context.Context, id uint) error
-	// Extra operations
+
 	ListAll(ctx context.Context) (*v1.RoleSearchResponseData, error)
-	// Permission related operations
+
 	GetPermissions(ctx context.Context, role string) (*v1.GetRolePermissionResponseData, error)
 	UpdatePermissions(ctx context.Context, req *v1.UpdateRolePermissionRequest) error
 }

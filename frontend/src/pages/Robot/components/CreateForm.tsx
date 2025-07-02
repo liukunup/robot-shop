@@ -2,7 +2,7 @@ import { Checkbox, Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState } from 'react';
-import { robotCreate } from '@/services/backend/robot';
+import { createRobot } from '@/services/backend/robot';
 
 interface CreateFormProps {
   visible: boolean;
@@ -24,7 +24,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
         ...values,
         enabled: values.enabled !== undefined ? values.enabled : true
       };
-      await robotCreate(params as API.RobotRequest);
+      await createRobot(params as API.RobotRequest);
       message.success(intl.formatMessage({ id: 'pages.common.new.success', defaultMessage: '新建成功' }));
       form.resetFields();
       onSuccess();

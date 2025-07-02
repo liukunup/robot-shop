@@ -71,12 +71,12 @@ func NewHTTPServer(
 		{
 			// User
 			strictAuthRouter.GET("/admin/users", userHandler.ListUsers)
-			strictAuthRouter.POST("/admin/users", userHandler.UserCreate)
-			strictAuthRouter.PUT("/admin/users/:id", userHandler.UserUpdate)
-			strictAuthRouter.DELETE("/admin/users/:id", userHandler.UserDelete)
+			strictAuthRouter.POST("/admin/users", userHandler.CreateUser)
+			strictAuthRouter.PUT("/admin/users/:id", userHandler.UpdateUser)
+			strictAuthRouter.DELETE("/admin/users/:id", userHandler.DeleteUser)
 			strictAuthRouter.GET("/users/me", userHandler.GetCurrentUser)
-			strictAuthRouter.GET("/users/me/permission", userHandler.GetUserPermission)
-			strictAuthRouter.GET("/users/me/menus", userHandler.GetUserMenu)
+			strictAuthRouter.GET("/users/me/permissions", userHandler.GetUserPermissions)
+			strictAuthRouter.GET("/users/me/menus", userHandler.GetUserMenus)
 
 			// Role
 			strictAuthRouter.GET("/admin/roles", roleHandler.ListRoles)
@@ -88,21 +88,21 @@ func NewHTTPServer(
 
 			// Menu
 			strictAuthRouter.GET("/admin/menus", menuHandler.ListMenus)
-			strictAuthRouter.POST("/admin/menus", menuHandler.MenuCreate)
-			strictAuthRouter.PUT("/admin/menus/:id", menuHandler.MenuUpdate)
-			strictAuthRouter.DELETE("/admin/menus/:id", menuHandler.MenuDelete)
+			strictAuthRouter.POST("/admin/menus", menuHandler.CreateMenu)
+			strictAuthRouter.PUT("/admin/menus/:id", menuHandler.UpdateMenu)
+			strictAuthRouter.DELETE("/admin/menus/:id", menuHandler.DeleteMenu)
 
 			// API
 			strictAuthRouter.GET("/admin/apis", apiHandler.ListApis)
-			strictAuthRouter.POST("/admin/apis", apiHandler.ApiCreate)
-			strictAuthRouter.PUT("/admin/apis/:id", apiHandler.ApiUpdate)
-			strictAuthRouter.DELETE("/admin/apis/:id", apiHandler.ApiDelete)
+			strictAuthRouter.POST("/admin/apis", apiHandler.CreateApi)
+			strictAuthRouter.PUT("/admin/apis/:id", apiHandler.UpdateApi)
+			strictAuthRouter.DELETE("/admin/apis/:id", apiHandler.DeleteApi)
 
 			// Robot
 			strictAuthRouter.GET("/robots", robotHandler.ListRobots)
-			strictAuthRouter.POST("/robots", robotHandler.RobotCreate)
-			strictAuthRouter.PUT("/robots/:id", robotHandler.RobotUpdate)
-			strictAuthRouter.DELETE("/robots/:id", robotHandler.RobotDelete)
+			strictAuthRouter.POST("/robots", robotHandler.CreateRobot)
+			strictAuthRouter.PUT("/robots/:id", robotHandler.UpdateRobot)
+			strictAuthRouter.DELETE("/robots/:id", robotHandler.DeleteRobot)
 			strictAuthRouter.GET("/robots/:id", robotHandler.GetRobot)
 		}
 	}

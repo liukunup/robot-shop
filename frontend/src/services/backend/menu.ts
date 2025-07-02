@@ -18,7 +18,7 @@ export async function listMenus(
 }
 
 /** 创建菜单 创建一个新的菜单 POST /admin/menus */
-export async function menuCreate(body: API.MenuRequest, options?: { [key: string]: any }) {
+export async function createMenu(body: API.MenuRequest, options?: { [key: string]: any }) {
   return request<API.Response>(`/v1/admin/menus`, {
     method: 'POST',
     headers: {
@@ -30,9 +30,9 @@ export async function menuCreate(body: API.MenuRequest, options?: { [key: string
 }
 
 /** 更新菜单 更新菜单数据 PUT /admin/menus/${param0} */
-export async function menuUpdate(
+export async function updateMenu(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.MenuUpdateParams,
+  params: API.UpdateMenuParams,
   body: API.MenuRequest,
   options?: { [key: string]: any },
 ) {
@@ -49,9 +49,9 @@ export async function menuUpdate(
 }
 
 /** 删除菜单 删除指定ID的菜单 DELETE /admin/menus/${param0} */
-export async function menuDelete(
+export async function deleteMenu(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.MenuDeleteParams,
+  params: API.DeleteMenuParams,
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;

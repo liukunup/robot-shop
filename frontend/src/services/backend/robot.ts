@@ -18,7 +18,7 @@ export async function listRobots(
 }
 
 /** 创建机器人 创建一个新的机器人 POST /robots */
-export async function robotCreate(body: API.RobotRequest, options?: { [key: string]: any }) {
+export async function createRobot(body: API.RobotRequest, options?: { [key: string]: any }) {
   return request<API.Response>(`/v1/robots`, {
     method: 'POST',
     headers: {
@@ -44,9 +44,9 @@ export async function getRobot(
 }
 
 /** 更新机器人 更新机器人数据 PUT /robots/${param0} */
-export async function robotUpdate(
+export async function updateRobot(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.RobotUpdateParams,
+  params: API.UpdateRobotParams,
   body: API.RobotRequest,
   options?: { [key: string]: any },
 ) {
@@ -63,9 +63,9 @@ export async function robotUpdate(
 }
 
 /** 删除机器人 删除指定ID的机器人 DELETE /robots/${param0} */
-export async function robotDelete(
+export async function deleteRobot(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.RobotDeleteParams,
+  params: API.DeleteRobotParams,
   options?: { [key: string]: any },
 ) {
   const { id: param0, ...queryParams } = params;

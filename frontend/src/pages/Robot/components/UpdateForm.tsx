@@ -2,7 +2,7 @@ import { Checkbox, Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState, useEffect } from 'react';
-import { robotUpdate } from '@/services/backend/robot';
+import { updateRobot } from '@/services/backend/robot';
 
 interface UpdateFormProps {
   visible: boolean;
@@ -29,7 +29,7 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
       if (!values.id) {
         throw new Error('更新操作时未找到记录ID');
       }
-      await robotUpdate({id: values.id}, values as API.RobotRequest);
+      await updateRobot({id: values.id}, values as API.RobotRequest);
       message.success(intl.formatMessage({ id: 'pages.common.update.success', defaultMessage: '更新成功' }));
       form.resetFields();
       onSuccess();

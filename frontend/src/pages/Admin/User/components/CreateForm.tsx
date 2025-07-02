@@ -2,7 +2,7 @@ import { Select, Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState, useEffect } from 'react';
-import { userCreate } from '@/services/backend/user';
+import { createUser } from '@/services/backend/user';
 import { listRoles } from '@/services/backend/role';
 
 interface CreateFormProps {
@@ -49,7 +49,11 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
     setLoading(true);
     try {
       const values = await form.validateFields();
-      await userCreate(values as API.UserRequest);
+      const params = {
+        ...values,
+        status: 0,
+      }
+      await createUser(params as API.UserRequest);
       message.success(intl.formatMessage({ id: 'pages.common.new.success', defaultMessage: '新建成功' }));
       form.resetFields();
       onSuccess();
@@ -140,9 +144,9 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
             style={{ width: '100%' }}
             optionLabelProp="label"
           >
-            {roles.map(role => (
-              <Select.Option key={role.id} value={role.role} label={role.name}>
-                {role.name} ({role.role})
+            {roles.map(r => (
+              <Select.Option key={r.id} value={r.casbinRole} label={r.name}>
+                {r.name} ({r.casbinRole})
               </Select.Option>
             ))}
           </Select>

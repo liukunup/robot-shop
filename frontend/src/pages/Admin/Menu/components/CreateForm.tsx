@@ -2,7 +2,7 @@ import { Form, Input, Modal, message } from 'antd';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { useForm } from 'antd/es/form/Form';
 import { useState } from 'react';
-import { menuCreate } from '@/services/backend/menu';
+import { createMenu } from '@/services/backend/menu';
 
 interface CreateFormProps {
   visible: boolean; // 弹窗是否可见
@@ -19,7 +19,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
     setLoading(true);
     try {
       const values = await form.validateFields();
-      await menuCreate(values as API.MenuRequest);
+      await createMenu(values as API.MenuRequest);
       message.success(intl.formatMessage({ id: 'pages.common.object.new.success', defaultMessage: '新增成功' }));
       form.resetFields();
       onSuccess();

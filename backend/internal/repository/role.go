@@ -10,18 +10,17 @@ import (
 )
 
 type RoleRepository interface {
-	// Base CRUD operations
 	Get(ctx context.Context, id uint) (model.Role, error)
 	List(ctx context.Context, req *v1.RoleSearchRequest) ([]model.Role, int64, error)
 	Create(ctx context.Context, m *model.Role) error
 	Update(ctx context.Context, m *model.Role) error
 	Delete(ctx context.Context, id uint) error
-	// Extra operations
+
 	ListAll(ctx context.Context) ([]model.Role, error)
-	// Casbin related operations
+
 	GetByCasbinRole(ctx context.Context, casbinRole string) (model.Role, error)
 	DeleteCasbinRole(ctx context.Context, casbinRole string) (bool, error)
-	// Permission related operations
+
 	GetPermissions(ctx context.Context, casbinRole string) ([][]string, error)
 	UpdatePermissions(ctx context.Context, casbinRole string, permissions map[string]struct{}) error
 }
