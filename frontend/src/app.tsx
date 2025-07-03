@@ -1,7 +1,7 @@
 import { AvatarDropdown, AvatarName, Footer, Question, SelectLang } from '@/components';
 import { getCurrentUser } from '@/services/backend/user';
-import { LinkOutlined } from '@ant-design/icons';
-import type { Settings as LayoutSettings } from '@ant-design/pro-components';
+import { LinkOutlined, SmileOutlined, CrownOutlined, RobotOutlined } from '@ant-design/icons';
+import type { Settings as LayoutSettings, MenuDataItem } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
@@ -9,6 +9,7 @@ import React from 'react';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './utils/request';
 import '@ant-design/v5-patch-for-react-19';
+import { getUserMenus } from '@/services/backend/user';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -48,6 +49,22 @@ export async function getInitialState(): Promise<{
     settings: defaultSettings as Partial<LayoutSettings>,
   };
 }
+
+// 映射菜单对应的图标
+const IconMap = {
+  smile: <SmileOutlined />,
+  crown: <CrownOutlined />,
+  robot: <RobotOutlined />,
+};
+const loopMenuItem = (menus: any[]): MenuDataItem[] =>
+  menus.map(({ icon, children, component, access, ...item }) => ({
+    ...item,
+    icon: icon && IconMap[icon as 'smile'],
+    children: children && loopMenuItem(children),
+    component: component ? require(`@/pages${component}`).default : undefined,
+    access,
+  })
+);
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
@@ -100,6 +117,15 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         ]
       : [],
     menuHeaderRender: undefined,
+    menu: {
+      request: async () => {
+        const response = await getUserMenus();
+        if (!response.success) {
+          return [];
+        }
+        return loopMenuItem(response.data?.root || []);
+      },
+    },
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
     // 增加一个 loading 的状态

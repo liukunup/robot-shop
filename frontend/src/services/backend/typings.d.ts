@@ -202,33 +202,19 @@ declare namespace API {
   };
 
   type Menu = {
-    /** 绑定的组件 */
+    access?: string;
     component?: string;
-    /** 是否保活 */
-    hideInMenu?: boolean;
-    /** 图标，使用字符串表示 */
+    /** 创建时间 */
+    createdAt?: string;
     icon?: string;
-    /** 唯一id，使用整数表示 */
+    /** ID */
     id?: number;
-    /** 是否保活 */
-    keepAlive?: boolean;
-    /** 本地化标识 */
-    locale?: string;
-    /** 同路由中的name，唯一标识 */
     name?: string;
-    /** 父级菜单的id，使用整数表示 */
     parentId?: number;
-    /** 地址 */
     path?: string;
-    /** 重定向地址 */
     redirect?: string;
-    /** 展示名称 */
-    title?: string;
-    /** 是否保活 */
+    /** 更新时间 */
     updatedAt?: string;
-    /** iframe模式下的跳转url，不能与path重复 */
-    url?: string;
-    /** 排序权重 */
     weight?: number;
   };
 
@@ -239,34 +225,7 @@ declare namespace API {
     total?: number;
   };
 
-  type MenuRequest = {
-    /** 绑定的组件 */
-    component?: string;
-    /** 是否保活 */
-    hideInMenu?: boolean;
-    /** 图标，使用字符串表示 */
-    icon?: string;
-    /** 是否保活 */
-    keepAlive?: boolean;
-    /** 本地化标识 */
-    locale?: string;
-    /** 同路由中的name，唯一标识 */
-    name?: string;
-    /** 父级菜单的id，使用整数表示 */
-    parentId?: number;
-    /** 地址 */
-    path?: string;
-    /** 重定向地址 */
-    redirect?: string;
-    /** 展示名称 */
-    title?: string;
-    /** iframe模式下的跳转url，不能与path重复 */
-    url?: string;
-    /** 排序权重 */
-    weight?: number;
-  };
-
-  type MenuSearchResponse = {
+  type MenuListResponse = {
     data?: MenuList;
     /** 错误码 */
     errorCode?: number;
@@ -276,6 +235,51 @@ declare namespace API {
     errorShowType?: number;
     /** 是否成功 */
     success?: boolean;
+  };
+
+  type MenuRequest = {
+    access?: string;
+    component?: string;
+    icon?: string;
+    name?: string;
+    parentId?: number;
+    path?: string;
+    redirect?: string;
+    weight?: number;
+  };
+
+  type MenuTree = {
+    access?: string;
+    children?: Menu[];
+    component?: string;
+    /** 创建时间 */
+    createdAt?: string;
+    icon?: string;
+    /** ID */
+    id?: number;
+    name?: string;
+    parentId?: number;
+    path?: string;
+    redirect?: string;
+    /** 更新时间 */
+    updatedAt?: string;
+    weight?: number;
+  };
+
+  type MenuTreeResponse = {
+    data?: MenuTreeResponseData;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
+    /** 是否成功 */
+    success?: boolean;
+  };
+
+  type MenuTreeResponseData = {
+    root?: MenuTree[];
   };
 
   type RegisterRequest = {

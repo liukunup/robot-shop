@@ -212,19 +212,20 @@ func (h *UserHandler) GetUserPermissions(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} v1.MenuSearchResponse
+// @Success 200 {object} v1.MenuTreeResponse
 // @Router /users/me/menus [get]
 // @ID GetUserMenus
 func (h *UserHandler) GetUserMenus(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
+		h.logger.WithContext(ctx).Error("GetUserMenus get uid error")
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
 		return
 	}
 
 	data, err := h.userService.GetMenus(ctx, uid)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("menuService.GetMenus error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("userService.GetMenus error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": err.Error()})
 		return
 	}

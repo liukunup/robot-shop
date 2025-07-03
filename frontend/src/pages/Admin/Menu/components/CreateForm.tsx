@@ -71,11 +71,15 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
         </Form.Item>
 
         <Form.Item
+          name="redirect"
+          label={<FormattedMessage id="pages.admin.menu.key.redirect" defaultMessage="重定向" />}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
           name="component"
           label={<FormattedMessage id="pages.admin.menu.key.component" defaultMessage="组件" />}
-          rules={[
-            { required: true, message: intl.formatMessage({ id: 'pages.admin.menu.form.component.required', defaultMessage: '组件不能为空'}) },
-          ]}
         >
           <Input />
         </Form.Item>
@@ -90,6 +94,13 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
         <Form.Item
           name="icon"
           label={<FormattedMessage id="pages.admin.menu.key.icon" defaultMessage="图标" />}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          name="access"
+          label={<FormattedMessage id="pages.admin.menu.key.access" defaultMessage="权限" />}
         >
           <Input />
         </Form.Item>

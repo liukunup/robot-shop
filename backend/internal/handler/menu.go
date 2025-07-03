@@ -35,11 +35,11 @@ func NewMenuHandler(
 // @Security Bearer
 // @Param page query int true "页码"
 // @Param pageSize query int true "分页大小"
-// @Success 200 {object} v1.MenuSearchResponse
+// @Success 200 {object} v1.MenuListResponse
 // @Router /admin/menus [get]
 // @ID ListMenus
 func (h *MenuHandler) ListMenus(ctx *gin.Context) {
-	var req v1.MenuSearchRequest
+	var req v1.MenuListRequest
 	if err := ctx.ShouldBind(&req); err != nil {
 		h.logger.WithContext(ctx).Error("ListMenus bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)

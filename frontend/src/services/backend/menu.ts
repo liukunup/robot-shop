@@ -8,7 +8,7 @@ export async function listMenus(
   params: API.ListMenusParams,
   options?: { [key: string]: any },
 ) {
-  return request<API.MenuSearchResponse>(`/v1/admin/menus`, {
+  return request<API.MenuListResponse>(`/v1/admin/menus`, {
     method: 'GET',
     params: {
       ...params,

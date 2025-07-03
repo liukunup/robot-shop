@@ -284,7 +284,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.MenuSearchResponse"
+                            "$ref": "#/definitions/backend_api_v1.MenuListResponse"
                         }
                     }
                 }
@@ -1197,7 +1197,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.MenuSearchResponse"
+                            "$ref": "#/definitions/backend_api_v1.MenuTreeResponse"
                         }
                     }
                 }
@@ -1300,60 +1300,43 @@ const docTemplate = `{
         "Menu": {
             "type": "object",
             "properties": {
-                "component": {
-                    "description": "绑定的组件",
+                "access": {
                     "type": "string"
                 },
-                "hideInMenu": {
-                    "description": "是否保活",
-                    "type": "boolean"
+                "component": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
                 },
                 "icon": {
-                    "description": "图标，使用字符串表示",
                     "type": "string"
                 },
                 "id": {
-                    "description": "唯一id，使用整数表示",
-                    "type": "integer"
-                },
-                "keepAlive": {
-                    "description": "是否保活",
-                    "type": "boolean"
-                },
-                "locale": {
-                    "description": "本地化标识",
-                    "type": "string"
+                    "description": "ID",
+                    "type": "integer",
+                    "example": 1
                 },
                 "name": {
-                    "description": "同路由中的name，唯一标识",
                     "type": "string"
                 },
                 "parentId": {
-                    "description": "父级菜单的id，使用整数表示",
                     "type": "integer"
                 },
                 "path": {
-                    "description": "地址",
                     "type": "string"
                 },
                 "redirect": {
-                    "description": "重定向地址",
-                    "type": "string"
-                },
-                "title": {
-                    "description": "展示名称",
                     "type": "string"
                 },
                 "updatedAt": {
-                    "description": "是否保活",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "iframe模式下的跳转url，不能与path重复",
-                    "type": "string"
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
                 },
                 "weight": {
-                    "description": "排序权重",
                     "type": "integer"
                 }
             }
@@ -1370,6 +1353,56 @@ const docTemplate = `{
                 },
                 "total": {
                     "description": "总数",
+                    "type": "integer"
+                }
+            }
+        },
+        "MenuTree": {
+            "type": "object",
+            "properties": {
+                "access": {
+                    "type": "string"
+                },
+                "children": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Menu"
+                    }
+                },
+                "component": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "id": {
+                    "description": "ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "redirect": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
+                },
+                "weight": {
                     "type": "integer"
                 }
             }
@@ -1725,60 +1758,7 @@ const docTemplate = `{
                 }
             }
         },
-        "backend_api_v1.MenuRequest": {
-            "type": "object",
-            "properties": {
-                "component": {
-                    "description": "绑定的组件",
-                    "type": "string"
-                },
-                "hideInMenu": {
-                    "description": "是否保活",
-                    "type": "boolean"
-                },
-                "icon": {
-                    "description": "图标，使用字符串表示",
-                    "type": "string"
-                },
-                "keepAlive": {
-                    "description": "是否保活",
-                    "type": "boolean"
-                },
-                "locale": {
-                    "description": "本地化标识",
-                    "type": "string"
-                },
-                "name": {
-                    "description": "同路由中的name，唯一标识",
-                    "type": "string"
-                },
-                "parentId": {
-                    "description": "父级菜单的id，使用整数表示",
-                    "type": "integer"
-                },
-                "path": {
-                    "description": "地址",
-                    "type": "string"
-                },
-                "redirect": {
-                    "description": "重定向地址",
-                    "type": "string"
-                },
-                "title": {
-                    "description": "展示名称",
-                    "type": "string"
-                },
-                "url": {
-                    "description": "iframe模式下的跳转url，不能与path重复",
-                    "type": "string"
-                },
-                "weight": {
-                    "description": "排序权重",
-                    "type": "integer"
-                }
-            }
-        },
-        "backend_api_v1.MenuSearchResponse": {
+        "backend_api_v1.MenuListResponse": {
             "type": "object",
             "properties": {
                 "data": {
@@ -1800,6 +1780,73 @@ const docTemplate = `{
                     "description": "是否成功",
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "backend_api_v1.MenuRequest": {
+            "type": "object",
+            "properties": {
+                "access": {
+                    "type": "string"
+                },
+                "component": {
+                    "type": "string"
+                },
+                "icon": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "path": {
+                    "type": "string"
+                },
+                "redirect": {
+                    "type": "string"
+                },
+                "weight": {
+                    "type": "integer",
+                    "example": 0
+                }
+            }
+        },
+        "backend_api_v1.MenuTreeResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/backend_api_v1.MenuTreeResponseData"
+                },
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
+                    "type": "string"
+                },
+                "errorShowType": {
+                    "description": "前端展示方式",
+                    "type": "integer"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "backend_api_v1.MenuTreeResponseData": {
+            "type": "object",
+            "properties": {
+                "root": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/MenuTree"
+                    }
                 }
             }
         },

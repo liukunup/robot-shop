@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"errors"
 	mathRand "math/rand"
+	"sort"
 	"strings"
 	"time"
 
@@ -26,7 +27,7 @@ type UserService interface {
 	Delete(ctx context.Context, uid uint) error
 	Get(ctx context.Context, uid uint) (*v1.UserDataItem, error)
 
-	GetMenus(ctx context.Context, uid uint) (*v1.MenuSearchResponseData, error)
+	GetMenus(ctx context.Context, uid uint) (*v1.MenuTreeResponseData, error)
 	GetPermissions(ctx context.Context, uid uint) (*v1.UserPermissionResponseData, error)
 
 	Register(ctx context.Context, req *v1.RegisterRequest) error
@@ -228,16 +229,12 @@ func (s *userService) Get(ctx context.Context, uid uint) (*v1.UserDataItem, erro
 	}, nil
 }
 
-func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.MenuSearchResponseData, error) {
+func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.MenuTreeResponseData, error) {
 	// 获取菜单列表
-	menuList, total, err := s.menuRepository.List(ctx, nil)
+	menuList, _, err := s.menuRepository.List(ctx, nil)
 	if err != nil {
 		s.logger.WithContext(ctx).Error("menuRepository.List error", zap.Error(err))
 		return nil, err
-	}
-	data := &v1.MenuSearchResponseData{
-		List:  make([]v1.MenuDataItem, 0),
-		Total: total,
 	}
 
 	// 获取权限列表
@@ -246,35 +243,26 @@ func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.MenuSearchRes
 		s.logger.WithContext(ctx).Error("userRepository.GetPermissions error", zap.Error(err))
 		return nil, err
 	}
+
 	// 构建菜单权限映射
-	menuPermMap := map[string]struct{}{}
+	permMap := map[string]struct{}{}
 	// 超管可以看到所有菜单
 	if convertor.ToString(uid) == constant.AdminUserID {
 		for _, permission := range permList {
-			menuPermMap[strings.TrimPrefix(permission[1], constant.MenuResourcePrefix)] = struct{}{}
+			permMap[strings.TrimPrefix(permission[1], constant.MenuResourcePrefix)] = struct{}{}
 		}
 	} else {
 		for _, permission := range permList {
 			if len(permission) == 3 && strings.HasPrefix(permission[1], constant.MenuResourcePrefix) {
-				menuPermMap[strings.TrimPrefix(permission[1], constant.MenuResourcePrefix)] = struct{}{}
+				permMap[strings.TrimPrefix(permission[1], constant.MenuResourcePrefix)] = struct{}{}
 			}
 		}
 	}
 
-	for _, menu := range menuList {
-		if _, ok := menuPermMap[menu.Path]; ok {
-			data.List = append(data.List, v1.MenuDataItem{
-				ID:        menu.ID,
-				CreatedAt: menu.CreatedAt.Format(constant.DateTimeLayout),
-				UpdatedAt: menu.UpdatedAt.Format(constant.DateTimeLayout),
-				ParentID:  menu.ParentID,
-				Path:      menu.Path,
-				Component: menu.Component,
-				Name:      menu.Name,
-				Icon:      menu.Icon,
-				Weight:    menu.Weight,
-			})
-		}
+	// 构建菜单树
+	menuTree := buildMenuTree(menuList, permMap)
+	data := &v1.MenuTreeResponseData{
+		Root: menuTree,
 	}
 	return data, nil
 }
@@ -401,4 +389,57 @@ func generateHumanNickname() string {
 
 	seededRand := mathRand.New(mathRand.NewSource(time.Now().UnixNano()))
 	return adjectives[seededRand.Intn(len(adjectives))] + nouns[seededRand.Intn(len(nouns))]
+}
+
+func buildMenuTree(menuList []model.Menu, permMap map[string]struct{}) []v1.MenuDataNode {
+	// 存储顶级菜单
+	menuRoot := make([]v1.MenuDataNode, 0)
+	// 创建ID到菜单的映射
+	menuMap := make(map[uint]v1.MenuDataNode)
+
+	// 第一轮遍历：创建所有菜单节点并存入字典
+	for _, menu := range menuList {
+		if _, ok := permMap[menu.Path]; ok {
+			menuNode := v1.MenuDataNode{
+				MenuDataItem: v1.MenuDataItem{
+					ID:        menu.ID,
+					ParentID:  menu.ParentID,
+					Path:      menu.Path,
+					Redirect:  menu.Redirect,
+					Component: menu.Component,
+					Name:      menu.Name,
+					Icon:      menu.Icon,
+					Access:    menu.Access,
+					Weight:    menu.Weight,
+				},
+				Children: []v1.MenuDataItem{},
+			}
+			menuMap[menu.ID] = menuNode
+		}
+	}
+
+	// 第二轮遍历：构建父子关系
+	for _, menu := range menuList {
+		node := menuMap[menu.ID]
+		// 顶级菜单
+		if menu.ParentID == 0 {
+			menuRoot = append(menuRoot, node)
+		} else {
+			if parent, ok := menuMap[menu.ParentID]; ok {
+				parent.Children = append(parent.Children, node.MenuDataItem)
+				// 按权重排序子菜单
+				sort.Slice(parent.Children, func(i, j int) bool {
+					return parent.Children[i].Weight < parent.Children[j].Weight
+				})
+				menuMap[menu.ParentID] = parent
+			}
+		}
+	}
+
+	// 对顶级菜单按权重排序
+	sort.Slice(menuRoot, func(i, j int) bool {
+		return menuRoot[i].Weight < menuRoot[j].Weight
+	})
+
+	return menuRoot
 }

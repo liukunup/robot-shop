@@ -42,22 +42,19 @@ const Menu: React.FC = () => {
     },
     {
       title: intl.formatMessage({
+        id: 'pages.admin.menu.key.redirect',
+        defaultMessage: '重定向',
+      }),
+      dataIndex: 'redirect',
+      ellipsis: true,
+    },
+    {
+      title: intl.formatMessage({
         id: 'pages.admin.menu.key.component',
         defaultMessage: '组件',
       }),
       dataIndex: 'component',
       ellipsis: true,
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-            message: intl.formatMessage({
-              id: 'pages.admin.menu.form.component.required',
-              defaultMessage: '组件不能为空',
-            }),
-          },
-        ],
-      },
     },
     {
       title: intl.formatMessage({
@@ -72,6 +69,13 @@ const Menu: React.FC = () => {
         defaultMessage: '图标',
       }),
       dataIndex: 'icon',
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.menu.key.access',
+        defaultMessage: '权限',
+      }),
+      dataIndex: 'access',
     },
     {
       title: intl.formatMessage({
