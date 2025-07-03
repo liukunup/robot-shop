@@ -23,39 +23,66 @@ const Menu: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.admin.role.key.name',
+        id: 'pages.admin.menu.key.path',
+        defaultMessage: '路径',
+      }),
+      dataIndex: 'path',
+      ellipsis: true,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: intl.formatMessage({
+              id: 'pages.admin.menu.form.path.required',
+              defaultMessage: '路径不能为空',
+            }),
+          },
+        ],
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.menu.key.component',
+        defaultMessage: '组件',
+      }),
+      dataIndex: 'component',
+      ellipsis: true,
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: intl.formatMessage({
+              id: 'pages.admin.menu.form.component.required',
+              defaultMessage: '组件不能为空',
+            }),
+          },
+        ],
+      },
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.admin.menu.key.name',
         defaultMessage: '名称',
       }),
       dataIndex: 'name',
-      ellipsis: true,
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-            message: 'This field is required',
-          },
-        ],
-      },
     },
     {
       title: intl.formatMessage({
-        id: 'pages.admin.menu.key.role',
-        defaultMessage: '标识',
+        id: 'pages.admin.menu.key.icon',
+        defaultMessage: '图标',
       }),
-      dataIndex: 'role',
-      ellipsis: true,
-      formItemProps: {
-        rules: [
-          {
-            required: true,
-            message: 'This field is required',
-          },
-        ],
-      },
+      dataIndex: 'icon',
     },
     {
       title: intl.formatMessage({
-        id: 'pages.admin.role.key.createdAt',
+        id: 'pages.admin.menu.key.weight',
+        defaultMessage: '权重',
+      }),
+      dataIndex: 'weight',
+    },
+    {
+      title: intl.formatMessage({
+        id: 'pages.common.key.createdAt',
         defaultMessage: '创建时间',
       }),
       key: 'createdAt',
@@ -66,7 +93,7 @@ const Menu: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.admin.role.key.updatedAt',
+        id: 'pages.common.key.updatedAt',
         defaultMessage: '更新时间',
       }),
       key: 'updatedAt',
@@ -77,7 +104,7 @@ const Menu: React.FC = () => {
     },
     {
       title: intl.formatMessage({
-        id: 'pages.robot.table.column.actions',
+        id: 'pages.common.table.key.actions',
         defaultMessage: '操作',
       }),
       valueType: 'option',
@@ -90,19 +117,22 @@ const Menu: React.FC = () => {
             setUpdateVisible(true);
           }}
         >
-          <FormattedMessage id="pages.admin.role.table.action.edit" defaultMessage="编辑" />
+          <FormattedMessage id="pages.common.edit" defaultMessage="编辑" />
         </a>,
         <a
           key="remove"
           onClick={async () => {
             if (record.id) {
               await deleteMenu({ id: record.id });
-              message.success('删除成功');
+              message.success(intl.formatMessage({
+                id: 'pages.common.remove.success',
+                defaultMessage: '删除成功',
+              }));
               action?.reload();
             }
           }}
         >
-          <FormattedMessage id="pages.admin.role.table.action.remove" defaultMessage="删除" />
+          <FormattedMessage id="pages.common.remove" defaultMessage="删除" />
         </a>,
       ],
     },
@@ -113,10 +143,13 @@ const Menu: React.FC = () => {
     pageSize: number;
   }) => {
     try {
-      const result = await listMenus(params as API.ListRolesParams);
+      const result = await listMenus(params as API.ListMenusParams);
       return { data: result.data?.list || [], success: result.success, total: result.data?.total };
     } catch (error) {
-      message.error('获取列表失败');
+      message.error(intl.formatMessage({
+        id: 'pages.common.fetchData.failure',
+        defaultMessage: '获取数据失败',
+      }));
       return { data: [], success: false, total: 0 };
     }
   };
@@ -145,9 +178,6 @@ const Menu: React.FC = () => {
           defaultValue: {
             option: { fixed: 'right', disable: true },
           },
-          onChange(value) {
-            console.log('value: ', value);
-          },
         }}
         rowKey="id"
         search={{
@@ -164,8 +194,8 @@ const Menu: React.FC = () => {
         }}
         dateFormatter="string"
         headerTitle={intl.formatMessage({
-          id: 'pages.admin.role.table.title',
-          defaultMessage: '角色列表',
+          id: 'pages.admin.menu.table.title',
+          defaultMessage: '菜单列表',
         })}
         toolBarRender={() => [
           <Button
@@ -176,7 +206,7 @@ const Menu: React.FC = () => {
             }}
             type="primary"
           >
-            <FormattedMessage id="pages.admin.user.table.toolbar.newUser" defaultMessage="新增" />
+            <FormattedMessage id="pages.common.new" defaultMessage="新建" />
           </Button>,
         ]}
       />

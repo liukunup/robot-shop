@@ -6,20 +6,15 @@ type MenuSearchRequest struct {
 	PageSize int `form:"pageSize" binding:"required" example:"10"` // 分页大小
 }
 type MenuDataItem struct {
-	ID         uint   `json:"id,omitempty"`         // 唯一id，使用整数表示
-	ParentID   uint   `json:"parentId,omitempty"`   // 父级菜单的id，使用整数表示
-	Weight     int    `json:"weight"`               // 排序权重
-	Path       string `json:"path"`                 // 地址
-	Title      string `json:"title"`                // 展示名称
-	Name       string `json:"name,omitempty"`       // 同路由中的name，唯一标识
-	Component  string `json:"component,omitempty"`  // 绑定的组件
-	Locale     string `json:"locale,omitempty"`     // 本地化标识
-	Icon       string `json:"icon,omitempty"`       // 图标，使用字符串表示
-	Redirect   string `json:"redirect,omitempty"`   // 重定向地址
-	KeepAlive  bool   `json:"keepAlive,omitempty"`  // 是否保活
-	HideInMenu bool   `json:"hideInMenu,omitempty"` // 是否保活
-	URL        string `json:"url,omitempty"`        // iframe模式下的跳转url，不能与path重复
-	UpdatedAt  string `json:"updatedAt,omitempty"`  // 是否保活
+	ID        uint   `json:"id,omitempty" example:"1"`                          // ID
+	CreatedAt string `json:"createdAt,omitempty" example:"2006-01-02 15:04:05"` // 创建时间
+	UpdatedAt string `json:"updatedAt,omitempty" example:"2006-01-02 15:04:05"` // 更新时间
+	ParentID  uint   `json:"parentId,omitempty" example:"0"`
+	Path      string `json:"path"`
+	Component string `json:"component"`
+	Name      string `json:"name,omitempty"`
+	Icon      string `json:"icon,omitempty"`
+	Weight    int    `json:"weight,omitempty" example:"0"`
 } // @name Menu
 type MenuSearchResponseData struct {
 	List  []MenuDataItem `json:"list"`  // 列表
@@ -38,16 +33,10 @@ type MenuResponse struct {
 
 // for Create | Update
 type MenuRequest struct {
-	ParentID   uint   `json:"parentId,omitempty"`   // 父级菜单的id，使用整数表示
-	Weight     int    `json:"weight"`               // 排序权重
-	Path       string `json:"path"`                 // 地址
-	Title      string `json:"title"`                // 展示名称
-	Name       string `json:"name,omitempty"`       // 同路由中的name，唯一标识
-	Component  string `json:"component,omitempty"`  // 绑定的组件
-	Locale     string `json:"locale,omitempty"`     // 本地化标识
-	Icon       string `json:"icon,omitempty"`       // 图标，使用字符串表示
-	Redirect   string `json:"redirect,omitempty"`   // 重定向地址
-	KeepAlive  bool   `json:"keepAlive,omitempty"`  // 是否保活
-	HideInMenu bool   `json:"hideInMenu,omitempty"` // 是否保活
-	URL        string `json:"url,omitempty"`        // iframe模式下的跳转url，不能与path重复
+	ParentID  uint   `json:"parentId,omitempty" example:"0"`
+	Path      string `json:"path"`
+	Component string `json:"component"`
+	Name      string `json:"name,omitempty"`
+	Icon      string `json:"icon,omitempty"`
+	Weight    int    `json:"weight,omitempty" example:"0"`
 }

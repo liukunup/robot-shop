@@ -44,20 +44,15 @@ func (s *menuService) List(ctx context.Context, req *v1.MenuSearchRequest) (*v1.
 	}
 	for _, menu := range list {
 		data.List = append(data.List, v1.MenuDataItem{
-			ID:         menu.ID,
-			Name:       menu.Name,
-			Title:      menu.Title,
-			Path:       menu.Path,
-			Component:  menu.Component,
-			Redirect:   menu.Redirect,
-			KeepAlive:  menu.KeepAlive,
-			HideInMenu: menu.HideInMenu,
-			Locale:     menu.Locale,
-			Weight:     menu.Weight,
-			Icon:       menu.Icon,
-			ParentID:   menu.ParentID,
-			UpdatedAt:  menu.UpdatedAt.Format(constant.DateTimeLayout),
-			URL:        menu.URL,
+			ID:        menu.ID,
+			CreatedAt: menu.CreatedAt.Format(constant.DateTimeLayout),
+			UpdatedAt: menu.UpdatedAt.Format(constant.DateTimeLayout),
+			ParentID:  menu.ParentID,
+			Path:      menu.Path,
+			Component: menu.Component,
+			Name:      menu.Name,
+			Icon:      menu.Icon,
+			Weight:    menu.Weight,
 		})
 	}
 	return data, nil
@@ -65,35 +60,23 @@ func (s *menuService) List(ctx context.Context, req *v1.MenuSearchRequest) (*v1.
 
 func (s *menuService) Create(ctx context.Context, req *v1.MenuRequest) error {
 	return s.menuRepository.Create(ctx, &model.Menu{
-		Component:  req.Component,
-		Icon:       req.Icon,
-		KeepAlive:  req.KeepAlive,
-		HideInMenu: req.HideInMenu,
-		Locale:     req.Locale,
-		Weight:     req.Weight,
-		Name:       req.Name,
-		ParentID:   req.ParentID,
-		Path:       req.Path,
-		Redirect:   req.Redirect,
-		Title:      req.Title,
-		URL:        req.URL,
+		ParentID:  req.ParentID,
+		Path:      req.Path,
+		Component: req.Component,
+		Name:      req.Name,
+		Icon:      req.Icon,
+		Weight:    req.Weight,
 	})
 }
 
 func (s *menuService) Update(ctx context.Context, id uint, req *v1.MenuRequest) error {
 	data := map[string]interface{}{
-		"component":    req.Component,
-		"icon":         req.Icon,
-		"keep_alive":   req.KeepAlive,
-		"hide_in_menu": req.HideInMenu,
-		"locale":       req.Locale,
-		"weight":       req.Weight,
-		"name":         req.Name,
-		"parent_id":    req.ParentID,
-		"path":         req.Path,
-		"redirect":     req.Redirect,
-		"title":        req.Title,
-		"url":          req.URL,
+		"path":      req.Path,
+		"parent_id": req.ParentID,
+		"component": req.Component,
+		"name":      req.Name,
+		"icon":      req.Icon,
+		"weight":    req.Weight,
 	}
 	return s.menuRepository.Update(ctx, id, data)
 }

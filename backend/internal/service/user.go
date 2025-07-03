@@ -264,20 +264,15 @@ func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.MenuSearchRes
 	for _, menu := range menuList {
 		if _, ok := menuPermMap[menu.Path]; ok {
 			data.List = append(data.List, v1.MenuDataItem{
-				ID:         menu.ID,
-				Name:       menu.Name,
-				Title:      menu.Title,
-				Path:       menu.Path,
-				Component:  menu.Component,
-				Redirect:   menu.Redirect,
-				KeepAlive:  menu.KeepAlive,
-				HideInMenu: menu.HideInMenu,
-				Locale:     menu.Locale,
-				Weight:     menu.Weight,
-				Icon:       menu.Icon,
-				ParentID:   menu.ParentID,
-				UpdatedAt:  menu.UpdatedAt.Format(constant.DateTimeLayout),
-				URL:        menu.URL,
+				ID:        menu.ID,
+				CreatedAt: menu.CreatedAt.Format(constant.DateTimeLayout),
+				UpdatedAt: menu.UpdatedAt.Format(constant.DateTimeLayout),
+				ParentID:  menu.ParentID,
+				Path:      menu.Path,
+				Component: menu.Component,
+				Name:      menu.Name,
+				Icon:      menu.Icon,
+				Weight:    menu.Weight,
 			})
 		}
 	}

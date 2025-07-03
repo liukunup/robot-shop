@@ -31,11 +31,11 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
         throw new Error('更新操作时未找到记录ID');
       }
       await updateMenu({id: values.id}, values as API.MenuRequest);
-      message.success(intl.formatMessage({ id: 'pages.common.object.update.success', defaultMessage: '更新成功' }));
+      message.success(intl.formatMessage({ id: 'pages.common.new.success', defaultMessage: '新建成功' }));
       form.resetFields();
       onSuccess();
     } catch (error) {
-      const msg = intl.formatMessage({ id: 'pages.common.object.update.failed', defaultMessage: '更新失败' });
+      const msg = intl.formatMessage({ id: 'pages.common.new.failure', defaultMessage: '新建失败' });
       if (error instanceof Error) {
         message.error(error.message || msg);
       } else {
@@ -53,7 +53,7 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
 
   return (
     <Modal
-      title={<FormattedMessage id="pages.admin.menu.modal.updateForm.title" defaultMessage="更新菜单" />}
+      title={<FormattedMessage id="pages.admin.menu.modal.updateForm.title" defaultMessage="编辑菜单" />}
       open={visible}
       onOk={handleOk}
       onCancel={handleCancel}
@@ -71,85 +71,49 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
         </Form.Item>
 
         <Form.Item
-          name="parentID"
-          label="父级菜单ID"
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          name="weight"
-          label="排序权重"
+          name="parentId"
+          label={<FormattedMessage id="pages.admin.menu.key.parent" defaultMessage="父级菜单" />}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
           name="path"
-          label="地址"
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          name="title"
-          label="展示名称"
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          name="name"
-          label="同路由中的name，唯一标识"
+          label={<FormattedMessage id="pages.admin.menu.key.path" defaultMessage="路径" />}
+          rules={[
+            { required: true, message: intl.formatMessage({ id: 'pages.admin.menu.form.path.required', defaultMessage: '路径不能为空'}) },
+          ]}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
           name="component"
-          label="绑定组件"
+          label={<FormattedMessage id="pages.admin.menu.key.component" defaultMessage="组件" />}
+          rules={[
+            { required: true, message: intl.formatMessage({ id: 'pages.admin.menu.form.component.required', defaultMessage: '组件不能为空'}) },
+          ]}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
-          name="locale"
-          label="本地化标识"
+          name="name"
+          label={<FormattedMessage id="pages.admin.menu.key.name" defaultMessage="名称" />}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
           name="icon"
-          label="图标，使用字符串表示"
+          label={<FormattedMessage id="pages.admin.menu.key.icon" defaultMessage="图标" />}
         >
           <Input />
         </Form.Item>
 
         <Form.Item
-          name="redirect"
-          label="重定向地址"
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          name="keepAlive"
-          label="是否保活"
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          name="hideInMenu"
-          label="是否隐藏在菜单中"
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          name="url"
-          label="iframe模式下的跳转url，不能与path重复"
+          name="weight"
+          label={<FormattedMessage id="pages.admin.menu.key.weight" defaultMessage="权重" />}
         >
           <Input />
         </Form.Item>
