@@ -22,6 +22,43 @@ export default [
     component: './Welcome',
   },
   {
+    path: '/robot',
+    name: 'robot',
+    icon: 'robot',
+    component: './Robot',
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    icon: 'crown',
+    routes: [
+      {
+        path: '/admin',
+        redirect: '/admin/user',
+      },
+      {
+        path: '/admin/user',
+        name: 'user',
+        component: './Admin/User',
+      },
+      {
+        path: '/admin/role',
+        name: 'role',
+        component: './Admin/Role',
+      },
+      {
+        path: '/admin/menu',
+        name: 'menu',
+        component: './Admin/Menu',
+      },
+      {
+        path: '/admin/api',
+        name: 'api',
+        component: './Admin/Api',
+      },
+    ],
+  },
+  {
     path: '/user',
     layout: false,
     routes: [

@@ -256,9 +256,10 @@ var menuData = `[
     "id": 1,
     "parentId": 0,
     "path": "/robot",
-    "component": "./Robot",
+    "component": "/Robot",
     "name": "robot",
-    "icon": "robot"
+    "icon": "robot",
+	"access": "canView"
   },
   {
     "id": 1000,
@@ -266,44 +267,49 @@ var menuData = `[
     "path": "/admin",
     "name": "admin",
     "icon": "crown",
-    "access": "admin"
+    "access": "canAdmin"
   },
   {
     "id": 1001,
     "parentId": 1000,
     "path": "/admin",
-    "redirect": "/admin/user"
+    "redirect": "/admin/user",
+	"access": "canAdmin"
   },
   {
     "id": 1002,
     "parentId": 1000,
     "path": "/admin/user",
-    "component": "./Admin/User",
+    "component": "/Admin/User",
     "name": "user",
+	"access": "canAdmin",
     "weight": 1
   },
   {
     "id": 1003,
     "parentId": 1000,
     "path": "/admin/role",
-    "component": "./Admin/Role",
+    "component": "/Admin/Role",
     "name": "role",
+	"access": "canAdmin",
     "weight": 2
   },
   {
     "id": 1004,
     "parentId": 1000,
     "path": "/admin/menu",
-    "component": "./Admin/Menu",
+    "component": "/Admin/Menu",
     "name": "menu",
+	"access": "canAdmin",
     "weight": 3
   },
   {
     "id": 1005,
     "parentId": 1000,
     "path": "/admin/api",
-    "component": "./Admin/Api",
+    "component": "/Admin/Api",
     "name": "api",
+	"access": "canAdmin",
     "weight": 4
   }
 ]`

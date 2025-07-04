@@ -1357,7 +1357,7 @@ const docTemplate = `{
                 }
             }
         },
-        "MenuTree": {
+        "MenuTreeNode": {
             "type": "object",
             "properties": {
                 "access": {
@@ -1845,7 +1845,7 @@ const docTemplate = `{
                 "root": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/MenuTree"
+                        "$ref": "#/definitions/MenuTreeNode"
                     }
                 }
             }

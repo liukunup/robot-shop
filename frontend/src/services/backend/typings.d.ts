@@ -248,7 +248,7 @@ declare namespace API {
     weight?: number;
   };
 
-  type MenuTree = {
+  type MenuTreeNode = {
     access?: string;
     children?: Menu[];
     component?: string;
@@ -279,7 +279,7 @@ declare namespace API {
   };
 
   type MenuTreeResponseData = {
-    root?: MenuTree[];
+    root?: MenuTreeNode[];
   };
 
   type RegisterRequest = {

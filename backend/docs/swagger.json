@@ -1350,7 +1350,7 @@
                 }
             }
         },
-        "MenuTree": {
+        "MenuTreeNode": {
             "type": "object",
             "properties": {
                 "access": {
@@ -1838,7 +1838,7 @@
                 "root": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/MenuTree"
+                        "$ref": "#/definitions/MenuTreeNode"
                     }
                 }
             }

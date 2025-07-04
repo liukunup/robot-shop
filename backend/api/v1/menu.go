@@ -31,7 +31,7 @@ type MenuListResponse struct {
 type MenuDataNode struct {
 	MenuDataItem
 	Children []MenuDataItem `json:"children,omitempty"`
-} // @name MenuTree
+} // @name MenuTreeNode
 type MenuTreeResponseData struct {
 	Root []MenuDataNode `json:"root"`
 }

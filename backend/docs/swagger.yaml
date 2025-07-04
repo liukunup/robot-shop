@@ -88,7 +88,7 @@ definitions:
         description: 总数
         type: integer
     type: object
-  MenuTree:
+  MenuTreeNode:
     properties:
       access:
         type: string
@@ -442,7 +442,7 @@ definitions:
     properties:
       root:
         items:
-          $ref: '#/definitions/MenuTree'
+          $ref: '#/definitions/MenuTreeNode'
         type: array
     type: object
   backend_api_v1.RegisterRequest:

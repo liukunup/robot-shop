@@ -14,6 +14,23 @@ import { getUserMenus } from '@/services/backend/user';
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 
+// 解决动态菜单图标问题
+interface IconMapType {
+  [key: string]: React.ReactNode;
+}
+const IconMap: IconMapType = {
+  smile: <SmileOutlined />,
+  crown: <CrownOutlined />,
+  robot: <RobotOutlined />,
+};
+const loopMenuItem = (menus: API.MenuTreeNode[]): MenuDataItem[] =>
+  menus.map(({ icon, children, ...item }) => ({
+    ...item,
+    icon: icon && IconMap[icon],
+    children: children && loopMenuItem(children),
+  })
+);
+
 /**
  * @see https://umijs.org/docs/api/runtime-config#getinitialstate
  * */
@@ -22,6 +39,7 @@ export async function getInitialState(): Promise<{
   currentUser?: API.User;
   loading?: boolean;
   fetchUserInfo?: () => Promise<API.User | undefined>;
+  menuData?: MenuDataItem[];
 }> {
   const fetchUserInfo = async () => {
     try {
@@ -34,37 +52,37 @@ export async function getInitialState(): Promise<{
     }
     return undefined;
   };
+
+  const fetchMenuData = async () => {
+    try {
+      const response = await getUserMenus();
+      if (response.success) {
+        return loopMenuItem(response.data?.root || []);
+      }
+    } catch (error) {
+      console.error('获取菜单数据失败:', error);
+    }
+    return [];
+  };
+
   // 如果不是登录页面，执行
   const { location } = history;
   if (location.pathname !== loginPath) {
     const currentUser = await fetchUserInfo();
+    const menuData = await fetchMenuData();
     return {
       fetchUserInfo,
       currentUser,
+      menuData,
       settings: defaultSettings as Partial<LayoutSettings>,
     };
   }
   return {
     fetchUserInfo,
+    menuData: [],
     settings: defaultSettings as Partial<LayoutSettings>,
   };
 }
-
-// 映射菜单对应的图标
-const IconMap = {
-  smile: <SmileOutlined />,
-  crown: <CrownOutlined />,
-  robot: <RobotOutlined />,
-};
-const loopMenuItem = (menus: any[]): MenuDataItem[] =>
-  menus.map(({ icon, children, component, access, ...item }) => ({
-    ...item,
-    icon: icon && IconMap[icon as 'smile'],
-    children: children && loopMenuItem(children),
-    component: component ? require(`@/pages${component}`).default : undefined,
-    access,
-  })
-);
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
@@ -117,15 +135,6 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         ]
       : [],
     menuHeaderRender: undefined,
-    menu: {
-      request: async () => {
-        const response = await getUserMenus();
-        if (!response.success) {
-          return [];
-        }
-        return loopMenuItem(response.data?.root || []);
-      },
-    },
     // 自定义 403 页面
     // unAccessible: <div>unAccessible</div>,
     // 增加一个 loading 的状态
@@ -150,6 +159,8 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         </>
       );
     },
+    // 实现动态菜单功能
+    menuDataRender: () => initialState?.menuData || [],
     ...initialState?.settings,
   };
 };
