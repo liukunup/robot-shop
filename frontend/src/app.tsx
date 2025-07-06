@@ -160,7 +160,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       );
     },
     // 实现动态菜单功能
-    menuDataRender: () => loopMenuItem(initialState.menuData),
+    menuDataRender: () => initialState.menuData,
     ...initialState?.settings,
   };
 };
