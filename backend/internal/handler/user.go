@@ -212,7 +212,7 @@ func (h *UserHandler) GetUserPermissions(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} v1.MenuTreeResponse
+// @Success 200 {object} v1.DynamicMenuResponse
 // @Router /users/me/menus [get]
 // @ID GetUserMenus
 func (h *UserHandler) GetUserMenus(ctx *gin.Context) {

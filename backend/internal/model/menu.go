@@ -9,9 +9,9 @@ type Menu struct {
 	Icon               string `gorm:"column:icon;type:varchar(255);comment:图标"`
 	Name               string `gorm:"column:name;type:varchar(255);comment:名称"`
 	Path               string `gorm:"column:path;type:varchar(255);comment:路由"`
+	Component          string `gorm:"column:component;type:varchar(255);comment:组件"`
 	Access             string `gorm:"column:access;type:varchar(255);comment:可见性"`
 	Locale             string `gorm:"column:locale;type:varchar(255);comment:国际化"`
-	Weight             uint   `gorm:"column:weight;default:0;comment:权重"`
 	Redirect           string `gorm:"column:redirect;type:varchar(255);comment:重定向"`
 	Target             string `gorm:"column:target;type:varchar(255);comment:指定外链打开形式"`
 	HideChildrenInMenu bool   `gorm:"column:hide_children_in_menu;default:false;comment:隐藏子节点"`

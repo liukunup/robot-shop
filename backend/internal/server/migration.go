@@ -91,29 +91,37 @@ func (m *MigrateServer) initialUser(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	err = m.db.Create(&model.User{
+	if err = m.db.Create(&model.User{
 		Model:    gorm.Model{ID: 1},
 		Username: "admin",
 		Password: string(hashedPassword),
 		Nickname: "超级管理员",
 		Email:    "admin@example.com",
-		Phone:    "12345678901",
-	}).Error
-	return m.db.Create(&model.User{
+		Phone:    "13900000001",
+		Status:   1,
+	}).Error; err != nil {
+		return err
+	}
+	if err = m.db.Create(&model.User{
 		Model:    gorm.Model{ID: 2},
 		Username: "operator",
 		Password: string(hashedPassword),
 		Nickname: "运营人员",
 		Email:    "operator@example.com",
-		Phone:    "12345678901",
-	}).Error
+		Phone:    "13900000002",
+		Status:   1,
+	}).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (m *MigrateServer) initialRBAC(ctx context.Context) error {
+	// 创建角色
 	roles := []model.Role{
 		{CasbinRole: constant.AdminRole, Name: "超级管理员"},
-		{CasbinRole: "operator", Name: "运营人员"},
-		{CasbinRole: "guest", Name: "访客"},
+		{CasbinRole: constant.OperatorRole, Name: "运营人员"},
+		{CasbinRole: "user", Name: "普通用户"},
 	}
 	if err := m.db.Create(&roles).Error; err != nil {
 		return err
@@ -124,20 +132,23 @@ func (m *MigrateServer) initialRBAC(ctx context.Context) error {
 		m.log.Error("m.e.SavePolicy error", zap.Error(err))
 		return err
 	}
+	// 给管理员加角色
 	_, err = m.e.AddRoleForUser(constant.AdminUserID, constant.AdminRole)
 	if err != nil {
 		m.log.Error("m.e.AddRoleForUser error", zap.Error(err))
 		return err
 	}
-	menuList := make([]v1.MenuDataItem, 0)
-	err = json.Unmarshal([]byte(menuData), &menuList)
+	// 给管理员加菜单权限
+	menuList := make([]model.Menu, 0)
+	err = m.db.Find(&menuList).Error
 	if err != nil {
-		m.log.Error("json.Unmarshal error", zap.Error(err))
+		m.log.Error("m.db.Find(&menuList).Error error", zap.Error(err))
 		return err
 	}
-	for _, item := range menuList {
-		m.addPermissionForRole(constant.AdminRole, constant.MenuResourcePrefix+item.Path, "read")
+	for _, menu := range menuList {
+		m.addPermissionForRole(constant.AdminRole, constant.MenuResourcePrefix+menu.Path, "read")
 	}
+	// 给管理员加接口权限
 	apiList := make([]model.Api, 0)
 	err = m.db.Find(&apiList).Error
 	if err != nil {
@@ -238,14 +249,22 @@ func (m *MigrateServer) initialMenuData(ctx context.Context) error {
 			Model: gorm.Model{
 				ID: item.ID,
 			},
-			ParentID:  item.ParentID,
-			Path:      item.Path,
-			Redirect:  item.Redirect,
-			Component: item.Component,
-			Name:      item.Name,
-			Icon:      item.Icon,
-			Access:    item.Access,
-			Weight:    item.Weight,
+			ParentID:           item.ParentID,
+			Icon:               item.Icon,
+			Name:               item.Name,
+			Path:               item.Path,
+			Component:          item.Component,
+			Access:             item.Access,
+			Redirect:           item.Redirect,
+			Target:             item.Target,
+			HideChildrenInMenu: item.HideChildrenInMenu,
+			HideInMenu:         item.HideInMenu,
+			FlatMenu:           item.FlatMenu,
+			Disabled:           item.Disabled,
+			Tooltip:            item.Tooltip,
+			DisabledTooltip:    item.DisabledTooltip,
+			Key:                item.Key,
+			ParentKeys:         item.ParentKeys,
 		})
 	}
 	return m.db.Create(&menuListDb).Error
@@ -254,16 +273,26 @@ func (m *MigrateServer) initialMenuData(ctx context.Context) error {
 var menuData = `[
   {
     "id": 1,
-    "parentId": 0,
+    "path": "/",
+	"redirect": "/welcome"
+  },
+  {
+    "id": 2,
+    "path": "/welcome",
+    "name": "welcome",
+    "icon": "smile",
+	"component": "@/pages/Welcome"
+  },
+  {
+    "id": 3,
     "path": "/robot",
-    "component": "/Robot",
     "name": "robot",
     "icon": "robot",
-	"access": "canView"
+	"component": "@/pages/Robot",
+	"access": "canUser"
   },
   {
     "id": 1000,
-    "parentId": 0,
     "path": "/admin",
     "name": "admin",
     "icon": "crown",
@@ -273,43 +302,34 @@ var menuData = `[
     "id": 1001,
     "parentId": 1000,
     "path": "/admin",
-    "redirect": "/admin/user",
-	"access": "canAdmin"
+	"redirect": "/admin/user"
   },
   {
     "id": 1002,
     "parentId": 1000,
     "path": "/admin/user",
-    "component": "/Admin/User",
     "name": "user",
-	"access": "canAdmin",
-    "weight": 1
+	"component": "@/pages/Admin/User"
   },
   {
     "id": 1003,
     "parentId": 1000,
     "path": "/admin/role",
-    "component": "/Admin/Role",
     "name": "role",
-	"access": "canAdmin",
-    "weight": 2
+	"component": "@/pages/Admin/Role"
   },
   {
     "id": 1004,
     "parentId": 1000,
     "path": "/admin/menu",
-    "component": "/Admin/Menu",
     "name": "menu",
-	"access": "canAdmin",
-    "weight": 3
+	"component": "@/pages/Admin/Menu"
   },
   {
     "id": 1005,
     "parentId": 1000,
     "path": "/admin/api",
-    "component": "/Admin/Api",
     "name": "api",
-	"access": "canAdmin",
-    "weight": 4
+	"component": "@/pages/Admin/Api"
   }
 ]`

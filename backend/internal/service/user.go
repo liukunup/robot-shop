@@ -10,11 +10,9 @@ import (
 	"encoding/base64"
 	"errors"
 	mathRand "math/rand"
-	"sort"
 	"strings"
 	"time"
 
-	"github.com/duke-git/lancet/v2/convertor"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -27,7 +25,7 @@ type UserService interface {
 	Delete(ctx context.Context, uid uint) error
 	Get(ctx context.Context, uid uint) (*v1.UserDataItem, error)
 
-	GetMenus(ctx context.Context, uid uint) (*v1.MenuTreeResponseData, error)
+	GetMenus(ctx context.Context, uid uint) (*v1.DynamicMenuResponseData, error)
 	GetPermissions(ctx context.Context, uid uint) (*v1.UserPermissionResponseData, error)
 
 	Register(ctx context.Context, req *v1.RegisterRequest) error
@@ -229,11 +227,11 @@ func (s *userService) Get(ctx context.Context, uid uint) (*v1.UserDataItem, erro
 	}, nil
 }
 
-func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.MenuTreeResponseData, error) {
+func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.DynamicMenuResponseData, error) {
 	// 获取菜单列表
-	menuList, _, err := s.menuRepository.List(ctx, nil)
+	menuList, err := s.menuRepository.ListAll(ctx)
 	if err != nil {
-		s.logger.WithContext(ctx).Error("menuRepository.List error", zap.Error(err))
+		s.logger.WithContext(ctx).Error("menuRepository.ListAll error", zap.Error(err))
 		return nil, err
 	}
 
@@ -246,23 +244,68 @@ func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.MenuTreeRespo
 
 	// 构建菜单权限映射
 	permMap := map[string]struct{}{}
-	// 超管可以看到所有菜单
-	if convertor.ToString(uid) == constant.AdminUserID {
-		for _, permission := range permList {
+	for _, permission := range permList {
+		if len(permission) == 3 && strings.HasPrefix(permission[1], constant.MenuResourcePrefix) {
 			permMap[strings.TrimPrefix(permission[1], constant.MenuResourcePrefix)] = struct{}{}
 		}
-	} else {
-		for _, permission := range permList {
-			if len(permission) == 3 && strings.HasPrefix(permission[1], constant.MenuResourcePrefix) {
-				permMap[strings.TrimPrefix(permission[1], constant.MenuResourcePrefix)] = struct{}{}
+	}
+
+	// -------------------- 构建动态菜单 --------------------
+	// 第一轮遍历 构建ID到节点的映射
+	menuMap := make(map[uint]*v1.MenuNode)
+	for _, menu := range menuList {
+		// 权限过滤
+		if _, ok := permMap[menu.Path]; !ok {
+			continue
+		}
+		// 构建节点
+		menuNode := &v1.MenuNode{
+			MenuDataItem: v1.MenuDataItem{
+				ID:                 menu.ID,
+				ParentID:           menu.ParentID,
+				Icon:               menu.Icon,
+				Name:               menu.Name,
+				Path:               menu.Path,
+				Component:          menu.Component,
+				Access:             menu.Access,
+				Locale:             menu.Locale,
+				Redirect:           menu.Redirect,
+				Target:             menu.Target,
+				HideChildrenInMenu: menu.HideChildrenInMenu,
+				HideInMenu:         menu.HideInMenu,
+				FlatMenu:           menu.FlatMenu,
+				Disabled:           menu.Disabled,
+				Tooltip:            menu.Tooltip,
+				DisabledTooltip:    menu.DisabledTooltip,
+				Key:                menu.Key,
+				ParentKeys:         menu.ParentKeys,
+			},
+			Children: make([]*v1.MenuNode, 0),
+		}
+		menuMap[menu.ID] = menuNode
+	}
+
+	// 第二轮遍历 构建树结构
+	menuRoot := make([]*v1.MenuNode, 0)
+	for _, menu := range menuList {
+		// 权限过滤
+		if _, ok := permMap[menu.Path]; !ok {
+			continue
+		}
+
+		menuNode := menuMap[menu.ID]
+
+		if menu.ParentID == 0 { // 顶级菜单
+			menuRoot = append(menuRoot, menuNode)
+		} else { // 子菜单
+			if parent, ok := menuMap[menu.ParentID]; ok {
+				parent.Children = append(parent.Children, menuNode)
 			}
 		}
 	}
 
-	// 构建菜单树
-	menuTree := buildMenuTree(menuList, permMap)
-	data := &v1.MenuTreeResponseData{
-		Root: menuTree,
+	data := &v1.DynamicMenuResponseData{
+		List: menuRoot,
 	}
 	return data, nil
 }
@@ -389,57 +432,4 @@ func generateHumanNickname() string {
 
 	seededRand := mathRand.New(mathRand.NewSource(time.Now().UnixNano()))
 	return adjectives[seededRand.Intn(len(adjectives))] + nouns[seededRand.Intn(len(nouns))]
-}
-
-func buildMenuTree(menuList []model.Menu, permMap map[string]struct{}) []v1.MenuDataNode {
-	// 存储顶级菜单
-	menuRoot := make([]v1.MenuDataNode, 0)
-	// 创建ID到菜单的映射
-	menuMap := make(map[uint]v1.MenuDataNode)
-
-	// 第一轮遍历：创建所有菜单节点并存入字典
-	for _, menu := range menuList {
-		if _, ok := permMap[menu.Path]; ok {
-			menuNode := v1.MenuDataNode{
-				MenuDataItem: v1.MenuDataItem{
-					ID:        menu.ID,
-					ParentID:  menu.ParentID,
-					Path:      menu.Path,
-					Redirect:  menu.Redirect,
-					Component: menu.Component,
-					Name:      menu.Name,
-					Icon:      menu.Icon,
-					Access:    menu.Access,
-					Weight:    menu.Weight,
-				},
-				Children: []v1.MenuDataItem{},
-			}
-			menuMap[menu.ID] = menuNode
-		}
-	}
-
-	// 第二轮遍历：构建父子关系
-	for _, menu := range menuList {
-		node := menuMap[menu.ID]
-		// 顶级菜单
-		if menu.ParentID == 0 {
-			menuRoot = append(menuRoot, node)
-		} else {
-			if parent, ok := menuMap[menu.ParentID]; ok {
-				parent.Children = append(parent.Children, node.MenuDataItem)
-				// 按权重排序子菜单
-				sort.Slice(parent.Children, func(i, j int) bool {
-					return parent.Children[i].Weight < parent.Children[j].Weight
-				})
-				menuMap[menu.ParentID] = parent
-			}
-		}
-	}
-
-	// 对顶级菜单按权重排序
-	sort.Slice(menuRoot, func(i, j int) bool {
-		return menuRoot[i].Weight < menuRoot[j].Weight
-	})
-
-	return menuRoot
 }

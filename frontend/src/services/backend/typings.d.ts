@@ -85,6 +85,23 @@ declare namespace API {
     id: number;
   };
 
+  type DynamicMenuResponse = {
+    data?: DynamicMenuResponseData;
+    /** 错误码 */
+    errorCode?: number;
+    /** 报错信息 */
+    errorMessage?: string;
+    /** 前端展示方式 */
+    errorShowType?: number;
+    /** 是否成功 */
+    success?: boolean;
+  };
+
+  type DynamicMenuResponseData = {
+    /** 顶级菜单 */
+    list?: MenuNode[];
+  };
+
   type GetApiParams = {
     /** 接口ID */
     id: number;
@@ -139,6 +156,12 @@ declare namespace API {
     page: number;
     /** 分页大小 */
     pageSize: number;
+    /** 名称 */
+    name?: string;
+    /** 路径 */
+    path?: string;
+    /** 可见性 */
+    access?: string;
   };
 
   type ListRobotsParams = {
@@ -202,19 +225,42 @@ declare namespace API {
   };
 
   type Menu = {
+    /** 可见性 */
     access?: string;
+    /** 组件 */
     component?: string;
     /** 创建时间 */
     createdAt?: string;
+    disabled?: boolean;
+    disabledTooltip?: boolean;
+    /** 隐藏自身+子节点提升并打平 */
+    flatMenu?: boolean;
+    /** 隐藏子节点 */
+    hideChildrenInMenu?: boolean;
+    /** 隐藏自身和子节点 */
+    hideInMenu?: boolean;
+    /** 图标 */
     icon?: string;
     /** ID */
     id?: number;
+    key?: string;
+    /** 本地化 */
+    locale?: string;
+    /** 名称 */
     name?: string;
+    /** 父级菜单 */
     parentId?: number;
+    parentKeys?: string;
+    /** 路径 */
     path?: string;
+    /** 重定向 */
     redirect?: string;
+    /** 指定外链打开形式 */
+    target?: string;
+    tooltip?: string;
     /** 更新时间 */
     updatedAt?: string;
+    /** 权重 */
     weight?: number;
   };
 
@@ -225,7 +271,83 @@ declare namespace API {
     total?: number;
   };
 
-  type MenuListResponse = {
+  type MenuNode = {
+    /** 可见性 */
+    access?: string;
+    /** 子节点 or 子菜单 */
+    children?: MenuNode[];
+    /** 组件 */
+    component?: string;
+    /** 创建时间 */
+    createdAt?: string;
+    disabled?: boolean;
+    disabledTooltip?: boolean;
+    /** 隐藏自身+子节点提升并打平 */
+    flatMenu?: boolean;
+    /** 隐藏子节点 */
+    hideChildrenInMenu?: boolean;
+    /** 隐藏自身和子节点 */
+    hideInMenu?: boolean;
+    /** 图标 */
+    icon?: string;
+    /** ID */
+    id?: number;
+    key?: string;
+    /** 本地化 */
+    locale?: string;
+    /** 名称 */
+    name?: string;
+    /** 父级菜单 */
+    parentId?: number;
+    parentKeys?: string;
+    /** 路径 */
+    path?: string;
+    /** 重定向 */
+    redirect?: string;
+    /** 指定外链打开形式 */
+    target?: string;
+    tooltip?: string;
+    /** 更新时间 */
+    updatedAt?: string;
+    /** 权重 */
+    weight?: number;
+  };
+
+  type MenuRequest = {
+    /** 可见性 */
+    access?: string;
+    /** 组件 */
+    component?: string;
+    disabled?: boolean;
+    disabledTooltip?: boolean;
+    /** 隐藏自身+子节点提升并打平 */
+    flatMenu?: boolean;
+    /** 隐藏子节点 */
+    hideChildrenInMenu?: boolean;
+    /** 隐藏自身和子节点 */
+    hideInMenu?: boolean;
+    /** 图标 */
+    icon?: string;
+    key?: string;
+    /** 本地化 */
+    locale?: string;
+    /** 名称 */
+    name?: string;
+    /** 父级菜单 */
+    parentId?: number;
+    parentKeys?: string;
+    /** 路径 */
+    path?: string;
+    /** 重定向 */
+    redirect?: string;
+    /** 指定外链打开形式 */
+    target?: string;
+    tooltip?: string;
+    /** 权重 */
+    weight?: number;
+  };
+
+  type MenuSearchResponse = {
     data?: MenuList;
     /** 错误码 */
     errorCode?: number;
@@ -235,51 +357,6 @@ declare namespace API {
     errorShowType?: number;
     /** 是否成功 */
     success?: boolean;
-  };
-
-  type MenuRequest = {
-    access?: string;
-    component?: string;
-    icon?: string;
-    name?: string;
-    parentId?: number;
-    path?: string;
-    redirect?: string;
-    weight?: number;
-  };
-
-  type MenuTreeNode = {
-    access?: string;
-    children?: Menu[];
-    component?: string;
-    /** 创建时间 */
-    createdAt?: string;
-    icon?: string;
-    /** ID */
-    id?: number;
-    name?: string;
-    parentId?: number;
-    path?: string;
-    redirect?: string;
-    /** 更新时间 */
-    updatedAt?: string;
-    weight?: number;
-  };
-
-  type MenuTreeResponse = {
-    data?: MenuTreeResponseData;
-    /** 错误码 */
-    errorCode?: number;
-    /** 报错信息 */
-    errorMessage?: string;
-    /** 前端展示方式 */
-    errorShowType?: number;
-    /** 是否成功 */
-    success?: boolean;
-  };
-
-  type MenuTreeResponseData = {
-    root?: MenuTreeNode[];
   };
 
   type RegisterRequest = {

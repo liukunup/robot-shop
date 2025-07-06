@@ -98,7 +98,7 @@ export async function getCurrentUser(options?: { [key: string]: any }) {
 
 /** 获取用户菜单 获取当前用户的菜单列表 GET /users/me/menus */
 export async function getUserMenus(options?: { [key: string]: any }) {
-  return request<API.MenuTreeResponse>(`/v1/users/me/menus`, {
+  return request<API.DynamicMenuResponse>(`/v1/users/me/menus`, {
     method: 'GET',
     ...(options || {}),
   });

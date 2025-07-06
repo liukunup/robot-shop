@@ -19,13 +19,13 @@ export default [
     path: '/welcome',
     name: 'welcome',
     icon: 'smile',
-    component: './Welcome',
+    component: '@/pages/Welcome',
   },
   {
     path: '/robot',
     name: 'robot',
     icon: 'robot',
-    component: './Robot',
+    component: '@/pages/Robot',
   },
   {
     path: '/admin',
@@ -39,22 +39,22 @@ export default [
       {
         path: '/admin/user',
         name: 'user',
-        component: './Admin/User',
+        component: '@/pages/Admin/User',
       },
       {
         path: '/admin/role',
         name: 'role',
-        component: './Admin/Role',
+        component: '@/pages/Admin/Role',
       },
       {
         path: '/admin/menu',
         name: 'menu',
-        component: './Admin/Menu',
+        component: '@/pages/Admin/Menu',
       },
       {
         path: '/admin/api',
         name: 'api',
-        component: './Admin/Api',
+        component: '@/pages/Admin/Api',
       },
     ],
   },
@@ -65,18 +65,18 @@ export default [
       {
         name: 'login',
         path: '/user/login',
-        component: './User/Login',
+        component: '@/pages/User/Login',
       },
       {
         name: 'register',
         path: '/user/register',
-        component: './User/Register',
+        component: '@/pages/User/Register',
       },
     ],
   },
   {
     path: '*',
     layout: false,
-    component: './404',
+    component: '@/pages/404',
   },
 ];

@@ -23,11 +23,12 @@ const IconMap: IconMapType = {
   crown: <CrownOutlined />,
   robot: <RobotOutlined />,
 };
-const loopMenuItem = (menus: API.MenuTreeNode[]): MenuDataItem[] =>
-  menus.map(({ icon, children, ...item }) => ({
+const loopMenuItem = (menus: API.MenuNode[]): MenuDataItem[] =>
+  menus.map(({ icon, children, parentKeys, ...item }) => ({
     ...item,
     icon: icon && IconMap[icon],
     children: children && loopMenuItem(children),
+    parentKeys: typeof parentKeys === 'string' ? parentKeys.split(',') : [],
   })
 );
 
@@ -43,24 +44,23 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const result = await getCurrentUser({
+      const response = await getCurrentUser({
         skipErrorHandler: true,
       });
-      return result.data;
+      return response.data;
     } catch (error) {
       history.push(loginPath);
     }
     return undefined;
   };
-
   const fetchMenuData = async () => {
     try {
       const response = await getUserMenus();
       if (response.success) {
-        return loopMenuItem(response.data?.root || []);
+        return loopMenuItem(response.data?.list || []);
       }
     } catch (error) {
-      console.error('获取菜单数据失败:', error);
+      console.error('failed to fetch menu data:', error);
     }
     return [];
   };
@@ -160,7 +160,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
       );
     },
     // 实现动态菜单功能
-    menuDataRender: () => initialState?.menuData || [],
+    menuDataRender: () => loopMenuItem(initialState.menuData),
     ...initialState?.settings,
   };
 };

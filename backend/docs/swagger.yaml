@@ -49,32 +49,71 @@ definitions:
   Menu:
     properties:
       access:
+        description: 可见性
+        example: canAdmin
         type: string
       component:
+        description: 组件
+        example: '@/pages/Admin/User'
         type: string
       createdAt:
         description: 创建时间
         example: "2006-01-02 15:04:05"
         type: string
+      disabled:
+        type: boolean
+      disabledTooltip:
+        type: boolean
+      flatMenu:
+        description: 隐藏自身+子节点提升并打平
+        type: boolean
+      hideChildrenInMenu:
+        description: 隐藏子节点
+        type: boolean
+      hideInMenu:
+        description: 隐藏自身和子节点
+        type: boolean
       icon:
+        description: 图标
+        example: crown
         type: string
       id:
         description: ID
         example: 1
         type: integer
+      key:
+        type: string
+      locale:
+        description: 本地化
+        type: string
       name:
+        description: 名称
+        example: User
         type: string
       parentId:
+        description: 父级菜单
+        example: 0
         type: integer
+      parentKeys:
+        type: string
       path:
+        description: 路径
+        example: /admin/user
         type: string
       redirect:
+        description: 重定向
+        type: string
+      target:
+        description: 指定外链打开形式
+        type: string
+      tooltip:
         type: string
       updatedAt:
         description: 更新时间
         example: "2006-01-02 15:04:05"
         type: string
       weight:
+        description: 权重
         type: integer
     type: object
   MenuList:
@@ -86,41 +125,7 @@ definitions:
         type: array
       total:
         description: 总数
-        type: integer
-    type: object
-  MenuTreeNode:
-    properties:
-      access:
-        type: string
-      children:
-        items:
-          $ref: '#/definitions/Menu'
-        type: array
-      component:
-        type: string
-      createdAt:
-        description: 创建时间
-        example: "2006-01-02 15:04:05"
-        type: string
-      icon:
-        type: string
-      id:
-        description: ID
-        example: 1
-        type: integer
-      name:
-        type: string
-      parentId:
-        type: integer
-      path:
-        type: string
-      redirect:
-        type: string
-      updatedAt:
-        description: 更新时间
-        example: "2006-01-02 15:04:05"
-        type: string
-      weight:
+        example: 10
         type: integer
     type: object
   Robot:
@@ -316,6 +321,32 @@ definitions:
         example: true
         type: boolean
     type: object
+  backend_api_v1.DynamicMenuResponse:
+    properties:
+      data:
+        $ref: '#/definitions/backend_api_v1.DynamicMenuResponseData'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.DynamicMenuResponseData:
+    properties:
+      list:
+        description: 顶级菜单
+        items:
+          $ref: '#/definitions/backend_api_v1.MenuNode'
+        type: array
+    type: object
   backend_api_v1.GetRolePermissionResponse:
     properties:
       data:
@@ -381,7 +412,134 @@ definitions:
       accessToken:
         type: string
     type: object
-  backend_api_v1.MenuListResponse:
+  backend_api_v1.MenuNode:
+    properties:
+      access:
+        description: 可见性
+        example: canAdmin
+        type: string
+      children:
+        description: 子节点 or 子菜单
+        items:
+          $ref: '#/definitions/backend_api_v1.MenuNode'
+        type: array
+      component:
+        description: 组件
+        example: '@/pages/Admin/User'
+        type: string
+      createdAt:
+        description: 创建时间
+        example: "2006-01-02 15:04:05"
+        type: string
+      disabled:
+        type: boolean
+      disabledTooltip:
+        type: boolean
+      flatMenu:
+        description: 隐藏自身+子节点提升并打平
+        type: boolean
+      hideChildrenInMenu:
+        description: 隐藏子节点
+        type: boolean
+      hideInMenu:
+        description: 隐藏自身和子节点
+        type: boolean
+      icon:
+        description: 图标
+        example: crown
+        type: string
+      id:
+        description: ID
+        example: 1
+        type: integer
+      key:
+        type: string
+      locale:
+        description: 本地化
+        type: string
+      name:
+        description: 名称
+        example: User
+        type: string
+      parentId:
+        description: 父级菜单
+        example: 0
+        type: integer
+      parentKeys:
+        type: string
+      path:
+        description: 路径
+        example: /admin/user
+        type: string
+      redirect:
+        description: 重定向
+        type: string
+      target:
+        description: 指定外链打开形式
+        type: string
+      tooltip:
+        type: string
+      updatedAt:
+        description: 更新时间
+        example: "2006-01-02 15:04:05"
+        type: string
+      weight:
+        description: 权重
+        type: integer
+    type: object
+  backend_api_v1.MenuRequest:
+    properties:
+      access:
+        description: 可见性
+        type: string
+      component:
+        description: 组件
+        type: string
+      disabled:
+        type: boolean
+      disabledTooltip:
+        type: boolean
+      flatMenu:
+        description: 隐藏自身+子节点提升并打平
+        type: boolean
+      hideChildrenInMenu:
+        description: 隐藏子节点
+        type: boolean
+      hideInMenu:
+        description: 隐藏自身和子节点
+        type: boolean
+      icon:
+        description: 图标
+        type: string
+      key:
+        type: string
+      locale:
+        description: 本地化
+        type: string
+      name:
+        description: 名称
+        type: string
+      parentId:
+        description: 父级菜单
+        type: integer
+      parentKeys:
+        type: string
+      path:
+        description: 路径
+        type: string
+      redirect:
+        description: 重定向
+        type: string
+      target:
+        description: 指定外链打开形式
+        type: string
+      tooltip:
+        type: string
+      weight:
+        description: 权重
+        type: integer
+    type: object
+  backend_api_v1.MenuSearchResponse:
     properties:
       data:
         $ref: '#/definitions/MenuList'
@@ -398,52 +556,6 @@ definitions:
         description: 是否成功
         example: true
         type: boolean
-    type: object
-  backend_api_v1.MenuRequest:
-    properties:
-      access:
-        type: string
-      component:
-        type: string
-      icon:
-        type: string
-      name:
-        type: string
-      parentId:
-        example: 0
-        type: integer
-      path:
-        type: string
-      redirect:
-        type: string
-      weight:
-        example: 0
-        type: integer
-    type: object
-  backend_api_v1.MenuTreeResponse:
-    properties:
-      data:
-        $ref: '#/definitions/backend_api_v1.MenuTreeResponseData'
-      errorCode:
-        description: 错误码
-        type: integer
-      errorMessage:
-        description: 报错信息
-        type: string
-      errorShowType:
-        description: 前端展示方式
-        type: integer
-      success:
-        description: 是否成功
-        example: true
-        type: boolean
-    type: object
-  backend_api_v1.MenuTreeResponseData:
-    properties:
-      root:
-        items:
-          $ref: '#/definitions/MenuTreeNode'
-        type: array
     type: object
   backend_api_v1.RegisterRequest:
     properties:
@@ -849,13 +961,25 @@ paths:
         name: pageSize
         required: true
         type: integer
+      - description: 名称
+        in: query
+        name: name
+        type: string
+      - description: 路径
+        in: query
+        name: path
+        type: string
+      - description: 可见性
+        in: query
+        name: access
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/backend_api_v1.MenuListResponse'
+            $ref: '#/definitions/backend_api_v1.MenuSearchResponse'
       security:
       - Bearer: []
       summary: 获取菜单列表
@@ -1439,7 +1563,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/backend_api_v1.MenuTreeResponse'
+            $ref: '#/definitions/backend_api_v1.DynamicMenuResponse'
       security:
       - Bearer: []
       summary: 获取用户菜单

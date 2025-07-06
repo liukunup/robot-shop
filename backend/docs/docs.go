@@ -278,13 +278,31 @@ const docTemplate = `{
                         "name": "pageSize",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "路径",
+                        "name": "path",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "可见性",
+                        "name": "access",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.MenuListResponse"
+                            "$ref": "#/definitions/backend_api_v1.MenuSearchResponse"
                         }
                     }
                 }
@@ -1197,7 +1215,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/backend_api_v1.MenuTreeResponse"
+                            "$ref": "#/definitions/backend_api_v1.DynamicMenuResponse"
                         }
                     }
                 }
@@ -1301,34 +1319,82 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access": {
-                    "type": "string"
+                    "description": "可见性",
+                    "type": "string",
+                    "example": "canAdmin"
                 },
                 "component": {
-                    "type": "string"
+                    "description": "组件",
+                    "type": "string",
+                    "example": "@/pages/Admin/User"
                 },
                 "createdAt": {
                     "description": "创建时间",
                     "type": "string",
                     "example": "2006-01-02 15:04:05"
                 },
+                "disabled": {
+                    "type": "boolean"
+                },
+                "disabledTooltip": {
+                    "type": "boolean"
+                },
+                "flatMenu": {
+                    "description": "隐藏自身+子节点提升并打平",
+                    "type": "boolean"
+                },
+                "hideChildrenInMenu": {
+                    "description": "隐藏子节点",
+                    "type": "boolean"
+                },
+                "hideInMenu": {
+                    "description": "隐藏自身和子节点",
+                    "type": "boolean"
+                },
                 "icon": {
-                    "type": "string"
+                    "description": "图标",
+                    "type": "string",
+                    "example": "crown"
                 },
                 "id": {
                     "description": "ID",
                     "type": "integer",
                     "example": 1
                 },
-                "name": {
+                "key": {
                     "type": "string"
+                },
+                "locale": {
+                    "description": "本地化",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string",
+                    "example": "User"
                 },
                 "parentId": {
-                    "type": "integer"
+                    "description": "父级菜单",
+                    "type": "integer",
+                    "example": 0
                 },
-                "path": {
+                "parentKeys": {
                     "type": "string"
                 },
+                "path": {
+                    "description": "路径",
+                    "type": "string",
+                    "example": "/admin/user"
+                },
                 "redirect": {
+                    "description": "重定向",
+                    "type": "string"
+                },
+                "target": {
+                    "description": "指定外链打开形式",
+                    "type": "string"
+                },
+                "tooltip": {
                     "type": "string"
                 },
                 "updatedAt": {
@@ -1337,6 +1403,7 @@ const docTemplate = `{
                     "example": "2006-01-02 15:04:05"
                 },
                 "weight": {
+                    "description": "权重",
                     "type": "integer"
                 }
             }
@@ -1353,57 +1420,8 @@ const docTemplate = `{
                 },
                 "total": {
                     "description": "总数",
-                    "type": "integer"
-                }
-            }
-        },
-        "MenuTreeNode": {
-            "type": "object",
-            "properties": {
-                "access": {
-                    "type": "string"
-                },
-                "children": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Menu"
-                    }
-                },
-                "component": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "description": "创建时间",
-                    "type": "string",
-                    "example": "2006-01-02 15:04:05"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "id": {
-                    "description": "ID",
                     "type": "integer",
-                    "example": 1
-                },
-                "name": {
-                    "type": "string"
-                },
-                "parentId": {
-                    "type": "integer"
-                },
-                "path": {
-                    "type": "string"
-                },
-                "redirect": {
-                    "type": "string"
-                },
-                "updatedAt": {
-                    "description": "更新时间",
-                    "type": "string",
-                    "example": "2006-01-02 15:04:05"
-                },
-                "weight": {
-                    "type": "integer"
+                    "example": 10
                 }
             }
         },
@@ -1666,6 +1684,43 @@ const docTemplate = `{
                 }
             }
         },
+        "backend_api_v1.DynamicMenuResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/backend_api_v1.DynamicMenuResponseData"
+                },
+                "errorCode": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "errorMessage": {
+                    "description": "报错信息",
+                    "type": "string"
+                },
+                "errorShowType": {
+                    "description": "前端展示方式",
+                    "type": "integer"
+                },
+                "success": {
+                    "description": "是否成功",
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "backend_api_v1.DynamicMenuResponseData": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "description": "顶级菜单",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_api_v1.MenuNode"
+                    }
+                }
+            }
+        },
         "backend_api_v1.GetRolePermissionResponse": {
             "type": "object",
             "properties": {
@@ -1758,7 +1813,179 @@ const docTemplate = `{
                 }
             }
         },
-        "backend_api_v1.MenuListResponse": {
+        "backend_api_v1.MenuNode": {
+            "type": "object",
+            "properties": {
+                "access": {
+                    "description": "可见性",
+                    "type": "string",
+                    "example": "canAdmin"
+                },
+                "children": {
+                    "description": "子节点 or 子菜单",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/backend_api_v1.MenuNode"
+                    }
+                },
+                "component": {
+                    "description": "组件",
+                    "type": "string",
+                    "example": "@/pages/Admin/User"
+                },
+                "createdAt": {
+                    "description": "创建时间",
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
+                },
+                "disabled": {
+                    "type": "boolean"
+                },
+                "disabledTooltip": {
+                    "type": "boolean"
+                },
+                "flatMenu": {
+                    "description": "隐藏自身+子节点提升并打平",
+                    "type": "boolean"
+                },
+                "hideChildrenInMenu": {
+                    "description": "隐藏子节点",
+                    "type": "boolean"
+                },
+                "hideInMenu": {
+                    "description": "隐藏自身和子节点",
+                    "type": "boolean"
+                },
+                "icon": {
+                    "description": "图标",
+                    "type": "string",
+                    "example": "crown"
+                },
+                "id": {
+                    "description": "ID",
+                    "type": "integer",
+                    "example": 1
+                },
+                "key": {
+                    "type": "string"
+                },
+                "locale": {
+                    "description": "本地化",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string",
+                    "example": "User"
+                },
+                "parentId": {
+                    "description": "父级菜单",
+                    "type": "integer",
+                    "example": 0
+                },
+                "parentKeys": {
+                    "type": "string"
+                },
+                "path": {
+                    "description": "路径",
+                    "type": "string",
+                    "example": "/admin/user"
+                },
+                "redirect": {
+                    "description": "重定向",
+                    "type": "string"
+                },
+                "target": {
+                    "description": "指定外链打开形式",
+                    "type": "string"
+                },
+                "tooltip": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "description": "更新时间",
+                    "type": "string",
+                    "example": "2006-01-02 15:04:05"
+                },
+                "weight": {
+                    "description": "权重",
+                    "type": "integer"
+                }
+            }
+        },
+        "backend_api_v1.MenuRequest": {
+            "type": "object",
+            "properties": {
+                "access": {
+                    "description": "可见性",
+                    "type": "string"
+                },
+                "component": {
+                    "description": "组件",
+                    "type": "string"
+                },
+                "disabled": {
+                    "type": "boolean"
+                },
+                "disabledTooltip": {
+                    "type": "boolean"
+                },
+                "flatMenu": {
+                    "description": "隐藏自身+子节点提升并打平",
+                    "type": "boolean"
+                },
+                "hideChildrenInMenu": {
+                    "description": "隐藏子节点",
+                    "type": "boolean"
+                },
+                "hideInMenu": {
+                    "description": "隐藏自身和子节点",
+                    "type": "boolean"
+                },
+                "icon": {
+                    "description": "图标",
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "locale": {
+                    "description": "本地化",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "名称",
+                    "type": "string"
+                },
+                "parentId": {
+                    "description": "父级菜单",
+                    "type": "integer"
+                },
+                "parentKeys": {
+                    "type": "string"
+                },
+                "path": {
+                    "description": "路径",
+                    "type": "string"
+                },
+                "redirect": {
+                    "description": "重定向",
+                    "type": "string"
+                },
+                "target": {
+                    "description": "指定外链打开形式",
+                    "type": "string"
+                },
+                "tooltip": {
+                    "type": "string"
+                },
+                "weight": {
+                    "description": "权重",
+                    "type": "integer"
+                }
+            }
+        },
+        "backend_api_v1.MenuSearchResponse": {
             "type": "object",
             "properties": {
                 "data": {
@@ -1780,73 +2007,6 @@ const docTemplate = `{
                     "description": "是否成功",
                     "type": "boolean",
                     "example": true
-                }
-            }
-        },
-        "backend_api_v1.MenuRequest": {
-            "type": "object",
-            "properties": {
-                "access": {
-                    "type": "string"
-                },
-                "component": {
-                    "type": "string"
-                },
-                "icon": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "parentId": {
-                    "type": "integer",
-                    "example": 0
-                },
-                "path": {
-                    "type": "string"
-                },
-                "redirect": {
-                    "type": "string"
-                },
-                "weight": {
-                    "type": "integer",
-                    "example": 0
-                }
-            }
-        },
-        "backend_api_v1.MenuTreeResponse": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/backend_api_v1.MenuTreeResponseData"
-                },
-                "errorCode": {
-                    "description": "错误码",
-                    "type": "integer"
-                },
-                "errorMessage": {
-                    "description": "报错信息",
-                    "type": "string"
-                },
-                "errorShowType": {
-                    "description": "前端展示方式",
-                    "type": "integer"
-                },
-                "success": {
-                    "description": "是否成功",
-                    "type": "boolean",
-                    "example": true
-                }
-            }
-        },
-        "backend_api_v1.MenuTreeResponseData": {
-            "type": "object",
-            "properties": {
-                "root": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/MenuTreeNode"
-                    }
                 }
             }
         },
