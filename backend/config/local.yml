@@ -26,6 +26,12 @@ data:
     db: 0
     read_timeout: 0.2s
     write_timeout: 0.2s
+email:
+  host: smtp.163.com
+  port: 465
+  username: xxx@163.com
+  password: 123456
+  use_ssl: true
 
 log:
   log_level: debug
