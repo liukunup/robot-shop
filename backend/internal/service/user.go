@@ -5,11 +5,14 @@ import (
 	"backend/internal/constant"
 	"backend/internal/model"
 	"backend/internal/repository"
+	"backend/pkg/email"
 	"context"
 	cryptoRand "crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	mathRand "math/rand"
+	"net/textproto"
 	"strings"
 	"time"
 
@@ -30,6 +33,7 @@ type UserService interface {
 
 	Register(ctx context.Context, req *v1.RegisterRequest) error
 	Login(ctx context.Context, req *v1.LoginRequest) (string, error)
+	ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) error
 }
 
 func NewUserService(
@@ -397,6 +401,74 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginRequest) (string, 
 	}
 
 	return token, nil
+}
+
+func (s *userService) ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) error {
+	// 查找指定用户
+	user, err := s.userRepository.GetByEmail(ctx, req.Email)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return v1.ErrUnauthorized
+	}
+	if err != nil {
+		return v1.ErrInternalServerError
+	}
+
+	// 邮件模板常量（可以提取到配置文件中）
+	const (
+		resetPasswordSubject      = "Robot Shop - 密码重置请求"
+		resetPasswordTextTemplate = `尊敬的%s：
+
+			我们收到了您的密码重置请求。请点击以下链接重置您的密码：
+			%s
+
+			如果您没有请求重置密码，请忽略此邮件。
+
+			此链接将在24小时后失效。
+
+			Robot Shop 团队
+			`
+		resetPasswordHTMLTemplate = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+			<h2>尊敬的%s：</h2>
+			<p>我们收到了您的密码重置请求。请点击以下链接重置您的密码：</p>
+			<p><a href="%s" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">重置密码</a></p>
+			<p>如果您没有请求重置密码，请忽略此邮件。</p>
+			<p><small>此链接将在24小时后失效。</small></p>
+			<hr>
+			<p>Robot Shop 团队</p>
+			<p><a href="https://robot-shop.com">https://robot-shop.com</a></p>
+		</div>`
+	)
+
+	// 发送重置密码邮件
+	resetLink := fmt.Sprintf("https://robot-shop.com/reset-password?token=%d", user.ID)
+	textContent := fmt.Sprintf(resetPasswordTextTemplate, user.Nickname, resetLink)
+	htmlContent := fmt.Sprintf(resetPasswordHTMLTemplate, user.Nickname, resetLink)
+
+	// 发送重置密码邮件
+	if err = s.email.Send(&email.Email{
+		From:    "xxx@163.com",
+		To:      []string{"xxx@163.com"},
+		Cc:      []string{"xxx@163.com"},
+		Bcc:     []string{"xxx@outlook.com"},
+		Subject: "重置密码",
+		Text:    textContent,
+		HTML:    htmlContent,
+		Headers: textproto.MIMEHeader{
+			"X-Custom-Header": []string{"Custom Value"},
+		},
+		Attachments: []*email.Attachment{
+			{
+				Filename: "附件.txt",
+				Content:  []byte("这是一个附件"),
+				Inline:   true,
+			},
+		},
+		ReadReceipt: []string{"robot-shop@example.com"},
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // 生成指定长度的随机密码

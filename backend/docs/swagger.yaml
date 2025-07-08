@@ -571,6 +571,15 @@ definitions:
     - email
     - password
     type: object
+  backend_api_v1.ResetPasswordRequest:
+    properties:
+      email:
+        description: 邮箱
+        example: zhangsan@example.com
+        type: string
+    required:
+    - email
+    type: object
   backend_api_v1.Response:
     properties:
       data: {}
@@ -1390,6 +1399,29 @@ paths:
           schema:
             $ref: '#/definitions/backend_api_v1.Response'
       summary: 注册
+      tags:
+      - User
+  /reset-password:
+    post:
+      consumes:
+      - application/json
+      description: 重置用户密码
+      operationId: ResetPassword
+      parameters:
+      - description: 重置密码信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      summary: 重置密码
       tags:
       - User
   /robots:

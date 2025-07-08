@@ -74,3 +74,8 @@ type LoginResponse struct {
 	Response
 	Data LoginResponseData
 }
+
+// for ResetPassword
+type ResetPasswordRequest struct {
+	Email string `json:"email" binding:"required,email" example:"zhangsan@example.com"` // 邮箱
+}

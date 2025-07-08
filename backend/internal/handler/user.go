@@ -289,3 +289,30 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 		AccessToken: token,
 	})
 }
+
+// ResetPassword godoc
+// @Summary 重置密码
+// @Schemes
+// @Description 重置用户密码
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body v1.ResetPasswordRequest true "重置密码信息"
+// @Success 200 {object} v1.Response
+// @Router /reset-password [post]
+// @ID ResetPassword
+func (h *UserHandler) ResetPassword(ctx *gin.Context) {
+	var req v1.ResetPasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.logger.WithContext(ctx).Error("ResetPassword bind error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+
+	if err := h.userService.ResetPassword(ctx, &req); err != nil {
+		h.logger.WithContext(ctx).Error("userService.ResetPassword error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	v1.HandleSuccess(ctx, nil)
+}

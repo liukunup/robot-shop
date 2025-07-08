@@ -64,6 +64,7 @@ func NewHTTPServer(
 		{
 			noAuthRouter.POST("/register", userHandler.Register)
 			noAuthRouter.POST("/login", userHandler.Login)
+			noAuthRouter.POST("/reset-password", userHandler.ResetPassword)
 		}
 
 		// Strict permission routing group

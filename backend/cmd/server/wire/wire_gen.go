@@ -13,6 +13,7 @@ import (
 	"backend/internal/server"
 	"backend/internal/service"
 	"backend/pkg/app"
+	"backend/pkg/email"
 	"backend/pkg/jwt"
 	"backend/pkg/log"
 	"backend/pkg/server/http"
@@ -28,10 +29,11 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	db := repository.NewDB(viperViper, logger)
 	syncedEnforcer := repository.NewCasbinEnforcer(viperViper, logger, db)
 	handlerHandler := handler.NewHandler(logger)
+	sidSid := sid.NewSid()
+	client := email.NewEmail(viperViper)
 	repositoryRepository := repository.NewRepository(logger, db, syncedEnforcer)
 	transaction := repository.NewTransaction(repositoryRepository)
-	sidSid := sid.NewSid()
-	serviceService := service.NewService(transaction, logger, sidSid, jwtJWT)
+	serviceService := service.NewService(logger, sidSid, jwtJWT, client, transaction)
 	userRepository := repository.NewUserRepository(repositoryRepository)
 	roleRepository := repository.NewRoleRepository(repositoryRepository)
 	menuRepository := repository.NewMenuRepository(repositoryRepository)

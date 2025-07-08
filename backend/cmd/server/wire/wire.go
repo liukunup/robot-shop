@@ -10,6 +10,7 @@ import (
 	"backend/internal/server"
 	"backend/internal/service"
 	"backend/pkg/app"
+	"backend/pkg/email"
 	"backend/pkg/jwt"
 	"backend/pkg/log"
 	"backend/pkg/server/http"
@@ -83,6 +84,7 @@ func NewWire(*viper.Viper, *log.Logger) (*app.App, func(), error) {
 		serverSet,
 		sid.NewSid,
 		jwt.NewJwt,
+		email.NewEmail,
 		newApp,
 	))
 }

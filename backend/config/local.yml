@@ -28,10 +28,12 @@ data:
     write_timeout: 0.2s
 email:
   host: smtp.163.com
-  port: 465
+  port: 587
   username: xxx@163.com
   password: 123456
-  use_ssl: true
+  ssl: true
+  local_name: robot-shop
+  from: xxx@163.com
 
 log:
   log_level: debug
