@@ -75,6 +75,12 @@ type LoginResponse struct {
 	Data LoginResponseData
 }
 
+// for UpdatePassword
+type UpdatePasswordRequest struct {
+	OldPassword string `json:"oldPassword" binding:"required" example:"123456"` // 旧密码
+	NewPassword string `json:"newPassword" binding:"required" example:"123456"` // 新密码
+}
+
 // for ResetPassword
 type ResetPasswordRequest struct {
 	Email string `json:"email" binding:"required,email" example:"zhangsan@example.com"` // 邮箱

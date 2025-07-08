@@ -33,6 +33,7 @@ type UserService interface {
 
 	Register(ctx context.Context, req *v1.RegisterRequest) error
 	Login(ctx context.Context, req *v1.LoginRequest) (string, error)
+	UpdatePassword(ctx context.Context, uid uint, req *v1.UpdatePasswordRequest) error
 	ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) error
 }
 
@@ -401,6 +402,35 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginRequest) (string, 
 	}
 
 	return token, nil
+}
+
+func (s *userService) UpdatePassword(ctx context.Context, uid uint, req *v1.UpdatePasswordRequest) error {
+	user, err := s.userRepository.Get(ctx, uid)
+	if err != nil {
+		return err
+	}
+
+	// 验证旧密码
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.OldPassword))
+	if err != nil {
+		return v1.ErrUnauthorized
+	}
+
+	// 创建新密码哈希值
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	// 更新密码
+	user.Password = string(hashedPassword)
+	if err = s.userRepository.Update(ctx, uid, map[string]interface{}{
+		"password": user.Password,
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *userService) ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) error {

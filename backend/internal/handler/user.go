@@ -290,6 +290,41 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 	})
 }
 
+// UpdatePassword godoc
+// @Summary 更新密码
+// @Schemes
+// @Description 更新用户密码
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body v1.UpdatePasswordRequest true "更新密码信息"
+// @Security Bearer
+// @Success 200 {object} v1.Response
+// @Router /users/password [put]
+// @ID UpdatePassword
+func (h *UserHandler) UpdatePassword(ctx *gin.Context) {
+	uid := GetUserIdFromCtx(ctx)
+	if uid == 0 {
+		h.logger.WithContext(ctx).Error("UpdatePassword get uid error")
+		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
+		return
+	}
+
+	var req v1.UpdatePasswordRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.logger.WithContext(ctx).Error("UpdatePassword bind error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+
+	if err := h.userService.UpdatePassword(ctx, uid, &req); err != nil {
+		h.logger.WithContext(ctx).Error("userService.UpdatePassword error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	v1.HandleSuccess(ctx, nil)
+}
+
 // ResetPassword godoc
 // @Summary 重置密码
 // @Schemes

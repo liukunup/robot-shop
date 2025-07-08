@@ -78,6 +78,7 @@ func NewHTTPServer(
 			strictAuthRouter.GET("/users/me", userHandler.GetCurrentUser)
 			strictAuthRouter.GET("/users/me/permissions", userHandler.GetUserPermissions)
 			strictAuthRouter.GET("/users/me/menus", userHandler.GetUserMenus)
+			strictAuthRouter.PUT("/users/password", userHandler.UpdatePassword)
 
 			// Role
 			strictAuthRouter.GET("/admin/roles", roleHandler.ListRoles)
