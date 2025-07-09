@@ -4,21 +4,23 @@ package v1
 type UserSearchRequest struct {
 	Page     int    `form:"page" binding:"required" example:"1"`      // 页码
 	PageSize int    `form:"pageSize" binding:"required" example:"10"` // 分页大小
+	Email    string `form:"email" example:"zhangsan@example.com"`     // 邮箱
 	Username string `form:"username" example:"zhangsan"`              // 用户名
 	Nickname string `form:"nickname" example:"Jackal"`                // 昵称
-	Phone    string `form:"phone" example:"13966668888"`              // 手机
-	Email    string `form:"email" example:"zhangsan@example.com"`     // 邮箱
 }
 type UserDataItem struct {
-	ID        uint           `json:"id"`                                                        // ID
+	ID        uint           `json:"userid,omitempty" example:"1"`                              // ID
 	CreatedAt string         `json:"createdAt,omitempty"  example:"2006-01-02 15:04:05"`        // 创建时间
 	UpdatedAt string         `json:"updatedAt,omitempty"  example:"2006-01-02 15:04:05"`        // 更新时间
-	Username  string         `json:"username" example:"zhangsan"`                               // 用户名
-	Nickname  string         `json:"nickname,omitempty" example:"Jackal"`                       // 昵称
+	Email     string         `json:"email,omitempty" example:"zhangsan@example.com"`            // 邮箱
+	Username  string         `json:"username,omitempty" example:"zhangsan"`                     // 用户名
 	Avatar    string         `json:"avatar,omitempty" example:"https://example.com/avatar.jpg"` // 头像
-	Email     string         `json:"email" example:"zhangsan@example.com"`                      // 邮箱
-	Phone     string         `json:"phone,omitempty" example:"13966668888"`                     // 手机
-	Status    int            `json:"status" example:"1"`                                        // 状态 0:待激活 1:正常 2:禁用
+	Nickname  string         `json:"nickname,omitempty" example:"Jackal"`                       // 昵称
+	Bio       string         `json:"bio,omitempty" example:"I am Jackal"`                       // 个人简介
+	Language  string         `json:"language,omitempty" example:"zh-CN"`                        // 语言
+	Timezone  string         `json:"timezone,omitempty" example:"Asia/Shanghai"`                // 时区
+	Theme     string         `json:"theme,omitempty" example:"light"`                           // 主题
+	Status    int            `json:"status,omitempty" example:"1"`                              // 状态 0:待激活 1:正常 2:禁用
 	Roles     []RoleDataItem `json:"roles,omitempty"`                                           // 角色
 } // @name User
 type UserSearchResponseData struct {
@@ -38,12 +40,15 @@ type UserResponse struct {
 
 // for Create | Update
 type UserRequest struct {
-	Username string   `json:"username" binding:"required" example:"zhangsan"`
-	Nickname string   `json:"nickname" example:"Jackal"`
-	Email    string   `json:"email" binding:"required" example:"zhangsan@example.com"`
-	Phone    string   `json:"phone" example:"13966668888"`
-	Status   int      `json:"status" example:"1"` // 状态 0:待激活 1:正常 2:禁用
-	Roles    []string `json:"roles"`
+	Email    string   `json:"email" example:"zhangsan@example.com"` // 邮箱
+	Username string   `json:"username" example:"zhangsan"`          // 用户名
+	Nickname string   `json:"nickname" example:"Jackal"`            // 昵称
+	Bio      string   `json:"bio" example:"I am Jackal"`            // 个人简介
+	Language string   `json:"language" example:"zh-CN"`             // 语言
+	Timezone string   `json:"timezone" example:"Asia/Shanghai"`     // 时区
+	Theme    string   `json:"theme" example:"light"`                // 主题
+	Status   int      `json:"status" example:"1"`                   // 状态 0:待激活 1:正常 2:禁用
+	Roles    []string `json:"roles"`                                // 角色
 }
 
 // User Permission
@@ -64,11 +69,11 @@ type RegisterRequest struct {
 
 // for Login
 type LoginRequest struct {
-	Username string `json:"username" binding:"required" example:"zhangsan"`
-	Password string `json:"password" binding:"required" example:"123456"`
+	Username string `json:"username" binding:"required" example:"zhangsan"` // 用户名
+	Password string `json:"password" binding:"required" example:"123456"`   // 密码
 }
 type LoginResponseData struct {
-	AccessToken string `json:"accessToken"`
+	AccessToken string `json:"accessToken"` // 访问令牌
 }
 type LoginResponse struct {
 	Response

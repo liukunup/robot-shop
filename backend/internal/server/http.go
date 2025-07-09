@@ -70,15 +70,17 @@ func NewHTTPServer(
 		// Strict permission routing group
 		strictAuthRouter := v1.Group("/").Use(middleware.StrictAuth(jwt, logger), middleware.AuthMiddleware(e))
 		{
+			// Base
+			strictAuthRouter.GET("/users/profile", userHandler.GetProfile)
+			strictAuthRouter.PUT("/users/profile", userHandler.UpdateProfile)
+			strictAuthRouter.GET("/users/menus", userHandler.GetMenus)
+			strictAuthRouter.PUT("/users/password", userHandler.UpdatePassword)
+
 			// User
 			strictAuthRouter.GET("/admin/users", userHandler.ListUsers)
 			strictAuthRouter.POST("/admin/users", userHandler.CreateUser)
 			strictAuthRouter.PUT("/admin/users/:id", userHandler.UpdateUser)
 			strictAuthRouter.DELETE("/admin/users/:id", userHandler.DeleteUser)
-			strictAuthRouter.GET("/users/me", userHandler.GetCurrentUser)
-			strictAuthRouter.GET("/users/me/permissions", userHandler.GetUserPermissions)
-			strictAuthRouter.GET("/users/me/menus", userHandler.GetUserMenus)
-			strictAuthRouter.PUT("/users/password", userHandler.UpdatePassword)
 
 			// Role
 			strictAuthRouter.GET("/admin/roles", roleHandler.ListRoles)

@@ -97,7 +97,6 @@ func (m *MigrateServer) initialUser(ctx context.Context) error {
 		Password: string(hashedPassword),
 		Nickname: "超级管理员",
 		Email:    "admin@example.com",
-		Phone:    "13900000001",
 		Status:   1,
 	}).Error; err != nil {
 		return err
@@ -108,7 +107,6 @@ func (m *MigrateServer) initialUser(ctx context.Context) error {
 		Password: string(hashedPassword),
 		Nickname: "运营人员",
 		Email:    "operator@example.com",
-		Phone:    "13900000002",
 		Status:   1,
 	}).Error; err != nil {
 		return err

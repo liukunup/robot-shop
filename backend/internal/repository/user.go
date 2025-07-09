@@ -56,9 +56,6 @@ func (r *userRepository) List(ctx context.Context, req *v1.UserSearchRequest) ([
 	if req.Email != "" {
 		scope = scope.Where("email LIKE ?", "%"+req.Email+"%")
 	}
-	if req.Phone != "" {
-		scope = scope.Where("phone LIKE ?", "%"+req.Phone+"%")
-	}
 	if err := scope.Count(&total).Error; err != nil {
 		return nil, total, err
 	}

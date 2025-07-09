@@ -32,10 +32,9 @@ func NewUserHandler(handler *Handler, userService service.UserService) *UserHand
 // @Security Bearer
 // @Param page query int true "页码"
 // @Param pageSize query int true "分页大小"
+// @Param email query string false "邮箱"
 // @Param username query string false "用户名"
 // @Param nickname query string false "昵称"
-// @Param phone query string false "手机"
-// @Param email query string false "邮箱"
 // @Success 200 {object} v1.UserSearchResponse
 // @Router /admin/users [get]
 // @ID ListUsers
@@ -150,7 +149,7 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, nil)
 }
 
-// GetCurrentUser godoc
+// GetProfile godoc
 // @Summary 获取当前用户
 // @Schemes
 // @Description 获取当前用户的详细信息
@@ -159,11 +158,12 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} v1.UserResponse
-// @Router /users/me [get]
-// @ID GetCurrentUser
-func (h *UserHandler) GetCurrentUser(ctx *gin.Context) {
+// @Router /users/profile [get]
+// @ID FetchCurrentUser
+func (h *UserHandler) GetProfile(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
+		h.logger.WithContext(ctx).Error("GetProfile get uid error")
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
 		return
 	}
@@ -177,34 +177,42 @@ func (h *UserHandler) GetCurrentUser(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, data)
 }
 
-// GetUserPermissions godoc
-// @Summary 获取用户权限
+// UpdateProfile godoc
+// @Summary 更新用户
 // @Schemes
-// @Description 获取当前用户的权限列表
+// @Description 更新用户信息
 // @Tags User
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Success 200 {object} v1.UserPermissionResponse
-// @Router /users/me/permissions [get]
-// @ID GetUserPermissions
-func (h *UserHandler) GetUserPermissions(ctx *gin.Context) {
+// @Param request body v1.UserRequest true "参数"
+// @Success 200 {object} v1.Response
+// @Router /users/profile [put]
+// @ID UpdateProfile
+func (h *UserHandler) UpdateProfile(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
+		h.logger.WithContext(ctx).Error("UpdateProfile get uid error")
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
 		return
 	}
 
-	data, err := h.userService.GetPermissions(ctx, uid)
-	if err != nil {
-		h.logger.WithContext(ctx).Error("userService.GetPermissions error", zap.Error(err))
-		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": err.Error()})
+	var req v1.UserRequest
+	if err := ctx.ShouldBind(&req); err != nil {
+		h.logger.WithContext(ctx).Error("UpdateUser bind error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
 	}
-	v1.HandleSuccess(ctx, data)
+
+	if err := h.userService.Update(ctx, uint(uid), &req); err != nil {
+		h.logger.WithContext(ctx).Error("userService.Update error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	v1.HandleSuccess(ctx, nil)
 }
 
-// GetUserMenus godoc
+// GetMenus godoc
 // @Summary 获取用户菜单
 // @Schemes
 // @Description 获取当前用户的菜单列表
@@ -213,12 +221,12 @@ func (h *UserHandler) GetUserPermissions(ctx *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} v1.DynamicMenuResponse
-// @Router /users/me/menus [get]
-// @ID GetUserMenus
-func (h *UserHandler) GetUserMenus(ctx *gin.Context) {
+// @Router /users/menu [get]
+// @ID FetchDynamicMenu
+func (h *UserHandler) GetMenus(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
-		h.logger.WithContext(ctx).Error("GetUserMenus get uid error")
+		h.logger.WithContext(ctx).Error("GetMenus get uid error")
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
 		return
 	}

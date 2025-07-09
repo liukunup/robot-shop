@@ -96,11 +96,14 @@ func (s *userService) List(ctx context.Context, req *v1.UserSearchRequest) (*v1.
 			ID:        user.ID,
 			CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
 			UpdatedAt: user.UpdatedAt.Format(constant.DateTimeLayout),
-			Username:  user.Username,
-			Nickname:  user.Nickname,
-			Avatar:    user.Avatar,
 			Email:     user.Email,
-			Phone:     user.Phone,
+			Username:  user.Username,
+			Avatar:    user.Avatar,
+			Nickname:  user.Nickname,
+			Bio:       user.Bio,
+			Language:  user.Language,
+			Timezone:  user.Timezone,
+			Theme:     user.Theme,
 			Status:    user.Status,
 			Roles:     roleList,
 		})
@@ -144,11 +147,14 @@ func (s *userService) Create(ctx context.Context, req *v1.UserRequest) error {
 
 	// 构造新用户对象
 	newUser := &model.User{
+		Email:    req.Email,
 		Username: req.Username,
 		Password: string(hashedPassword), // 用户通过邮箱激活账户并设置新密码
 		Nickname: req.Nickname,
-		Email:    req.Email,
-		Phone:    req.Phone,
+		Bio:      req.Bio,
+		Language: req.Language,
+		Timezone: req.Timezone,
+		Theme:    req.Theme,
 		Status:   req.Status,
 	}
 	// 创建用户
@@ -170,10 +176,13 @@ func (s *userService) Update(ctx context.Context, uid uint, req *v1.UserRequest)
 	}
 	// 更新用户
 	data := map[string]interface{}{
+		"email":    req.Email,
 		"username": req.Username,
 		"nickname": req.Nickname,
-		"email":    req.Email,
-		"phone":    req.Phone,
+		"bio":      req.Bio,
+		"language": req.Language,
+		"timezone": req.Timezone,
+		"theme":    req.Theme,
 		"status":   req.Status,
 	}
 	return s.userRepository.Update(ctx, uid, data)
@@ -222,11 +231,14 @@ func (s *userService) Get(ctx context.Context, uid uint) (*v1.UserDataItem, erro
 		ID:        user.ID,
 		CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
 		UpdatedAt: user.UpdatedAt.Format(constant.DateTimeLayout),
+		Email:     user.Email,
 		Username:  user.Username,
 		Nickname:  user.Nickname,
 		Avatar:    "https://cravatar.cn/avatar/245467ef31b6f0addc72b039b94122a4?s=100&f=y&r=g",
-		Email:     user.Email,
-		Phone:     user.Phone,
+		Bio:       user.Bio,
+		Language:  user.Language,
+		Timezone:  user.Timezone,
+		Theme:     user.Theme,
 		Status:    user.Status,
 		Roles:     roleList,
 	}, nil
