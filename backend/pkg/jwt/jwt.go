@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	v1 "backend/api/v1"
 	"errors"
 	"strings"
 	"time"
@@ -9,17 +10,56 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	BearerPrefix       = "Bearer " // 请勿删除空格
+	DefaultTokenExpiry = 24 * time.Hour
+	ResetTokenExpiry   = 1 * time.Hour
+	ResetTokenLength   = 32
+)
+
 type JWT struct {
-	key []byte
+	key               []byte
+	signingMethod     jwt.SigningMethod
+	accessTokenExpiry time.Duration
+	resetTokenExpiry  time.Duration
+	tokenStore        TokenStore // 用于黑名单/白名单功能
+}
+
+type TokenStore interface {
+	IsRevoked(tokenID string) (bool, error)
+	Revoke(tokenID string, expiry time.Time) error
 }
 
 type MyCustomClaims struct {
-	UserId uint
+	UserId  uint
+	TokenID string `json:"jti,omitempty"` // 唯一标识符，可用于撤销
 	jwt.RegisteredClaims
 }
 
-func NewJwt(conf *viper.Viper) *JWT {
-	return &JWT{key: []byte(conf.GetString("security.jwt.key"))}
+type ResetTokenClaims struct {
+	Email   string `json:"email"`
+	TokenID string `json:"jti,omitempty"` // 唯一标识符，可用于撤销
+	jwt.RegisteredClaims
+}
+
+func NewJwt(conf *viper.Viper, store TokenStore) (*JWT, error) {
+	key := conf.GetString("security.jwt.key")
+	if len(key) < 32 {
+		return nil, v1.ErrInvalidKeyLength
+	}
+
+	tokenExpiry := conf.GetDuration("security.jwt.expiry")
+	if tokenExpiry == 0 {
+		tokenExpiry = DefaultTokenExpiry
+	}
+
+	return &JWT{
+		key:               []byte(key),
+		signingMethod:     jwt.SigningMethodHS256,
+		accessTokenExpiry: tokenExpiry,
+		resetTokenExpiry:  ResetTokenExpiry,
+		tokenStore:        store,
+	}, nil
 }
 
 func (j *JWT) GenToken(userId uint, expiresAt time.Time) (string, error) {
@@ -60,4 +100,11 @@ func (j *JWT) ParseToken(tokenString string) (*MyCustomClaims, error) {
 	} else {
 		return nil, err
 	}
+}
+
+func (j *JWT) RevokeToken(tokenID string, expiry time.Time) error {
+	if j.tokenStore == nil {
+		return nil
+	}
+	return j.tokenStore.Revoke(tokenID, expiry)
 }

@@ -11,6 +11,12 @@ var (
 	ErrServiceUnavailable  = newError(503, "Service Unavailable")
 
 	// more biz errors
-	ErrEmailAlreadyUse    = newError(1001, "The email is already in use.")
-	ErrUsernameAlreadyUse = newError(1002, "The username is already in use.")
+	ErrEmailAlreadyUse      = newError(1001, "The email is already in use.")
+	ErrUsernameAlreadyUse   = newError(1002, "The username is already in use.")
+	ErrEmptyToken           = newError(1003, "token is empty")
+	ErrInvalidToken         = newError(1004, "invalid token")
+	ErrUnexpectedClaim      = newError(1005, "unexpected claims type")
+	ErrTokenExpired         = newError(1006, "token has expired")
+	ErrInvalidSigningMethod = newError(1007, "invalid signing method")
+	ErrInvalidKeyLength     = newError(1008, "invalid key length")
 )
