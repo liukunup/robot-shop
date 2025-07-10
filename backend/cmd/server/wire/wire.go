@@ -15,6 +15,7 @@ import (
 	"backend/pkg/log"
 	"backend/pkg/server/http"
 	"backend/pkg/sid"
+	"backend/pkg/storage"
 
 	"github.com/google/wire"
 	"github.com/spf13/viper"
@@ -85,6 +86,7 @@ func NewWire(*viper.Viper, *log.Logger) (*app.App, func(), error) {
 		sid.NewSid,
 		jwt.NewJwt,
 		email.NewEmail,
+		storage.NewStorage,
 		newApp,
 	))
 }

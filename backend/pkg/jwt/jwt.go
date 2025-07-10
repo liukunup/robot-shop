@@ -2,8 +2,9 @@ package jwt
 
 import (
 	v1 "backend/api/v1"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -11,100 +12,205 @@ import (
 )
 
 const (
-	BearerPrefix       = "Bearer " // 请勿删除空格
-	DefaultTokenExpiry = 24 * time.Hour
-	ResetTokenExpiry   = 1 * time.Hour
-	ResetTokenLength   = 32
+	BearerPrefix             = "Bearer " // 请勿删除空格
+	AccessTokenExpiry        = 15 * time.Minute
+	RefreshTokenExpiry       = 30 * 24 * time.Hour
+	ResetPasswordTokenExpiry = 1 * time.Hour
+	RandomBytes              = 32
 )
 
 type JWT struct {
-	key               []byte
-	signingMethod     jwt.SigningMethod
-	accessTokenExpiry time.Duration
-	resetTokenExpiry  time.Duration
-	tokenStore        TokenStore // 用于黑名单/白名单功能
+	secret                   []byte
+	signingMethod            jwt.SigningMethod
+	accessTokenExpiry        time.Duration
+	refreshTokenExpiry       time.Duration
+	resetPasswordTokenExpiry time.Duration
+	tokenStore               TokenStore
 }
 
 type TokenStore interface {
-	IsRevoked(tokenID string) (bool, error)
-	Revoke(tokenID string, expiry time.Time) error
+	StoreRefreshToken(tokenID string, familyID string, userID uint, expiry time.Duration) error
+	IsRefreshTokenValid(tokenID string, familyID string) (bool, error)
+	InvalidateRefreshToken(tokenID string) error
+	InvalidateRefreshTokenFamily(familyID string) error
+
+	RevokeAccessToken(tokenID string, expiry time.Time) error
+	IsAccessTokenRevoked(tokenID string) (bool, error)
 }
 
-type MyCustomClaims struct {
-	UserId  uint
-	TokenID string `json:"jti,omitempty"` // 唯一标识符，可用于撤销
+type AccessClaims struct {
+	UserID  uint   `json:"userid"`
+	TokenID string `json:"jti,omitempty"` // 唯一标识符
 	jwt.RegisteredClaims
 }
 
-type ResetTokenClaims struct {
+type RefreshClaims struct {
+	UserID   uint   `json:"userid"`
+	TokenID  string `json:"jti,omitempty"`    // 唯一标识符
+	FamilyID string `json:"family,omitempty"` // Token簇ID
+	jwt.RegisteredClaims
+}
+
+type ResetPasswordClaims struct {
 	Email   string `json:"email"`
-	TokenID string `json:"jti,omitempty"` // 唯一标识符，可用于撤销
+	TokenID string `json:"jti,omitempty"` // 唯一标识符
 	jwt.RegisteredClaims
 }
 
-func NewJwt(conf *viper.Viper, store TokenStore) (*JWT, error) {
-	key := conf.GetString("security.jwt.key")
-	if len(key) < 32 {
-		return nil, v1.ErrInvalidKeyLength
-	}
-
-	tokenExpiry := conf.GetDuration("security.jwt.expiry")
-	if tokenExpiry == 0 {
-		tokenExpiry = DefaultTokenExpiry
+func NewJwt(conf *viper.Viper, store TokenStore) *JWT {
+	secret := conf.GetString("security.jwt.secret")
+	if len(secret) < 32 {
+		panic("jwt secret length must be at least 32")
 	}
 
 	return &JWT{
-		key:               []byte(key),
-		signingMethod:     jwt.SigningMethodHS256,
-		accessTokenExpiry: tokenExpiry,
-		resetTokenExpiry:  ResetTokenExpiry,
-		tokenStore:        store,
+		secret:                   []byte(secret),
+		signingMethod:            jwt.SigningMethodHS256,
+		accessTokenExpiry:        AccessTokenExpiry,
+		refreshTokenExpiry:       RefreshTokenExpiry,
+		resetPasswordTokenExpiry: ResetPasswordTokenExpiry,
+		tokenStore:               store,
+	}
+}
+
+func (j *JWT) GenerateTokenPair(uid uint) (*v1.TokenPair, error) {
+	// 生成 Access Token
+	accessTokenID, err := generateTokenID()
+	if err != nil {
+		return nil, err
+	}
+	accessClaims := AccessClaims{
+		UserID:  uid,
+		TokenID: accessTokenID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.accessTokenExpiry)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			ID:        accessTokenID,
+		},
+	}
+	accessToken := jwt.NewWithClaims(j.signingMethod, accessClaims)
+	accessTokenStr, err := accessToken.SignedString(j.secret)
+	if err != nil {
+		return nil, err
+	}
+
+	// 生成 Refresh Token
+	refreshTokenID, err := generateTokenID()
+	if err != nil {
+		return nil, err
+	}
+	familyID, err := generateTokenID()
+	if err != nil {
+		return nil, err
+	}
+	refreshClaims := RefreshClaims{
+		UserID:   uid,
+		TokenID:  refreshTokenID,
+		FamilyID: familyID,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.refreshTokenExpiry)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			NotBefore: jwt.NewNumericDate(time.Now()),
+			ID:        refreshTokenID,
+		},
+	}
+	refreshToken := jwt.NewWithClaims(j.signingMethod, refreshClaims)
+	refreshTokenStr, err := refreshToken.SignedString(j.secret)
+	if err != nil {
+		return nil, err
+	}
+
+	// 存储 Refresh Token 信息
+	if j.tokenStore != nil {
+		err = j.tokenStore.StoreRefreshToken(refreshTokenID, familyID, uid, j.refreshTokenExpiry)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &v1.TokenPair{
+		AccessToken:  accessTokenStr,
+		RefreshToken: refreshTokenStr,
+		ExpiresAt:    int64(j.accessTokenExpiry.Seconds()),
 	}, nil
 }
 
-func (j *JWT) GenToken(userId uint, expiresAt time.Time) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, MyCustomClaims{
-		UserId: userId,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expiresAt),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "",
-			Subject:   "",
-			ID:        "",
-			Audience:  []string{},
-		},
-	})
-
-	// Sign and get the complete encoded token as a string using the key
-	tokenString, err := token.SignedString(j.key)
+// 刷新 Access Token
+func (j *JWT) RefreshAccessToken(refreshToken string) (*v1.TokenPair, error) {
+	// 验证 Refresh Token
+	refreshClaims, err := j.parseRefreshToken(refreshToken)
 	if err != nil {
+		return nil, err
+	}
+
+	// 检查 Refresh Token 是否有效
+	if j.tokenStore != nil {
+		var valid bool
+		valid, err = j.tokenStore.IsRefreshTokenValid(refreshClaims.TokenID, refreshClaims.FamilyID)
+		if err != nil {
+			return nil, err
+		}
+		if !valid {
+			return nil, errors.New("invalid refresh token")
+		}
+	}
+
+	// 使旧 Refresh Token 失效(可选，根据安全需求)
+	if j.tokenStore != nil {
+		err = j.tokenStore.InvalidateRefreshToken(refreshClaims.TokenID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// 生成新的 Token Pair
+	return j.GenerateTokenPair(refreshClaims.UserID)
+}
+
+// 验证 Access Token
+func (j *JWT) ValidateAccessToken(accessToken string) (*AccessClaims, error) {
+	token, err := jwt.ParseWithClaims(accessToken, &AccessClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return j.secret, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(*AccessClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, errors.New("invalid access token")
+}
+
+// 解析 Refresh Token
+func (j *JWT) parseRefreshToken(tokenStr string) (*RefreshClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenStr, &RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return j.secret, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(*RefreshClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, errors.New("invalid refresh token")
+}
+
+// 生成 Token ID
+func generateTokenID() (string, error) {
+	b := make([]byte, RandomBytes/2)
+	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
-	return tokenString, nil
-}
-
-func (j *JWT) ParseToken(tokenString string) (*MyCustomClaims, error) {
-	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-	if strings.TrimSpace(tokenString) == "" {
-		return nil, errors.New("token is empty")
-	}
-	token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return j.key, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
-		return claims, nil
-	} else {
-		return nil, err
-	}
-}
-
-func (j *JWT) RevokeToken(tokenID string, expiry time.Time) error {
-	if j.tokenStore == nil {
-		return nil
-	}
-	return j.tokenStore.Revoke(tokenID, expiry)
+	return hex.EncodeToString(b), nil
 }

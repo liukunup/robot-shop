@@ -60,12 +60,14 @@ type LoginRequest struct {
 	Username string `json:"username" binding:"required" example:"zhangsan"` // 用户名
 	Password string `json:"password" binding:"required" example:"123456"`   // 密码
 }
-type LoginResponseData struct {
-	AccessToken string `json:"accessToken"` // 访问令牌
+type TokenPair struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+	ExpiresAt    int64  `json:"expiresAt"`
 }
 type LoginResponse struct {
 	Response
-	Data LoginResponseData
+	Data TokenPair
 }
 
 // Update Password

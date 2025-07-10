@@ -34,6 +34,17 @@ email:
   use_ssl: false
   use_tls: true
   local_name: localhost
+storage:
+  type: local
+  local:
+    path: ./storage/avatars
+  minio:
+    endpoint: "http://minio.local:9000"
+    access_key: xxx
+    secret_key: xxx
+    bucket: robot-shop-avatars
+    region: us-east-1
+    secure: false
 
 log:
   log_level: info
