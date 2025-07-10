@@ -12,7 +12,7 @@ type Service struct {
 	logger *log.Logger
 	sid    *sid.Sid
 	jwt    *jwt.JWT
-	email  *email.Client
+	email  *email.Email
 	tm     repository.Transaction
 }
 
@@ -20,7 +20,7 @@ func NewService(
 	logger *log.Logger,
 	sid *sid.Sid,
 	jwt *jwt.JWT,
-	email *email.Client,
+	email *email.Email,
 	tm repository.Transaction,
 ) *Service {
 	return &Service{

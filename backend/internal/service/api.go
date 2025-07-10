@@ -40,14 +40,9 @@ func (s *apiService) List(ctx context.Context, req *v1.ApiSearchRequest) (*v1.Ap
 	if err != nil {
 		return nil, err
 	}
-	groups, err := s.apiRepository.ListAllGroups(ctx)
-	if err != nil {
-		return nil, err
-	}
 	data := &v1.ApiSearchResponseData{
 		List:   make([]v1.ApiDataItem, 0),
 		Total:  total,
-		Groups: groups,
 	}
 	for _, api := range list {
 		data.List = append(data.List, v1.ApiDataItem{

@@ -12,7 +12,6 @@ import (
 	"errors"
 	"fmt"
 	mathRand "math/rand"
-	"net/textproto"
 	"strings"
 	"time"
 
@@ -29,7 +28,6 @@ type UserService interface {
 	Get(ctx context.Context, uid uint) (*v1.UserDataItem, error)
 
 	GetMenus(ctx context.Context, uid uint) (*v1.DynamicMenuResponseData, error)
-	GetPermissions(ctx context.Context, uid uint) (*v1.UserPermissionResponseData, error)
 
 	Register(ctx context.Context, req *v1.RegisterRequest) error
 	Login(ctx context.Context, req *v1.LoginRequest) (string, error)
@@ -327,25 +325,6 @@ func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.DynamicMenuRe
 	return data, nil
 }
 
-func (s *userService) GetPermissions(ctx context.Context, uid uint) (*v1.UserPermissionResponseData, error) {
-	// 获取权限列表
-	permList, err := s.userRepository.GetPermissions(ctx, uid)
-	if err != nil {
-		s.logger.WithContext(ctx).Error("userRepository.GetPermissions error", zap.Error(err))
-		return nil, err
-	}
-
-	data := &v1.UserPermissionResponseData{
-		List: []string{},
-	}
-	for _, v := range permList {
-		if len(v) == 3 {
-			data.List = append(data.List, strings.Join([]string{v[1], v[2]}, constant.PermSep))
-		}
-	}
-	return data, nil
-}
-
 func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) error {
 	// 检查邮箱是否已注册
 	_, err := s.userRepository.GetByEmail(ctx, req.Email)
@@ -455,57 +434,14 @@ func (s *userService) ResetPassword(ctx context.Context, req *v1.ResetPasswordRe
 		return v1.ErrInternalServerError
 	}
 
-	// 邮件模板常量（可以提取到配置文件中）
-	const (
-		resetPasswordSubject      = "Robot Shop - 密码重置请求"
-		resetPasswordTextTemplate = `尊敬的%s：
-
-			我们收到了您的密码重置请求。请点击以下链接重置您的密码：
-			%s
-
-			如果您没有请求重置密码，请忽略此邮件。
-
-			此链接将在24小时后失效。
-
-			Robot Shop 团队
-			`
-		resetPasswordHTMLTemplate = `<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-			<h2>尊敬的%s：</h2>
-			<p>我们收到了您的密码重置请求。请点击以下链接重置您的密码：</p>
-			<p><a href="%s" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">重置密码</a></p>
-			<p>如果您没有请求重置密码，请忽略此邮件。</p>
-			<p><small>此链接将在24小时后失效。</small></p>
-			<hr>
-			<p>Robot Shop 团队</p>
-			<p><a href="https://robot-shop.com">https://robot-shop.com</a></p>
-		</div>`
-	)
-
-	// 发送重置密码邮件
+	// 生成重置密码链接
 	resetLink := fmt.Sprintf("https://robot-shop.com/reset-password?token=%d", user.ID)
-	textContent := fmt.Sprintf(resetPasswordTextTemplate, user.Nickname, resetLink)
-	htmlContent := fmt.Sprintf(resetPasswordHTMLTemplate, user.Nickname, resetLink)
 
 	// 发送重置密码邮件
-	if err = s.email.Send(&email.Email{
-		From:    "xxx@163.com",
-		To:      []string{"xxx@163.com"},
-		Cc:      []string{"xxx@163.com"},
-		Bcc:     []string{"xxx@outlook.com"},
-		Subject: "重置密码",
-		Text:    textContent,
-		HTML:    htmlContent,
-		Headers: textproto.MIMEHeader{
-			"X-Custom-Header": []string{"Custom Value"},
-		},
-		Attachments: []*email.Attachment{
-			{
-				Filename: "附件.txt",
-				Content:  []byte("这是一个附件"),
-				Inline:   true,
-			},
-		},
-		ReadReceipt: []string{"robot-shop@example.com"},
+	if err = s.email.Send(&email.Message{
+		To:      []string{user.Email},
+		Subject: constant.ResetPasswordSubject,
+		Text:    fmt.Sprintf(constant.ResetPasswordTextTemplate, user.Nickname, resetLink),
 	}); err != nil {
 		return err
 	}

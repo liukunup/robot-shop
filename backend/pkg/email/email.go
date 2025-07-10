@@ -18,65 +18,72 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Email
-type Email struct {
-	From        string               // 发件人地址
-	To          []string             // 收件人地址列表
-	Cc          []string             // 抄送地址列表
-	Bcc         []string             // 密送地址列表
-	Subject     string               // 邮件主题
-	Text        string               // 文本内容
-	HTML        string               // HTML内容
-	Headers     textproto.MIMEHeader // 自定义头字段
-	Attachments []*Attachment        // 附件列表
-	ReadReceipt []string             // 回执地址列表
+type Message struct {
+	From         string               // 发件人地址
+	To           []string             // 收件人地址列表
+	Cc           []string             // 抄送地址列表
+	Bcc          []string             // 密送地址列表
+	Subject      string               // 邮件主题
+	Text         string               // 文本内容
+	HTML         string               // HTML内容
+	Headers      textproto.MIMEHeader // 自定义头字段
+	Attachments  []*Attachment        // 附件列表
+	ReadReceipts []string             // 回执地址列表
 }
 
-// Attachment
 type Attachment struct {
 	Filename string // 附件文件名
 	Content  []byte // 附件内容
 	Inline   bool   // 是否内联显示
 }
 
-// Config
-type Config struct {
-	Host      string      // SMTP服务器主机
-	Port      int         // SMTP服务器端口
-	Username  string      // SMTP服务器用户名
-	Password  string      // SMTP服务器密码
-	SSL       bool        // 是否使用SSL
-	TLSConfig *tls.Config // TLS配置
+// Mail Submission Agent
+type MSA struct {
+	Host      string      // 主机
+	Port      int         // 端口
+	Username  string      // 用户名
+	Password  string      // 密码
+	UseSSL    bool        // 是否使用 SSL
+	UseTLS    bool        // 是否使用 TLS (SSL/TLS 二选一)
+	TLSConfig *tls.Config // TLS 配置
 	LocalName string      // 本地主机名
 }
 
-type Client struct {
-	config *Config
+type Email struct {
+	msa *MSA
 }
 
-func NewEmail(conf *viper.Viper) *Client {
-	return &Client{config: &Config{
+func NewEmail(conf *viper.Viper) *Email {
+	return &Email{msa: &MSA{
 		Host:      conf.GetString("email.host"),
 		Port:      conf.GetInt("email.port"),
 		Username:  conf.GetString("email.username"),
 		Password:  conf.GetString("email.password"),
-		SSL:       conf.GetBool("email.ssl"),
+		UseSSL:    conf.GetBool("email.use_ssl"),
+		UseTLS:    conf.GetBool("email.use_tls"),
 		LocalName: conf.GetString("email.local_name"),
 	}}
 }
 
-func (c *Client) Send(email *Email) error {
-	if len(email.To) == 0 {
+func (e *Email) Send(msg *Message) error {
+
+	// 必须指定至少一个收件人
+	if len(msg.To) == 0 {
 		return errors.New("mail: no recipient specified")
 	}
 
-	from, err := mail.ParseAddress(email.From)
+	// 默认发件人与用户名相同
+	if msg.From == "" {
+		msg.From = e.msa.Username
+	}
+
+	from, err := mail.ParseAddress(msg.From)
 	if err != nil {
 		return fmt.Errorf("mail: invalid from address: %v", err)
 	}
 
-	to := make([]string, 0, len(email.To))
-	for _, addr := range email.To {
+	to := make([]string, 0, len(msg.To))
+	for _, addr := range msg.To {
 		parsedAddr, err := mail.ParseAddress(addr)
 		if err != nil {
 			return fmt.Errorf("mail: invalid to address %q: %v", addr, err)
@@ -84,8 +91,8 @@ func (c *Client) Send(email *Email) error {
 		to = append(to, parsedAddr.Address)
 	}
 
-	cc := make([]string, 0, len(email.Cc))
-	for _, addr := range email.Cc {
+	cc := make([]string, 0, len(msg.Cc))
+	for _, addr := range msg.Cc {
 		parsedAddr, err := mail.ParseAddress(addr)
 		if err != nil {
 			return fmt.Errorf("mail: invalid cc address %q: %v", addr, err)
@@ -93,8 +100,8 @@ func (c *Client) Send(email *Email) error {
 		cc = append(cc, parsedAddr.Address)
 	}
 
-	bcc := make([]string, 0, len(email.Bcc))
-	for _, addr := range email.Bcc {
+	bcc := make([]string, 0, len(msg.Bcc))
+	for _, addr := range msg.Bcc {
 		parsedAddr, err := mail.ParseAddress(addr)
 		if err != nil {
 			return fmt.Errorf("mail: invalid bcc address %q: %v", addr, err)
@@ -102,41 +109,40 @@ func (c *Client) Send(email *Email) error {
 		bcc = append(bcc, parsedAddr.Address)
 	}
 
-	raw, err := c.buildEmail(email, from, to)
+	raw, err := e.buildEmail(msg, from, to)
 	if err != nil {
 		return err
 	}
 
-	return c.sendEmail(from.Address, to, cc, bcc, raw)
+	return e.sendEmail(from.Address, to, cc, bcc, raw)
 }
 
-// 构建邮件内容
-func (c *Client) buildEmail(email *Email, from *mail.Address, to []string) ([]byte, error) {
+func (e *Email) buildEmail(msg *Message, from *mail.Address, to []string) ([]byte, error) {
 	buf := bytes.NewBuffer(nil)
 
 	// 设置头部
 	headers := make(textproto.MIMEHeader)
 	headers.Set("From", from.String())
 	headers.Set("To", strings.Join(to, ", "))
-	headers.Set("Subject", mime.QEncoding.Encode("utf-8", email.Subject))
+	headers.Set("Subject", mime.QEncoding.Encode("utf-8", msg.Subject))
 	headers.Set("Date", time.Now().Format(time.RFC1123Z))
 	headers.Set("MIME-Version", "1.0")
 
-	if len(email.Cc) > 0 {
-		headers.Set("Cc", strings.Join(email.Cc, ", "))
+	if len(msg.Cc) > 0 {
+		headers.Set("Cc", strings.Join(msg.Cc, ", "))
 	}
 
-	if len(email.ReadReceipt) > 0 {
-		headers.Set("Disposition-Notification-To", strings.Join(email.ReadReceipt, ", "))
+	if len(msg.ReadReceipts) > 0 {
+		headers.Set("Disposition-Notification-To", strings.Join(msg.ReadReceipts, ", "))
 	}
 
 	// 添加自定义头部
-	for k, v := range email.Headers {
+	for k, v := range msg.Headers {
 		headers[k] = v
 	}
 
 	// 根据是否有附件决定内容类型
-	mixed := len(email.Attachments) > 0
+	mixed := len(msg.Attachments) > 0
 	var (
 		related     bool
 		alternative bool
@@ -147,13 +153,13 @@ func (c *Client) buildEmail(email *Email, from *mail.Address, to []string) ([]by
 		buf.WriteString("--MIXED_BOUNDARY\r\n")
 	}
 
-	alternative = email.Text != "" && email.HTML != ""
+	alternative = msg.Text != "" && msg.HTML != ""
 	if alternative {
 		headers.Set("Content-Type", "multipart/alternative; boundary=ALTERNATIVE_BOUNDARY")
 		buf.WriteString("--ALTERNATIVE_BOUNDARY\r\n")
 	}
 
-	related = len(email.getInlineAttachments()) > 0
+	related = len(msg.getInlineAttachments()) > 0
 	if related {
 		headers.Set("Content-Type", "multipart/related; boundary=RELATED_BOUNDARY")
 		buf.WriteString("--RELATED_BOUNDARY\r\n")
@@ -166,13 +172,13 @@ func (c *Client) buildEmail(email *Email, from *mail.Address, to []string) ([]by
 	buf.WriteString("\r\n")
 
 	// 写入文本内容
-	if email.Text != "" || email.HTML == "" {
+	if msg.Text != "" || msg.HTML == "" {
 		textHeader := make(textproto.MIMEHeader)
 		textHeader.Set("Content-Type", "text/plain; charset=utf-8")
 		textHeader.Set("Content-Transfer-Encoding", "quoted-printable")
 
 		writeHeaders(buf, textHeader)
-		buf.WriteString(encodeText(email.Text))
+		buf.WriteString(encodeText(msg.Text))
 		buf.WriteString("\r\n")
 
 		if alternative {
@@ -181,13 +187,13 @@ func (c *Client) buildEmail(email *Email, from *mail.Address, to []string) ([]by
 	}
 
 	// 写入HTML内容
-	if email.HTML != "" {
+	if msg.HTML != "" {
 		htmlHeader := make(textproto.MIMEHeader)
 		htmlHeader.Set("Content-Type", "text/html; charset=utf-8")
 		htmlHeader.Set("Content-Transfer-Encoding", "quoted-printable")
 
 		writeHeaders(buf, htmlHeader)
-		buf.WriteString(encodeText(email.HTML))
+		buf.WriteString(encodeText(msg.HTML))
 		buf.WriteString("\r\n")
 
 		if alternative {
@@ -201,7 +207,7 @@ func (c *Client) buildEmail(email *Email, from *mail.Address, to []string) ([]by
 
 	// 添加附件
 	if mixed {
-		for _, attachment := range email.Attachments {
+		for _, attachment := range msg.Attachments {
 			buf.WriteString("\r\n--MIXED_BOUNDARY\r\n")
 			attachmentHeader := make(textproto.MIMEHeader)
 			if attachment.Inline {
@@ -230,17 +236,17 @@ func (c *Client) buildEmail(email *Email, from *mail.Address, to []string) ([]by
 }
 
 // 执行发送邮件
-func (c *Client) sendEmail(from string, to, cc, bcc []string, raw []byte) error {
+func (e *Email) sendEmail(from string, to, cc, bcc []string, raw []byte) error {
 
-	addr := net.JoinHostPort(c.config.Host, strconv.Itoa(c.config.Port))
+	addr := net.JoinHostPort(e.msa.Host, strconv.Itoa(e.msa.Port))
 
 	var conn net.Conn
 	var err error
 
-	if c.config.SSL {
-		tlsconfig := c.config.TLSConfig
+	if e.msa.UseSSL {
+		tlsconfig := e.msa.TLSConfig
 		if tlsconfig == nil {
-			tlsconfig = &tls.Config{ServerName: c.config.Host}
+			tlsconfig = &tls.Config{ServerName: e.msa.Host}
 		}
 
 		conn, err = tls.Dial("tcp", addr, tlsconfig)
@@ -254,23 +260,23 @@ func (c *Client) sendEmail(from string, to, cc, bcc []string, raw []byte) error 
 		}
 	}
 
-	client, err := smtp.NewClient(conn, c.config.Host)
+	client, err := smtp.NewClient(conn, e.msa.Host)
 	if err != nil {
 		return fmt.Errorf("mail: smtp new client error: %v", err)
 	}
 	defer client.Close()
 
-	if c.config.LocalName != "" {
-		if err = client.Hello(c.config.LocalName); err != nil {
+	if e.msa.LocalName != "" {
+		if err = client.Hello(e.msa.LocalName); err != nil {
 			return fmt.Errorf("mail: helo error: %v", err)
 		}
 	}
 
-	if !c.config.SSL {
+	if e.msa.UseTLS {
 		if ok, _ := client.Extension("STARTTLS"); ok {
-			tlsconfig := c.config.TLSConfig
+			tlsconfig := e.msa.TLSConfig
 			if tlsconfig == nil {
-				tlsconfig = &tls.Config{ServerName: c.config.Host}
+				tlsconfig = &tls.Config{ServerName: e.msa.Host}
 			}
 			if err = client.StartTLS(tlsconfig); err != nil {
 				return fmt.Errorf("mail: starttls error: %v", err)
@@ -278,8 +284,8 @@ func (c *Client) sendEmail(from string, to, cc, bcc []string, raw []byte) error 
 		}
 	}
 
-	if c.config.Username != "" && c.config.Password != "" {
-		auth := smtp.PlainAuth("", c.config.Username, c.config.Password, c.config.Host)
+	if e.msa.Username != "" && e.msa.Password != "" {
+		auth := smtp.PlainAuth("", e.msa.Username, e.msa.Password, e.msa.Host)
 		if err = client.Auth(auth); err != nil {
 			return fmt.Errorf("mail: auth error: %v", err)
 		}
@@ -334,9 +340,9 @@ func writeHeaders(buf *bytes.Buffer, headers textproto.MIMEHeader) {
 }
 
 // 获取内联附件
-func (e *Email) getInlineAttachments() []*Attachment {
+func (msg *Message) getInlineAttachments() []*Attachment {
 	var inlines []*Attachment
-	for _, a := range e.Attachments {
+	for _, a := range msg.Attachments {
 		if a.Inline {
 			inlines = append(inlines, a)
 		}
