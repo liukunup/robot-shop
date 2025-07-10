@@ -272,7 +272,7 @@ func (e *Email) sendEmail(from string, to, cc, bcc []string, raw []byte) error {
 		}
 	}
 
-	if e.msa.UseTLS {
+	if e.msa.UseTLS && !e.msa.UseSSL {
 		if ok, _ := client.Extension("STARTTLS"); ok {
 			tlsconfig := e.msa.TLSConfig
 			if tlsconfig == nil {

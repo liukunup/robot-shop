@@ -31,9 +31,9 @@ email:
   port: 587
   username: xxx@163.com
   password: 123456
-  ssl: true
-  local_name: robot-shop
-  from: xxx@163.com
+  use_ssl: false
+  use_tls: true
+  local_name: localhost
 
 log:
   log_level: info
