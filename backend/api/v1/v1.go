@@ -8,8 +8,8 @@ import (
 )
 
 type Response struct {
-	Success       bool        `json:"success" example:"true"` // 是否成功
-	Data          interface{} `json:"data"`
+	Success       bool        `json:"success" example:"true"`  // 是否成功
+	Data          interface{} `json:"data"`                    // 返回数据
 	ErrorCode     int         `json:"errorCode,omitempty"`     // 错误码
 	ErrorMessage  string      `json:"errorMessage,omitempty"`  // 报错信息
 	ErrorShowType int         `json:"errorShowType,omitempty"` // 前端展示方式
