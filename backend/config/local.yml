@@ -3,6 +3,8 @@ http:
   #  host: 0.0.0.0
   host: 127.0.0.1
   port: 8000
+  # cert_file: "./storage/cert/server.crt"
+  # key_file: "./storage/cert/server.key"
 security:
   api_sign:
     app_key: 123456

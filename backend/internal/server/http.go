@@ -33,6 +33,7 @@ func NewHTTPServer(
 		logger,
 		http.WithServerHost(conf.GetString("http.host")),
 		http.WithServerPort(conf.GetInt("http.port")),
+		http.WithCertFiles(conf.GetString("http.cert_file"), conf.GetString("http.key_file")),
 	)
 
 	// swagger doc

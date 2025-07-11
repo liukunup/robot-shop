@@ -1,21 +1,25 @@
 package http
 
 import (
+	"backend/pkg/log"
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"backend/pkg/log"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
 	*gin.Engine
-	httpSrv *http.Server
-	host    string
-	port    int
-	logger  *log.Logger
+	httpSrv  *http.Server
+	host     string
+	port     int
+	certFile string
+	keyFile  string
+	logger   *log.Logger
 }
 type Option func(s *Server)
 
@@ -39,15 +43,36 @@ func WithServerPort(port int) Option {
 		s.port = port
 	}
 }
+func WithCertFiles(certFile string, keyFile string) Option {
+	return func(s *Server) {
+		s.certFile = certFile
+		s.keyFile = keyFile
+	}
+}
 
 func (s *Server) Start(ctx context.Context) error {
-	s.httpSrv = &http.Server{
-		Addr:    fmt.Sprintf("%s:%d", s.host, s.port),
-		Handler: s,
-	}
-
-	if err := s.httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		s.logger.Sugar().Fatalf("listen: %s\n", err)
+	if s.certFile != "" && s.keyFile != "" { // HTTPS
+		if _, err := tls.LoadX509KeyPair(s.certFile, s.keyFile); err != nil {
+			s.logger.Sugar().Fatalf("certificate or key file error: %v", err)
+		}
+		s.httpSrv = &http.Server{
+			Addr:    fmt.Sprintf("%s:%d", s.host, s.port),
+			Handler: s,
+			TLSConfig: &tls.Config{
+				MinVersion: tls.VersionTLS12,
+			},
+		}
+		if err := s.httpSrv.ListenAndServeTLS(s.certFile, s.keyFile); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			s.logger.Sugar().Fatalf("listen: %s\n", err)
+		}
+	} else { // HTTP
+		s.httpSrv = &http.Server{
+			Addr:    fmt.Sprintf("%s:%d", s.host, s.port),
+			Handler: s,
+		}
+		if err := s.httpSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			s.logger.Sugar().Fatalf("listen: %s\n", err)
+		}
 	}
 
 	return nil
