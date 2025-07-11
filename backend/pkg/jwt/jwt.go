@@ -28,16 +28,6 @@ type JWT struct {
 	tokenStore               TokenStore
 }
 
-type TokenStore interface {
-	StoreRefreshToken(tokenID string, familyID string, userID uint, expiry time.Duration) error
-	IsRefreshTokenValid(tokenID string, familyID string) (bool, error)
-	InvalidateRefreshToken(tokenID string) error
-	InvalidateRefreshTokenFamily(familyID string) error
-
-	RevokeAccessToken(tokenID string, expiry time.Time) error
-	IsAccessTokenRevoked(tokenID string) (bool, error)
-}
-
 type AccessClaims struct {
 	UserID  uint   `json:"userid"`
 	TokenID string `json:"jti,omitempty"` // 唯一标识符
@@ -73,7 +63,7 @@ func NewJwt(conf *viper.Viper, store TokenStore) *JWT {
 	}
 }
 
-func (j *JWT) GenerateTokenPair(uid uint) (*v1.TokenPair, error) {
+func (j *JWT) GenerateTokenPair(uid uint, familyID string) (*v1.TokenPair, error) {
 	// 生成 Access Token
 	accessTokenID, err := generateTokenID()
 	if err != nil {
@@ -132,7 +122,7 @@ func (j *JWT) GenerateTokenPair(uid uint) (*v1.TokenPair, error) {
 	return &v1.TokenPair{
 		AccessToken:  accessTokenStr,
 		RefreshToken: refreshTokenStr,
-		ExpiresAt:    int64(j.accessTokenExpiry.Seconds()),
+		ExpiresIn:    int64(j.accessTokenExpiry.Seconds()),
 	}, nil
 }
 

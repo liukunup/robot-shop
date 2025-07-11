@@ -19,4 +19,5 @@ var (
 	ErrTokenExpired         = newError(1006, "token has expired")
 	ErrInvalidSigningMethod = newError(1007, "invalid signing method")
 	ErrInvalidKeyLength     = newError(1008, "invalid key length")
+	ErrRedisUnavailable     = newError(1009, "redis service unavailable")
 )

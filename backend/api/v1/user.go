@@ -61,9 +61,9 @@ type LoginRequest struct {
 	Password string `json:"password" binding:"required" example:"123456"`   // 密码
 }
 type TokenPair struct {
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
-	ExpiresAt    int64  `json:"expiresAt"`
+	AccessToken  string `json:"accessToken"`  // 访问令牌
+	RefreshToken string `json:"refreshToken"` // 刷新令牌
+	ExpiresIn    int64  `json:"expiresIn"`    // 过期时间(单位:秒)
 }
 type LoginResponse struct {
 	Response
