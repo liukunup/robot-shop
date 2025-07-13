@@ -23,5 +23,5 @@ func GetUserIdFromCtx(ctx *gin.Context) uint {
 	if !exists {
 		return 0
 	}
-	return v.(*jwt.MyCustomClaims).UserId
+	return v.(*jwt.AccessClaims).UserID
 }

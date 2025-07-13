@@ -21,7 +21,8 @@ type TokenStore interface {
 	IsRefreshTokenValid(ctx context.Context, tokenID string, familyID string) (bool, error)
 	InvalidateRefreshToken(ctx context.Context, tokenID string) error
 	InvalidateRefreshTokenFamily(ctx context.Context, familyID string) error
+	InvalidateRefreshTokenFamilyByUserID(ctx context.Context, userID uint) error
 	// Access Token
-	RevokeAccessToken(ctx context.Context, tokenID string, expiry time.Time) error
+	RevokeAccessToken(ctx context.Context, tokenID string, expiry time.Duration) error
 	IsAccessTokenRevoked(ctx context.Context, tokenID string) (bool, error)
 }

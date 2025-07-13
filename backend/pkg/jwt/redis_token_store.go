@@ -12,38 +12,36 @@ import (
 )
 
 const (
-	NsRefresh = "refresh"
-	NsFamily  = "family"
+	NsRefresh      = "refresh"
+	NsFamily       = "family"
 	NsUserFamilies = "user_families"
+	NsAccess       = "access"
 )
 
 type RedisTokenStore struct {
-	client        redis.UniversalClient
-	keyPrefix     string
-	accessExpiry  time.Duration
-	refreshExpiry time.Duration
+	client    redis.UniversalClient
+	keyPrefix string
 }
 
-func NewRedisTokenStore(client redis.UniversalClient, keyPrefix string) *RedisTokenStore {
+func NewRedisTokenStore(client redis.UniversalClient, keyPrefix string) TokenStore {
 	return &RedisTokenStore{
 		client:    client,
 		keyPrefix: keyPrefix,
 	}
 }
 
-// 生成带命名空间的Redis键
+// 生成带 Namespace 的 Redis Key
 func (s *RedisTokenStore) key(namespace, id string) string {
 	return fmt.Sprintf("%s:%s:%s", s.keyPrefix, namespace, id)
 }
 
-// StoreRefreshToken 存储Refresh Token (带自动过期和家族管理)
-func (s *RedisTokenStore) StoreRefreshToken(ctx context.Context, tokenID, familyID string, userID uint, expiry time.Duration) error {
+func (s *RedisTokenStore) StoreRefreshToken(ctx context.Context, tokenID string, familyID string, userID uint, expiry time.Duration) error {
 	data := refreshTokenEntry{
 		TokenID:   tokenID,
 		FamilyID:  familyID,
 		UserID:    userID,
-		Valid:     true,
 		ExpiresAt: time.Now().Add(expiry),
+		Valid:     true,
 	}
 
 	jsonData, err := json.Marshal(data)
@@ -51,22 +49,19 @@ func (s *RedisTokenStore) StoreRefreshToken(ctx context.Context, tokenID, family
 		return fmt.Errorf("marshal token data failed: %w", err)
 	}
 
-	// 使用Pipeline批量操作
 	_, err = s.client.Pipelined(ctx, func(pipe redis.Pipeliner) error {
-		// 存储Token数据
+		// 存储 Refresh Token
 		pipe.SetEx(ctx, s.key(NsRefresh, tokenID), jsonData, expiry)
-
-		// 添加到家族集合
+		// 存储 Family
 		if familyID != "" {
-			familyKey := s.key("family", familyID)
+			familyKey := s.key(NsFamily, familyID)
 			pipe.SAdd(ctx, familyKey, tokenID)
-			pipe.Expire(ctx, familyKey, expiry+10*time.Minute) // 比Token多保留一段时间
+			pipe.Expire(ctx, familyKey, expiry+15*time.Minute) // 比 Token 多保留一段时间
 		}
-
-		// 维护用户到家族的映射（用于快速查找）
-		userFamiliesKey := s.key("user_families", fmt.Sprintf("%d", userID))
+		// 维护 UserID 到 FamilyID 的映射（用于快速查找）
+		userFamiliesKey := s.key(NsUserFamilies, fmt.Sprintf("%d", userID))
 		pipe.SAdd(ctx, userFamiliesKey, familyID)
-		pipe.Expire(ctx, userFamiliesKey, expiry+24*time.Hour)
+		pipe.Expire(ctx, userFamiliesKey, expiry+24*time.Hour) // 比 Token 多保留一段时间
 		return nil
 	})
 
@@ -76,9 +71,8 @@ func (s *RedisTokenStore) StoreRefreshToken(ctx context.Context, tokenID, family
 	return nil
 }
 
-// IsRefreshTokenValid 检查Refresh Token有效性
-func (s *RedisTokenStore) IsRefreshTokenValid(ctx context.Context, tokenID, familyID string) (bool, error) {
-	data, err := s.client.Get(ctx, s.key("refresh", tokenID)).Bytes()
+func (s *RedisTokenStore) IsRefreshTokenValid(ctx context.Context, tokenID string, familyID string) (bool, error) {
+	data, err := s.client.Get(ctx, s.key(NsRefresh, tokenID)).Bytes()
 	switch {
 	case err == redis.Nil:
 		return false, nil // 不存在视为无效
@@ -91,37 +85,34 @@ func (s *RedisTokenStore) IsRefreshTokenValid(ctx context.Context, tokenID, fami
 		return false, fmt.Errorf("unmarshal token data failed: %w", err)
 	}
 
-	// 检查有效性、家族匹配和过期时间
-	now := time.Now().UnixNano()
-	return token.Valid && 
-		(familyID == "" || token.FamilyID == familyID) && 
-		now < token.ExpiresAt, nil
+	// 检查有效性、FamilyID匹配和过期时间
+	return token.Valid &&
+		(familyID == "" || token.FamilyID == familyID) &&
+		time.Now().Before(token.ExpiresAt), nil
 }
 
-// InvalidateRefreshToken 使单个Token失效
 func (s *RedisTokenStore) InvalidateRefreshToken(ctx context.Context, tokenID string) error {
 	// 使用Lua脚本保证原子性
 	script := `
 	local key = KEYS[1]
 	local data = redis.call('GET', key)
 	if not data then return 0 end
-	
+
 	local token = cjson.decode(data)
 	token['valid'] = false
 	redis.call('SET', key, cjson.encode(token))
 	return 1
 	`
 
-	_, err := s.client.Eval(ctx, script, []string{s.key("refresh", tokenID)}).Result()
+	_, err := s.client.Eval(ctx, script, []string{s.key(NsRefresh, tokenID)}).Result()
 	if err != nil && err != redis.Nil {
 		return fmt.Errorf("lua script failed: %w", err)
 	}
 	return nil
 }
 
-// InvalidateRefreshTokenFamily 使整个家族失效
 func (s *RedisTokenStore) InvalidateRefreshTokenFamily(ctx context.Context, familyID string) error {
-	familyKey := s.key("family", familyID)
+	familyKey := s.key(NsFamily, familyID)
 
 	// 分页扫描避免阻塞
 	var cursor uint64
@@ -147,10 +138,35 @@ func (s *RedisTokenStore) InvalidateRefreshTokenFamily(ctx context.Context, fami
 	return nil
 }
 
-// RevokeAccessToken 撤销Access Token
-func (s *RedisTokenStore) RevokeAccessToken(ctx context.Context, tokenID string, expiry time.Time) error {
+func (s *RedisTokenStore) InvalidateRefreshTokenFamilyByUserID(ctx context.Context, userID uint) error {
+	userFamiliesKey := s.key(NsUserFamilies, fmt.Sprintf("%d", userID))
+
+	// 分页扫描避免阻塞
+	var cursor uint64
+	for {
+		var familyIDs []string
+		var err error
+		familyIDs, cursor, err = s.client.SScan(ctx, userFamiliesKey, cursor, "", 100).Result()
+		if err != nil {
+			return fmt.Errorf("scan user families failed: %w", err)
+		}
+
+		// 批量失效
+		for _, familyID := range familyIDs {
+			if err := s.InvalidateRefreshTokenFamily(ctx, familyID); err != nil {
+				return fmt.Errorf("invalidate family %s failed: %w", familyID, err)
+			}
+		}
+		if cursor == 0 {
+			break
+		}
+	}
+	return nil
+}
+
+func (s *RedisTokenStore) RevokeAccessToken(ctx context.Context, tokenID string, expiry time.Duration) error {
 	// 使用SET NX模式避免覆盖更晚的撤销记录
-	ok, err := s.client.SetNX(ctx, s.key("revoked_access", tokenID), "1", time.Until(expiry)).Result()
+	ok, err := s.client.SetNX(ctx, s.key(NsAccess, tokenID), "1", expiry).Result()
 	if err != nil {
 		return fmt.Errorf("%w: %v", v1.ErrRedisUnavailable, err)
 	}
@@ -160,24 +176,10 @@ func (s *RedisTokenStore) RevokeAccessToken(ctx context.Context, tokenID string,
 	return nil
 }
 
-// IsAccessTokenRevoked 检查Access Token是否被撤销
 func (s *RedisTokenStore) IsAccessTokenRevoked(ctx context.Context, tokenID string) (bool, error) {
-	exists, err := s.client.Exists(ctx, s.key("revoked_access", tokenID)).Result()
+	exists, err := s.client.Exists(ctx, s.key(NsAccess, tokenID)).Result()
 	if err != nil {
 		return false, fmt.Errorf("%w: %v", v1.ErrRedisUnavailable, err)
 	}
 	return exists > 0, nil
-}
-
-// GetUserFamilies 获取用户的所有Token家族（用于全设备退出）
-func (s *RedisTokenStore) GetUserFamilies(ctx context.Context, userID uint) ([]string, error) {
-	key := s.key("user_families", fmt.Sprintf("%d", userID))
-	return s.client.SMembers(ctx, key).Result()
-}
-
-// CleanStaleData 清理过期数据（后台任务）
-func (s *RedisTokenStore) CleanStaleData(ctx context.Context) error {
-	// Redis会自动清理过期的Key，此方法用于处理额外关系
-	// 实现略（可使用SCAN遍历清理无效的家族集合等）
-	return nil
 }

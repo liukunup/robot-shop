@@ -1866,7 +1866,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/backend_api_v1.LoginResponseData"
+                    "$ref": "#/definitions/backend_api_v1.TokenPair"
                 },
                 "errorCode": {
                     "description": "错误码",
@@ -1884,15 +1884,6 @@ const docTemplate = `{
                     "description": "是否成功",
                     "type": "boolean",
                     "example": true
-                }
-            }
-        },
-        "backend_api_v1.LoginResponseData": {
-            "type": "object",
-            "properties": {
-                "accessToken": {
-                    "description": "访问令牌",
-                    "type": "string"
                 }
             }
         },
@@ -2274,6 +2265,23 @@ const docTemplate = `{
                     "description": "是否成功",
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "backend_api_v1.TokenPair": {
+            "type": "object",
+            "properties": {
+                "accessToken": {
+                    "description": "访问令牌",
+                    "type": "string"
+                },
+                "expiresIn": {
+                    "description": "过期时间(单位:秒)",
+                    "type": "integer"
+                },
+                "refreshToken": {
+                    "description": "刷新令牌",
+                    "type": "string"
                 }
             }
         },

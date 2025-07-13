@@ -286,16 +286,14 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := h.userService.Login(ctx, &req)
+	tokenPair, err := h.userService.Login(ctx, &req)
 	if err != nil {
 		h.logger.WithContext(ctx).Error("userService.Login error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
-	v1.HandleSuccess(ctx, v1.LoginResponseData{
-		AccessToken: token,
-	})
+	v1.HandleSuccess(ctx, tokenPair)
 }
 
 // UpdatePassword godoc

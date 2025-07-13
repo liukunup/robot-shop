@@ -14,7 +14,7 @@ type LocalStorage struct {
 	basePath string
 }
 
-func NewLocalStorage(conf *viper.Viper) *LocalStorage {
+func NewLocalStorage(conf *viper.Viper) Storage {
 	basePath := conf.GetString("storage.local.path")
 	if basePath == "" {
 		panic("local storage base path is required")

@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"context"
 	"sync"
 	"time"
 )
@@ -12,14 +13,15 @@ type MemoryTokenStore struct {
 	mu            sync.RWMutex
 }
 
-func NewMemoryTokenStore() *MemoryTokenStore {
+func NewMemoryTokenStore() TokenStore {
 	return &MemoryTokenStore{
 		refreshTokens: make(map[string]refreshTokenEntry),
 		revokedTokens: make(map[string]time.Time),
+		mu:            sync.RWMutex{},
 	}
 }
 
-func (s *MemoryTokenStore) StoreRefreshToken(tokenID string, familyID string, userID uint, expiry time.Duration) error {
+func (s *MemoryTokenStore) StoreRefreshToken(ctx context.Context, tokenID string, familyID string, userID uint, expiry time.Duration) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -33,7 +35,7 @@ func (s *MemoryTokenStore) StoreRefreshToken(tokenID string, familyID string, us
 	return nil
 }
 
-func (s *MemoryTokenStore) IsRefreshTokenValid(tokenID string, familyID string) (bool, error) {
+func (s *MemoryTokenStore) IsRefreshTokenValid(ctx context.Context, tokenID string, familyID string) (bool, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -56,7 +58,7 @@ func (s *MemoryTokenStore) IsRefreshTokenValid(tokenID string, familyID string) 
 	return true, nil
 }
 
-func (s *MemoryTokenStore) InvalidateRefreshToken(tokenID string) error {
+func (s *MemoryTokenStore) InvalidateRefreshToken(ctx context.Context, tokenID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -68,7 +70,7 @@ func (s *MemoryTokenStore) InvalidateRefreshToken(tokenID string) error {
 	return nil
 }
 
-func (s *MemoryTokenStore) InvalidateRefreshTokenFamily(familyID string) error {
+func (s *MemoryTokenStore) InvalidateRefreshTokenFamily(ctx context.Context, familyID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -82,16 +84,30 @@ func (s *MemoryTokenStore) InvalidateRefreshTokenFamily(familyID string) error {
 	return nil
 }
 
-func (s *MemoryTokenStore) RevokeAccessToken(tokenID string, expiry time.Time) error {
+func (s *MemoryTokenStore) InvalidateRefreshTokenFamilyByUserID(ctx context.Context, userID uint) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for tokenID, entry := range s.refreshTokens {
+		// 使所有属于该 UserID 的 Token 无效
+		if entry.UserID == userID {
+			entry.Valid = false
+			s.refreshTokens[tokenID] = entry
+		}
+	}
+	return nil
+}
+
+func (s *MemoryTokenStore) RevokeAccessToken(ctx context.Context, tokenID string, expiry time.Duration) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	// 撤销时加入黑名单
-	s.revokedTokens[tokenID] = expiry
+	s.revokedTokens[tokenID] = time.Now().Add(expiry)
 	return nil
 }
 
-func (s *MemoryTokenStore) IsAccessTokenRevoked(tokenID string) (bool, error) {
+func (s *MemoryTokenStore) IsAccessTokenRevoked(ctx context.Context, tokenID string) (bool, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -115,7 +131,7 @@ func (s *MemoryTokenStore) IsAccessTokenRevoked(tokenID string) (bool, error) {
 }
 
 // 清理过期的 Token 记录
-func (s *MemoryTokenStore) CleanupExpiredTokens() {
+func (s *MemoryTokenStore) CleanupExpiredTokens(ctx context.Context) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

@@ -25,7 +25,7 @@ type MinIOStorage struct {
 	bucket string        // 桶
 }
 
-func NewMinIOStorage(conf *viper.Viper) *MinIOStorage {
+func NewMinIOStorage(conf *viper.Viper) Storage {
 	cfg := &MinIOConfig{
 		Endpoint:  conf.GetString("storage.minio.endpoint"),
 		AccessKey: conf.GetString("storage.minio.access_key"),

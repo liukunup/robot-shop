@@ -30,7 +30,9 @@ type UserService interface {
 	GetMenus(ctx context.Context, uid uint) (*v1.DynamicMenuResponseData, error)
 
 	Register(ctx context.Context, req *v1.RegisterRequest) error
-	Login(ctx context.Context, req *v1.LoginRequest) (string, error)
+	Login(ctx context.Context, req *v1.LoginRequest) (*v1.TokenPair, error)
+	Logout(ctx context.Context, uid uint) error
+	RefreshToken(ctx context.Context, refreshToken string) (*v1.TokenPair, error)
 	UpdatePassword(ctx context.Context, uid uint, req *v1.UpdatePasswordRequest) error
 	ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) error
 }
@@ -370,29 +372,37 @@ func (s *userService) Register(ctx context.Context, req *v1.RegisterRequest) err
 	return err
 }
 
-func (s *userService) Login(ctx context.Context, req *v1.LoginRequest) (string, error) {
+func (s *userService) Login(ctx context.Context, req *v1.LoginRequest) (*v1.TokenPair, error) {
 	// 查找指定用户
 	user, err := s.userRepository.GetByUsernameOrEmail(ctx, req.Username, req.Username)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return "", v1.ErrUnauthorized
+		return nil, v1.ErrUnauthorized
 	}
 	if err != nil {
-		return "", v1.ErrInternalServerError
+		return nil, v1.ErrInternalServerError
 	}
 
 	// 验证密码
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	// 创建AccessToken
-	token, err := s.jwt.GenToken(user.ID, time.Now().Add(time.Hour*24*90))
+	// 创建令牌
+	tokenPair, err := s.jwt.GenerateTokenPair(ctx, user.ID, "")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return token, nil
+	return tokenPair, nil
+}
+
+func (s *userService) Logout(ctx context.Context, uid uint) error {
+	return s.jwt.InvalidateRefreshTokenFamilyByUserID(ctx, uid)
+}
+
+func (s *userService) RefreshToken(ctx context.Context, refreshToken string) (*v1.TokenPair, error) {
+	return s.jwt.RefreshAccessToken(ctx, refreshToken)
 }
 
 func (s *userService) UpdatePassword(ctx context.Context, uid uint, req *v1.UpdatePasswordRequest) error {

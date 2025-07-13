@@ -18,6 +18,7 @@ import (
 	"backend/pkg/log"
 	"backend/pkg/server/http"
 	"backend/pkg/sid"
+	"backend/pkg/storage"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 )
@@ -31,9 +32,10 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	handlerHandler := handler.NewHandler(logger)
 	sidSid := sid.NewSid()
 	emailEmail := email.NewEmail(viperViper)
+	storageStorage := storage.NewStorage(viperViper)
 	repositoryRepository := repository.NewRepository(logger, db, syncedEnforcer)
 	transaction := repository.NewTransaction(repositoryRepository)
-	serviceService := service.NewService(logger, sidSid, jwtJWT, emailEmail, transaction)
+	serviceService := service.NewService(logger, sidSid, jwtJWT, emailEmail, storageStorage, transaction)
 	userRepository := repository.NewUserRepository(repositoryRepository)
 	roleRepository := repository.NewRoleRepository(repositoryRepository)
 	menuRepository := repository.NewMenuRepository(repositoryRepository)

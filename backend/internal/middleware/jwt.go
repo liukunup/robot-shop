@@ -1,12 +1,13 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
-	"backend/api/v1"
+	v1 "backend/api/v1"
 	"backend/pkg/jwt"
 	"backend/pkg/log"
-	"go.uber.org/zap"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 func StrictAuth(j *jwt.JWT, logger *log.Logger) gin.HandlerFunc {
@@ -22,7 +23,7 @@ func StrictAuth(j *jwt.JWT, logger *log.Logger) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := j.ParseToken(tokenString)
+		claims, err := j.ValidateAccessToken(ctx, tokenString)
 		if err != nil {
 			logger.WithContext(ctx).Error("token error", zap.Any("data", map[string]interface{}{
 				"url":    ctx.Request.URL,
@@ -53,7 +54,7 @@ func NoStrictAuth(j *jwt.JWT, logger *log.Logger) gin.HandlerFunc {
 			return
 		}
 
-		claims, err := j.ParseToken(tokenString)
+		claims, err := j.ValidateAccessToken(ctx, tokenString)
 		if err != nil {
 			ctx.Next()
 			return
@@ -66,7 +67,7 @@ func NoStrictAuth(j *jwt.JWT, logger *log.Logger) gin.HandlerFunc {
 }
 
 func recoveryLoggerFunc(ctx *gin.Context, logger *log.Logger) {
-	if userInfo, ok := ctx.MustGet("claims").(*jwt.MyCustomClaims); ok {
-		logger.WithValue(ctx, zap.String("UserId", string(userInfo.UserId)))
+	if userInfo, ok := ctx.MustGet("claims").(*jwt.AccessClaims); ok {
+		logger.WithValue(ctx, zap.String("UserId", string(userInfo.UserID)))
 	}
 }

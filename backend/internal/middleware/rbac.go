@@ -1,13 +1,14 @@
 package middleware
 
 import (
-	"github.com/casbin/casbin/v2"
-	"github.com/duke-git/lancet/v2/convertor"
-	"github.com/gin-gonic/gin"
-	"net/http"
 	v1 "backend/api/v1"
 	"backend/internal/constant"
 	"backend/pkg/jwt"
+	"net/http"
+
+	"github.com/casbin/casbin/v2"
+	"github.com/duke-git/lancet/v2/convertor"
+	"github.com/gin-gonic/gin"
 )
 
 func AuthMiddleware(e *casbin.SyncedEnforcer) gin.HandlerFunc {
@@ -19,7 +20,7 @@ func AuthMiddleware(e *casbin.SyncedEnforcer) gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		uid := v.(*jwt.MyCustomClaims).UserId
+		uid := v.(*jwt.AccessClaims).UserID
 		if convertor.ToString(uid) == constant.AdminUserID {
 			// 防呆设计，超管跳过API权限检查
 			ctx.Next()

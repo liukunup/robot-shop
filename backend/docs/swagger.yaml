@@ -396,7 +396,7 @@ definitions:
   backend_api_v1.LoginResponse:
     properties:
       data:
-        $ref: '#/definitions/backend_api_v1.LoginResponseData'
+        $ref: '#/definitions/backend_api_v1.TokenPair'
       errorCode:
         description: 错误码
         type: integer
@@ -410,12 +410,6 @@ definitions:
         description: 是否成功
         example: true
         type: boolean
-    type: object
-  backend_api_v1.LoginResponseData:
-    properties:
-      accessToken:
-        description: 访问令牌
-        type: string
     type: object
   backend_api_v1.MenuNode:
     properties:
@@ -697,6 +691,18 @@ definitions:
         description: 是否成功
         example: true
         type: boolean
+    type: object
+  backend_api_v1.TokenPair:
+    properties:
+      accessToken:
+        description: 访问令牌
+        type: string
+      expiresIn:
+        description: 过期时间(单位:秒)
+        type: integer
+      refreshToken:
+        description: 刷新令牌
+        type: string
     type: object
   backend_api_v1.UpdatePasswordRequest:
     properties:
