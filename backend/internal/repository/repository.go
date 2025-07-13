@@ -23,7 +23,7 @@ const ctxTxKey = "TxKey"
 type Repository struct {
 	db *gorm.DB
 	e  *casbin.SyncedEnforcer
-	//rdb    *redis.Client
+	//rdb    *redis.UniversalClient
 	logger *log.Logger
 }
 
@@ -31,7 +31,7 @@ func NewRepository(
 	logger *log.Logger,
 	db *gorm.DB,
 	e *casbin.SyncedEnforcer,
-	// rdb *redis.Client,
+	// rdb *redis.UniversalClient,
 ) *Repository {
 	return &Repository{
 		db: db,
@@ -144,9 +144,9 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 	return e
 }
 
-func NewRedis(conf *viper.Viper) *redis.Client {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     conf.GetString("data.redis.addr"),
+func NewRedis(conf *viper.Viper) *redis.UniversalClient {
+	rdb := redis.NewUniversalClient(&redis.UniversalOptions{
+		Addrs:    conf.GetStringSlice("data.redis.addr"),
 		Password: conf.GetString("data.redis.password"),
 		DB:       conf.GetInt("data.redis.db"),
 	})
@@ -159,5 +159,5 @@ func NewRedis(conf *viper.Viper) *redis.Client {
 		panic(fmt.Sprintf("redis error: %s", err.Error()))
 	}
 
-	return rdb
+	return &rdb
 }
