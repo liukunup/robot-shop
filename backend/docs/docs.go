@@ -902,6 +902,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/refresh-token": {
+            "post": {
+                "description": "刷新访问令牌和刷新令牌",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "刷新令牌",
+                "operationId": "RefreshToken",
+                "parameters": [
+                    {
+                        "description": "刷新令牌信息",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.RefreshTokenRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.LoginResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/register": {
             "post": {
                 "description": "目前只支持通过邮箱进行注册",
@@ -2079,6 +2114,19 @@ const docTemplate = `{
                     "description": "是否成功",
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "backend_api_v1.RefreshTokenRequest": {
+            "type": "object",
+            "required": [
+                "refreshToken"
+            ],
+            "properties": {
+                "refreshToken": {
+                    "description": "刷新令牌",
+                    "type": "string",
+                    "example": "123456"
                 }
             }
         },

@@ -556,6 +556,15 @@ definitions:
         example: true
         type: boolean
     type: object
+  backend_api_v1.RefreshTokenRequest:
+    properties:
+      refreshToken:
+        description: 刷新令牌
+        example: "123456"
+        type: string
+    required:
+    - refreshToken
+    type: object
   backend_api_v1.RegisterRequest:
     properties:
       email:
@@ -1385,6 +1394,29 @@ paths:
           schema:
             $ref: '#/definitions/backend_api_v1.LoginResponse'
       summary: 登录
+      tags:
+      - User
+  /refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: 刷新访问令牌和刷新令牌
+      operationId: RefreshToken
+      parameters:
+      - description: 刷新令牌信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.LoginResponse'
+      summary: 刷新令牌
       tags:
       - User
   /register:

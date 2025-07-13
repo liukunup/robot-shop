@@ -296,6 +296,34 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, tokenPair)
 }
 
+// RefreshToken godoc
+// @Summary 刷新令牌
+// @Schemes
+// @Description 刷新访问令牌和刷新令牌
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param request body v1.RefreshTokenRequest true "刷新令牌信息"
+// @Success 200 {object} v1.LoginResponse
+// @Router /refresh-token [post]
+// @ID RefreshToken
+func (h *UserHandler) RefreshToken(ctx *gin.Context) {
+	var req v1.RefreshTokenRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		h.logger.WithContext(ctx).Error("RefreshToken bind error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+
+	tokenPair, err := h.userService.RefreshToken(ctx, &req)
+	if err != nil {
+		h.logger.WithContext(ctx).Error("userService.RefreshToken error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	v1.HandleSuccess(ctx, tokenPair)
+}
+
 // UpdatePassword godoc
 // @Summary 更新密码
 // @Schemes

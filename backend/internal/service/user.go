@@ -32,7 +32,7 @@ type UserService interface {
 	Register(ctx context.Context, req *v1.RegisterRequest) error
 	Login(ctx context.Context, req *v1.LoginRequest) (*v1.TokenPair, error)
 	Logout(ctx context.Context, uid uint) error
-	RefreshToken(ctx context.Context, refreshToken string) (*v1.TokenPair, error)
+	RefreshToken(ctx context.Context, req *v1.RefreshTokenRequest) (*v1.TokenPair, error)
 	UpdatePassword(ctx context.Context, uid uint, req *v1.UpdatePasswordRequest) error
 	ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) error
 }
@@ -401,8 +401,8 @@ func (s *userService) Logout(ctx context.Context, uid uint) error {
 	return s.jwt.InvalidateRefreshTokenFamilyByUserID(ctx, uid)
 }
 
-func (s *userService) RefreshToken(ctx context.Context, refreshToken string) (*v1.TokenPair, error) {
-	return s.jwt.RefreshAccessToken(ctx, refreshToken)
+func (s *userService) RefreshToken(ctx context.Context, req *v1.RefreshTokenRequest) (*v1.TokenPair, error) {
+	return s.jwt.RefreshAccessToken(ctx, req.RefreshToken)
 }
 
 func (s *userService) UpdatePassword(ctx context.Context, uid uint, req *v1.UpdatePasswordRequest) error {

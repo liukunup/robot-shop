@@ -17,8 +17,6 @@ declare namespace API {
   };
 
   type ApiList = {
-    /** 分组列表 */
-    groups?: string[];
     /** 列表 */
     list?: Api[];
     /** 总数 */
@@ -193,23 +191,23 @@ declare namespace API {
     page: number;
     /** 分页大小 */
     pageSize: number;
+    /** 邮箱 */
+    email?: string;
     /** 用户名 */
     username?: string;
     /** 昵称 */
     nickname?: string;
-    /** 手机 */
-    phone?: string;
-    /** 邮箱 */
-    email?: string;
   };
 
   type LoginRequest = {
+    /** 密码 */
     password: string;
+    /** 用户名 */
     username: string;
   };
 
   type LoginResponse = {
-    data?: LoginResponseData;
+    data?: TokenPair;
     /** 错误码 */
     errorCode?: number;
     /** 报错信息 */
@@ -218,10 +216,6 @@ declare namespace API {
     errorShowType?: number;
     /** 是否成功 */
     success?: boolean;
-  };
-
-  type LoginResponseData = {
-    accessToken?: string;
   };
 
   type Menu = {
@@ -244,7 +238,7 @@ declare namespace API {
     /** ID */
     id?: number;
     key?: string;
-    /** 本地化 */
+    /** 国际化 */
     locale?: string;
     /** 名称 */
     name?: string;
@@ -260,8 +254,6 @@ declare namespace API {
     tooltip?: string;
     /** 更新时间 */
     updatedAt?: string;
-    /** 权重 */
-    weight?: number;
   };
 
   type MenuList = {
@@ -274,7 +266,7 @@ declare namespace API {
   type MenuNode = {
     /** 可见性 */
     access?: string;
-    /** 子节点 or 子菜单 */
+    /** 子菜单 */
     children?: MenuNode[];
     /** 组件 */
     component?: string;
@@ -293,7 +285,7 @@ declare namespace API {
     /** ID */
     id?: number;
     key?: string;
-    /** 本地化 */
+    /** 国际化 */
     locale?: string;
     /** 名称 */
     name?: string;
@@ -309,8 +301,6 @@ declare namespace API {
     tooltip?: string;
     /** 更新时间 */
     updatedAt?: string;
-    /** 权重 */
-    weight?: number;
   };
 
   type MenuRequest = {
@@ -329,7 +319,7 @@ declare namespace API {
     /** 图标 */
     icon?: string;
     key?: string;
-    /** 本地化 */
+    /** 国际化 */
     locale?: string;
     /** 名称 */
     name?: string;
@@ -343,8 +333,6 @@ declare namespace API {
     /** 指定外链打开形式 */
     target?: string;
     tooltip?: string;
-    /** 权重 */
-    weight?: number;
   };
 
   type MenuSearchResponse = {
@@ -359,6 +347,11 @@ declare namespace API {
     success?: boolean;
   };
 
+  type RefreshTokenRequest = {
+    /** 刷新令牌 */
+    refreshToken: string;
+  };
+
   type RegisterRequest = {
     /** 邮箱 */
     email: string;
@@ -366,7 +359,13 @@ declare namespace API {
     password: string;
   };
 
+  type ResetPasswordRequest = {
+    /** 邮箱 */
+    email: string;
+  };
+
   type Response = {
+    /** 返回数据 */
     data?: any;
     /** 错误码 */
     errorCode?: number;
@@ -446,7 +445,7 @@ declare namespace API {
   };
 
   type Role = {
-    /** Casbin Role */
+    /** Casbin-Role */
     casbinRole?: string;
     /** 创建时间 */
     createdAt?: string;
@@ -466,7 +465,7 @@ declare namespace API {
   };
 
   type RoleRequest = {
-    /** Casbin Role */
+    /** Casbin-Role */
     casbinRole: string;
     /** 角色名 */
     name: string;
@@ -484,6 +483,15 @@ declare namespace API {
     success?: boolean;
   };
 
+  type TokenPair = {
+    /** 访问令牌 */
+    accessToken?: string;
+    /** 过期时间(单位:秒) */
+    expiresIn?: number;
+    /** 刷新令牌 */
+    refreshToken?: string;
+  };
+
   type UpdateApiParams = {
     /** 接口ID */
     id: number;
@@ -492,6 +500,13 @@ declare namespace API {
   type UpdateMenuParams = {
     /** 菜单ID */
     id: number;
+  };
+
+  type UpdatePasswordRequest = {
+    /** 新密码 */
+    newPassword: string;
+    /** 旧密码 */
+    oldPassword: string;
   };
 
   type UpdateRobotParams = {
@@ -505,7 +520,7 @@ declare namespace API {
   };
 
   type UpdateRolePermissionRequest = {
-    /** Casbin Role */
+    /** Casbin-Role */
     casbinRole: string;
     /** 权限列表 */
     list: string[];
@@ -519,22 +534,28 @@ declare namespace API {
   type User = {
     /** 头像 */
     avatar?: string;
+    /** 个人简介 */
+    bio?: string;
     /** 创建时间 */
     createdAt?: string;
     /** 邮箱 */
     email?: string;
-    /** ID */
-    id?: number;
+    /** 语言 */
+    language?: string;
     /** 昵称 */
     nickname?: string;
-    /** 手机 */
-    phone?: string;
     /** 角色 */
     roles?: Role[];
     /** 状态 0:待激活 1:正常 2:禁用 */
     status?: number;
+    /** 主题 */
+    theme?: string;
+    /** 时区 */
+    timezone?: string;
     /** 更新时间 */
     updatedAt?: string;
+    /** ID */
+    userid?: number;
     /** 用户名 */
     username?: string;
   };
@@ -546,31 +567,25 @@ declare namespace API {
     total?: number;
   };
 
-  type UserPermissionResponse = {
-    data?: UserPermissionResponseData;
-    /** 错误码 */
-    errorCode?: number;
-    /** 报错信息 */
-    errorMessage?: string;
-    /** 前端展示方式 */
-    errorShowType?: number;
-    /** 是否成功 */
-    success?: boolean;
-  };
-
-  type UserPermissionResponseData = {
-    list?: string[];
-    total?: number;
-  };
-
   type UserRequest = {
-    email: string;
+    /** 个人简介 */
+    bio?: string;
+    /** 邮箱 */
+    email?: string;
+    /** 语言 */
+    language?: string;
+    /** 昵称 */
     nickname?: string;
-    phone?: string;
+    /** 角色 */
     roles?: string[];
     /** 状态 0:待激活 1:正常 2:禁用 */
     status?: number;
-    username: string;
+    /** 主题 */
+    theme?: string;
+    /** 时区 */
+    timezone?: string;
+    /** 用户名 */
+    username?: string;
   };
 
   type UserResponse = {

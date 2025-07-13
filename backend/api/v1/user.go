@@ -70,6 +70,11 @@ type LoginResponse struct {
 	Data TokenPair
 }
 
+// Refresh Token
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refreshToken" binding:"required" example:"123456"` // 刷新令牌
+}
+
 // Update Password
 type UpdatePasswordRequest struct {
 	OldPassword string `json:"oldPassword" binding:"required" example:"123456"` // 旧密码

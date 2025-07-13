@@ -1,7 +1,8 @@
 ﻿import type { RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
-import { getToken } from './auth';
+import { getToken, setToken, getRefreshToken, removeToken } from './auth';
+import { refreshToken } from '@/services/backend/user';
 
 // 错误处理方案： 错误类型
 enum ErrorShowType {
@@ -21,6 +22,36 @@ interface IResponse {
   errorShowType?: ErrorShowType;
 }
 
+// 新增：刷新token的API请求
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const handleTokenRefresh = async () => {
+  try {
+    const response = await refreshToken({ refreshToken: getRefreshToken() });
+    if (response.success) {
+      setToken(response.data.accessToken, response.data.refreshToken);
+      return response.data.accessToken;
+    }
+    throw new Error('刷新token失败');
+  } catch (error) {
+    removeToken();
+    window.location.href = '/user/login';
+    throw error;
+  }
+};
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 /**
  * @name 错误处理
  * pro 自带的错误处理， 可以在这里做自己的改动
@@ -32,7 +63,7 @@ export const errorConfig: RequestConfig = {
     // 错误抛出
     errorThrower: (response: any) => {
       const { success, data, errorCode, errorMessage, errorShowType } =
-      response as unknown as IResponse;
+        response as unknown as IResponse;
       if (!success) {
         const error: any = new Error(errorMessage);
         error.name = 'BizError';
@@ -41,7 +72,7 @@ export const errorConfig: RequestConfig = {
       }
     },
     // 错误接收及处理
-    errorHandler: (error: any, opts: any) => {
+    errorHandler: async (error: any, opts: any) => {
       if (opts?.skipErrorHandler) throw error;
       // 我们的 errorThrower 抛出的错误。
       if (error.name === 'BizError') {
@@ -55,17 +86,27 @@ export const errorConfig: RequestConfig = {
               description: errorMessage,
             });
           } else if (errorCode === 401) {
-            notification.error({
-              message: '登录过期',
-              description: '请重新登录',
-              duration: 2,
-            });
-            if (typeof window !== 'undefined') {
-              localStorage.removeItem('accessToken');
-              setTimeout(() => {
-                window.location.href = '/user/login';
-              }, 2000);
+            // 处理token过期逻辑
+            const originalRequest = error.config;
+            if (!isRefreshing) {
+              isRefreshing = true;
+              try {
+                const newToken = await handleTokenRefresh();
+                processQueue(null, newToken);
+                // 重试原始请求
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                return fetch(originalRequest);
+              } catch (err) {
+                processQueue(err, null);
+                return Promise.reject(err);
+              } finally {
+                isRefreshing = false;
+              }
             }
+            // 如果正在刷新token，则将请求加入队列
+            return new Promise((resolve, reject) => {
+              failedQueue.push({ resolve, reject });
+            });
           } else if (errorCode === 403) {
             notification.error({
               message: '权限不足',

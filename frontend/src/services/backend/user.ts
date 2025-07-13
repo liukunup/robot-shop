@@ -76,6 +76,21 @@ export async function login(body: API.LoginRequest, options?: { [key: string]: a
   });
 }
 
+/** 刷新令牌 刷新访问令牌和刷新令牌 POST /refresh-token */
+export async function refreshToken(
+  body: API.RefreshTokenRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.LoginResponse>(`/v1/refresh-token`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 注册 目前只支持通过邮箱进行注册 POST /register */
 export async function register(body: API.RegisterRequest, options?: { [key: string]: any }) {
   return request<API.Response>(`/v1/register`, {
@@ -88,26 +103,60 @@ export async function register(body: API.RegisterRequest, options?: { [key: stri
   });
 }
 
-/** 获取当前用户 获取当前用户的详细信息 GET /users/me */
-export async function getCurrentUser(options?: { [key: string]: any }) {
-  return request<API.UserResponse>(`/v1/users/me`, {
+/** 重置密码 重置用户密码 POST /reset-password */
+export async function resetPassword(
+  body: API.ResetPasswordRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.Response>(`/v1/reset-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 获取用户菜单 获取当前用户的菜单列表 GET /users/menu */
+export async function fetchDynamicMenu(options?: { [key: string]: any }) {
+  return request<API.DynamicMenuResponse>(`/v1/users/menu`, {
     method: 'GET',
     ...(options || {}),
   });
 }
 
-/** 获取用户菜单 获取当前用户的菜单列表 GET /users/me/menus */
-export async function getUserMenus(options?: { [key: string]: any }) {
-  return request<API.DynamicMenuResponse>(`/v1/users/me/menus`, {
+/** 更新密码 更新用户密码 PUT /users/password */
+export async function updatePassword(
+  body: API.UpdatePasswordRequest,
+  options?: { [key: string]: any },
+) {
+  return request<API.Response>(`/v1/users/password`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 获取当前用户 获取当前用户的详细信息 GET /users/profile */
+export async function fetchCurrentUser(options?: { [key: string]: any }) {
+  return request<API.UserResponse>(`/v1/users/profile`, {
     method: 'GET',
     ...(options || {}),
   });
 }
 
-/** 获取用户权限 获取当前用户的权限列表 GET /users/me/permissions */
-export async function getUserPermissions(options?: { [key: string]: any }) {
-  return request<API.UserPermissionResponse>(`/v1/users/me/permissions`, {
-    method: 'GET',
+/** 更新用户 更新用户信息 PUT /users/profile */
+export async function updateProfile(body: API.UserRequest, options?: { [key: string]: any }) {
+  return request<API.Response>(`/v1/users/profile`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: body,
     ...(options || {}),
   });
 }
