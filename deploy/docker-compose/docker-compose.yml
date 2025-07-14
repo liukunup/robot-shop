@@ -1,25 +1,73 @@
-version: '3'
+version: '3.8'
 
+# ======================
+# 数据卷配置（持久化存储）
+# ======================
+volumes:
+  mysql_data:
+    driver: local
+    name: ${COMPOSE_PROJECT_NAME:-robotshop}-mysql-data
+  redis_data:
+    driver: local
+    name: ${COMPOSE_PROJECT_NAME:-robotshop}-redis-data
+
+# ======================
+# 网络配置
+# ======================
+networks:
+  dev-network:
+    name: ${COMPOSE_PROJECT_NAME:-robotshop}-network  # 自定义网络名称
+    driver: bridge                                    # 显式指定驱动
+    attachable: true                                  # 允许其他容器后期接入
+
+# ======================
+# 服务定义
+# ======================
 services:
-  user-db:
-    image: mysql:8.0.31-debian
-    hostname: user-db
-    container_name: user-db
-    ports:
-      - 3380:3306
+  mysql:
+    image: ${REGISTRY:-docker.io}/mysql:${MYSQL_VERSION:-8}
+    container_name: ${COMPOSE_PROJECT_NAME:-robotshop}-mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=123456
-      - MYSQL_ROOT_HOST=%
-      - MYSQL_DATABASE=user
-    # volumes:
-    #   - ./data/mysql/user:/var/lib/mysql
-    #   - ./conf/mysql/conf.d:/etc/mysql/conf.d
-  cache-redis:
-    image: redis:6-alpine
-    hostname: cache-redis
-    # volumes:
-    #   - ./data/redis/cache/:/data
-    #   - ./conf/redis/cache/redis.conf:/etc/redis/redis.conf
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ChangeMe123!}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-robotshop}
+      MYSQL_USER: ${MYSQL_USER:-robotshop}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-ChangeMe123!}
+      TZ: ${TZ:-Asia/Shanghai}
     ports:
-      - 6350:6379
-    command: ["redis-server","/etc/redis/redis.conf"]
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/conf.d:/etc/mysql/conf.d               # 挂载自定义配置
+      - ./mysql/initdb:/docker-entrypoint-initdb.d:ro  # 初始化脚本目录
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - dev-network
+    restart: unless-stopped
+
+  redis:
+    image: ${REGISTRY:-docker.io}/redis:${REDIS_VERSION:-7}
+    container_name: ${COMPOSE_PROJECT_NAME:-robotshop}-redis
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    command: [
+      "redis-server",
+      "/usr/local/etc/redis/redis.conf",
+      "--requirepass", "${REDIS_PASSWORD:-ChangeMe123!}"
+    ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - dev-network
+    restart: unless-stopped
