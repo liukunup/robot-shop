@@ -35,6 +35,9 @@ type UserService interface {
 	RefreshToken(ctx context.Context, req *v1.RefreshTokenRequest) (*v1.TokenPair, error)
 	UpdatePassword(ctx context.Context, uid uint, req *v1.UpdatePasswordRequest) error
 	ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) error
+
+	UploadAvatar(ctx context.Context, uid uint, req *v1.UploadAvatarRequest) (*v1.UploadAvatarResponseData, error)
+	UpdateAvatar(ctx context.Context, uid uint, req *v1.UpdateAvatarRequest) error
 }
 
 func NewUserService(
@@ -42,12 +45,14 @@ func NewUserService(
 	userRepository repository.UserRepository,
 	roleRepository repository.RoleRepository,
 	menuRepository repository.MenuRepository,
+	avatarStorage repository.AvatarStorage,
 ) UserService {
 	return &userService{
 		Service:        service,
 		userRepository: userRepository,
 		roleRepository: roleRepository,
 		menuRepository: menuRepository,
+		avatarStorage:  avatarStorage,
 	}
 }
 
@@ -56,6 +61,7 @@ type userService struct {
 	userRepository repository.UserRepository
 	roleRepository repository.RoleRepository
 	menuRepository repository.MenuRepository
+	avatarStorage  repository.AvatarStorage
 }
 
 func (s *userService) List(ctx context.Context, req *v1.UserSearchRequest) (*v1.UserSearchResponseData, error) {
@@ -461,6 +467,34 @@ func (s *userService) ResetPassword(ctx context.Context, req *v1.ResetPasswordRe
 	}
 
 	return nil
+}
+
+func (s *userService) UploadAvatar(ctx context.Context, uid uint, req *v1.UploadAvatarRequest) (*v1.UploadAvatarResponseData, error) {
+	if req.Filename == "" {
+		return nil, fmt.Errorf("avatar name is required")
+	}
+	if req.Size > 1024*1024*5 {
+		return nil, fmt.Errorf("avatar size exceeds the limit")
+	}
+	if req.Type != "image/jpeg" && req.Type != "image/png" {
+		return nil, fmt.Errorf("avatar type is invalid")
+	}
+
+	url, err := s.avatarStorage.PresignedUploadURL(ctx, uid, req.Filename)
+	if err != nil {
+		return nil, err
+	}
+
+	return &v1.UploadAvatarResponseData{
+		PresignedURL: url,
+		ObjectName:   req.Filename,
+	}, nil
+}
+
+func (s *userService) UpdateAvatar(ctx context.Context, uid uint, req *v1.UpdateAvatarRequest) error {
+	return s.userRepository.Update(ctx, uid, map[string]interface{}{
+		"avatar": req.ObjectName,
+	})
 }
 
 // 生成指定长度的随机密码

@@ -12,6 +12,8 @@ import (
 	gormadapter "github.com/casbin/gorm-adapter/v3"
 	"github.com/dgraph-io/ristretto/v2"
 	"github.com/glebarez/sqlite"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -23,11 +25,12 @@ import (
 const ctxTxKey = "TxKey"
 
 type Repository struct {
-	db           *gorm.DB
-	e            *casbin.SyncedEnforcer
-	cache        *ristretto.Cache[string, interface{}]
-	rdb          redis.UniversalClient
-	logger       *log.Logger
+	db     *gorm.DB
+	e      *casbin.SyncedEnforcer
+	cache  *ristretto.Cache[string, interface{}]
+	rdb    redis.UniversalClient
+	m      *MinIO
+	logger *log.Logger
 }
 
 func NewRepository(
@@ -35,14 +38,16 @@ func NewRepository(
 	e *casbin.SyncedEnforcer,
 	cache *ristretto.Cache[string, interface{}],
 	rdb redis.UniversalClient,
+	m *MinIO,
 	logger *log.Logger,
 ) *Repository {
 	return &Repository{
-		db:          db,
-		e:           e,
-		cache:       cache,
-		rdb:         rdb,
-		logger:      logger,
+		db:     db,
+		e:      e,
+		cache:  cache,
+		rdb:    rdb,
+		m:      m,
+		logger: logger,
 	}
 }
 
@@ -149,6 +154,19 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 	return e
 }
 
+func NewCache() *ristretto.Cache[string, interface{}] {
+	cache, err := ristretto.NewCache(&ristretto.Config[string, interface{}]{
+		NumCounters: 1e7,     // number of keys to track frequency of (10M).
+		MaxCost:     1 << 30, // maximum cost of cache (1GB).
+		BufferItems: 64,      // number of keys per Get buffer.
+	})
+	if err != nil {
+		panic(fmt.Errorf("failed to create Ristretto cache: %w", err))
+	}
+
+	return cache
+}
+
 func NewRedis(conf *viper.Viper, log *log.Logger) redis.UniversalClient {
 	// Use UniversalClient to support both single and cluster mode
 	rdb := redis.NewUniversalClient(&redis.UniversalOptions{
@@ -163,21 +181,64 @@ func NewRedis(conf *viper.Viper, log *log.Logger) redis.UniversalClient {
 	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
 		_ = rdb.Close() // close the client if ping fails
-		log.WithContext(ctx).Warn("Failed to connect to Redis", zap.Error(err))
+		log.WithContext(ctx).Warn("failed to connect to Redis", zap.Error(err))
 	}
 
 	return rdb
 }
 
-func NewCache() *ristretto.Cache[string, interface{}] {
-	cache, err := ristretto.NewCache(&ristretto.Config[string, interface{}]{
-		NumCounters: 1e7,     // number of keys to track frequency of (10M).
-		MaxCost:     1 << 30, // maximum cost of cache (1GB).
-		BufferItems: 64,      // number of keys per Get buffer.
-	})
-	if err != nil {
-		panic(fmt.Errorf("Failed to create Ristretto cache: %w", err))
+type minioConfig struct {
+	Endpoint  string
+	AccessKey string
+	SecretKey string
+	Bucket    string
+	Region    string
+	Secure    bool
+}
+
+type MinIO struct {
+	client *minio.Client
+	bucket string
+}
+
+func NewMinIO(conf *viper.Viper, log *log.Logger) *MinIO {
+	cfg := &minioConfig{
+		Endpoint:  conf.GetString("storage.minio.endpoint"),
+		AccessKey: conf.GetString("storage.minio.access_key"),
+		SecretKey: conf.GetString("storage.minio.secret_key"),
+		Bucket:    conf.GetString("storage.minio.bucket"),
+		Region:    conf.GetString("storage.minio.region"),
+		Secure:    conf.GetBool("storage.minio.secure"),
 	}
 
-	return cache
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	client, err := minio.New(cfg.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(cfg.AccessKey, cfg.SecretKey, ""),
+		Region: cfg.Region,
+		Secure: cfg.Secure,
+	})
+	if err != nil {
+		log.WithContext(ctx).Warn("failed to initialize MinIO client", zap.Error(err))
+		return nil
+	}
+
+	// 检查桶是否存在（不存在则创建）
+	exists, err := client.BucketExists(ctx, cfg.Bucket)
+	if err != nil {
+		log.WithContext(ctx).Warn("failed to check bucket existence", zap.Error(err))
+		return nil
+	}
+	if !exists {
+		if err := client.MakeBucket(ctx, cfg.Bucket, minio.MakeBucketOptions{}); err != nil {
+			log.WithContext(ctx).Warn("failed to create bucket", zap.Error(err))
+			return nil
+		}
+	}
+
+	return &MinIO{
+		client: client,
+		bucket: cfg.Bucket,
+	}
 }
