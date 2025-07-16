@@ -398,7 +398,7 @@ func (s *userService) Login(ctx context.Context, req *v1.LoginRequest) (*v1.Toke
 }
 
 func (s *userService) Logout(ctx context.Context, uid uint) error {
-	return s.jwt.InvalidateRefreshTokenFamilyByUserID(ctx, uid)
+	return s.jwt.InvalidateRefreshTokenByUserID(ctx, uid)
 }
 
 func (s *userService) RefreshToken(ctx context.Context, req *v1.RefreshTokenRequest) (*v1.TokenPair, error) {
@@ -445,7 +445,11 @@ func (s *userService) ResetPassword(ctx context.Context, req *v1.ResetPasswordRe
 	}
 
 	// 生成重置密码链接
-	resetLink := fmt.Sprintf("https://robot-shop.com/reset-password?token=%d", user.ID)
+	token, err := s.jwt.GenerateResetPasswordToken(user.Email)
+	if err != nil {
+		return fmt.Errorf("failed to generate reset password token: %w", err)
+	}
+	resetLink := fmt.Sprintf("https://robot-shop.com/reset-password?token=%s", token)
 
 	// 发送重置密码邮件
 	if err = s.email.Send(&email.Message{

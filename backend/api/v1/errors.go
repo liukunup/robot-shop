@@ -23,4 +23,5 @@ var (
 	ErrUnexpectedSigningMethod = newError(1010, "unexpected signing method")
 	ErrInvalidAccessToken      = newError(1011, "invalid access token")
 	ErrInvalidRefreshToken     = newError(1012, "invalid refresh token")
+	ErrTokenAlreadyRevoked     = newError(1013, "token already revoked with later expiry")
 )

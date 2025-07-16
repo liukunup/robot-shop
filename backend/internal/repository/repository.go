@@ -14,6 +14,7 @@ import (
 	"github.com/glebarez/sqlite"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -22,26 +23,26 @@ import (
 const ctxTxKey = "TxKey"
 
 type Repository struct {
-	db *gorm.DB
-	e  *casbin.SyncedEnforcer
-	//rdb    *redis.UniversalClient
-	//cache  *ristretto.Cache[string, interface{}]
-	logger *log.Logger
+	db           *gorm.DB
+	e            *casbin.SyncedEnforcer
+	cache        *ristretto.Cache[string, interface{}]
+	rdb          redis.UniversalClient
+	logger       *log.Logger
 }
 
 func NewRepository(
-	logger *log.Logger,
 	db *gorm.DB,
 	e *casbin.SyncedEnforcer,
-	// rdb *redis.UniversalClient,
-	// cache *ristretto.Cache[string, interface{}],
+	cache *ristretto.Cache[string, interface{}],
+	rdb redis.UniversalClient,
+	logger *log.Logger,
 ) *Repository {
 	return &Repository{
-		db: db,
-		e:  e,
-		//rdb:    rdb,
-		//cache:  cache,
-		logger: logger,
+		db:          db,
+		e:           e,
+		cache:       cache,
+		rdb:         rdb,
+		logger:      logger,
 	}
 }
 
@@ -148,7 +149,7 @@ m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act
 	return e
 }
 
-func NewRedis(conf *viper.Viper) redis.UniversalClient {
+func NewRedis(conf *viper.Viper, log *log.Logger) redis.UniversalClient {
 	// Use UniversalClient to support both single and cluster mode
 	rdb := redis.NewUniversalClient(&redis.UniversalOptions{
 		Addrs:    conf.GetStringSlice("data.redis.addrs"),
@@ -162,7 +163,7 @@ func NewRedis(conf *viper.Viper) redis.UniversalClient {
 	_, err := rdb.Ping(ctx).Result()
 	if err != nil {
 		_ = rdb.Close() // close the client if ping fails
-		panic(fmt.Errorf("failed to connect to Redis: %w", err))
+		log.WithContext(ctx).Warn("Failed to connect to Redis", zap.Error(err))
 	}
 
 	return rdb
@@ -175,7 +176,7 @@ func NewCache() *ristretto.Cache[string, interface{}] {
 		BufferItems: 64,      // number of keys per Get buffer.
 	})
 	if err != nil {
-		panic(fmt.Errorf("failed to create Ristretto cache: %w", err))
+		panic(fmt.Errorf("Failed to create Ristretto cache: %w", err))
 	}
 
 	return cache

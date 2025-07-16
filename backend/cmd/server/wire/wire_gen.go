@@ -26,14 +26,17 @@ import (
 // Injectors from wire.go:
 
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), error) {
-	jwtJWT := jwt.NewJwt(viperViper)
 	db := repository.NewDB(viperViper, logger)
 	syncedEnforcer := repository.NewCasbinEnforcer(viperViper, logger, db)
+	cache := repository.NewCache()
+	universalClient := repository.NewRedis(viperViper, logger)
+	repositoryRepository := repository.NewRepository(db, syncedEnforcer, cache, universalClient, logger)
+	tokenStore := repository.NewTokenStore(repositoryRepository)
+	jwtJWT := jwt.NewJwt(viperViper, tokenStore)
 	handlerHandler := handler.NewHandler(logger)
 	sidSid := sid.NewSid()
 	emailEmail := email.NewEmail(viperViper)
 	storageStorage := storage.NewStorage(viperViper)
-	repositoryRepository := repository.NewRepository(logger, db, syncedEnforcer)
 	transaction := repository.NewTransaction(repositoryRepository)
 	serviceService := service.NewService(logger, sidSid, jwtJWT, emailEmail, storageStorage, transaction)
 	userRepository := repository.NewUserRepository(repositoryRepository)
@@ -62,7 +65,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewRepository, repository.NewTransaction, repository.NewCasbinEnforcer, repository.NewUserRepository, repository.NewRoleRepository, repository.NewMenuRepository, repository.NewApiRepository, repository.NewRobotRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewRedis, repository.NewCache, repository.NewRepository, repository.NewTransaction, repository.NewTokenStore, repository.NewCasbinEnforcer, repository.NewUserRepository, repository.NewRoleRepository, repository.NewMenuRepository, repository.NewApiRepository, repository.NewRobotRepository)
 
 var serviceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewRoleService, service.NewMenuService, service.NewApiService, service.NewRobotService)
 

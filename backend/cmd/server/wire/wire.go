@@ -23,9 +23,11 @@ import (
 
 var repositorySet = wire.NewSet(
 	repository.NewDB,
-	//repository.NewRedis,
+	repository.NewRedis,
+	repository.NewCache,
 	repository.NewRepository,
 	repository.NewTransaction,
+	repository.NewTokenStore,
 	repository.NewCasbinEnforcer,
 	repository.NewUserRepository,
 	repository.NewRoleRepository,
