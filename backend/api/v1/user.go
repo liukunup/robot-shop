@@ -86,21 +86,10 @@ type ResetPasswordRequest struct {
 	Email string `json:"email" binding:"required,email" example:"zhangsan@example.com"` // 邮箱
 }
 
-// Upload Avatar
-type UploadAvatarRequest struct {
-	Filename string `json:"filename" binding:"required" example:"avatar.jpg"` // 文件名
-	Size     int    `json:"size" binding:"required" example:"1024"`           // 文件大小
-	Type     string `json:"type" binding:"required" example:"image/jpeg"`     // 文件类型
-}
-type UploadAvatarResponseData struct {
-	PresignedURL string `json:"presignedURL"` // 预签名链接
-	ObjectName   string `json:"objectName"`   // 对象名称
-}
-type UploadAvatarResponse struct {
-	Response
-	Data UploadAvatarResponseData
-}
-type UpdateAvatarRequest struct {
-	ObjectName string `json:"objectName" binding:"required" example:"avatar.jpg"` // 对象名称
-	Source     string `json:"source" binding:"required" example:"minio"`          // 来源
+// Avatar
+type AvatarRequest struct {
+	UserID   uint   `json:"userID" binding:"required" example:"1"`            // 用户ID
+	Filename string `json:"filename" binding:"required" example:"avatar.jpg"` // 文件名称
+	Size     int64  `json:"size" example:"1024"`                              // 文件大小
+	Type     string `json:"type" example:"image/jpeg"`                        // 文件类型
 }

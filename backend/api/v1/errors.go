@@ -24,4 +24,6 @@ var (
 	ErrInvalidAccessToken      = newError(1011, "invalid access token")
 	ErrInvalidRefreshToken     = newError(1012, "invalid refresh token")
 	ErrTokenAlreadyRevoked     = newError(1013, "token already revoked with later expiry")
+	ErrAvatarSizeExceeded      = newError(1014, "avatar size exceeded")
+	ErrAvatarTypeInvalid       = newError(1015, "avatar type invalid")
 )

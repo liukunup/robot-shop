@@ -212,6 +212,56 @@ func (h *UserHandler) UpdateProfile(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, nil)
 }
 
+// UploadAvatar godoc
+// @Summary 上传头像
+// @Schemes
+// @Description 上传用户头像
+// @Tags User
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param file formData file true "头像文件"
+// @Success 200 {object} v1.Response
+// @Router /users/avatar [post]
+// @ID UploadAvatar
+func (h *UserHandler) UploadAvatar(ctx *gin.Context) {
+	uid := GetUserIdFromCtx(ctx)
+	if uid == 0 {
+		h.logger.WithContext(ctx).Error("UploadAvatar get uid error")
+		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
+		return
+	}
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		h.logger.WithContext(ctx).Error("UploadAvatar get file error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+
+	reader, err := file.Open()
+	if err != nil {
+		h.logger.WithContext(ctx).Error("UploadAvatar get file error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
+		return
+	}
+	defer reader.Close()
+
+	req := &v1.AvatarRequest{
+		UserID:   uid,
+		Filename: file.Filename,
+		Size:     file.Size,
+		Type:     file.Header.Get("Content-Type"),
+	}
+
+	if err := h.userService.UploadAvatar(ctx, uid, req, reader); err != nil {
+		h.logger.WithContext(ctx).Error("userService.UploadAvatar error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	v1.HandleSuccess(ctx, nil)
+}
+
 // GetMenus godoc
 // @Summary 获取用户菜单
 // @Schemes

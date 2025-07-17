@@ -11,6 +11,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io"
 	mathRand "math/rand"
 	"strings"
 	"time"
@@ -36,8 +37,7 @@ type UserService interface {
 	UpdatePassword(ctx context.Context, uid uint, req *v1.UpdatePasswordRequest) error
 	ResetPassword(ctx context.Context, req *v1.ResetPasswordRequest) error
 
-	UploadAvatar(ctx context.Context, uid uint, req *v1.UploadAvatarRequest) (*v1.UploadAvatarResponseData, error)
-	UpdateAvatar(ctx context.Context, uid uint, req *v1.UpdateAvatarRequest) error
+	UploadAvatar(ctx context.Context, uid uint, req *v1.AvatarRequest, reader io.Reader) error
 }
 
 func NewUserService(
@@ -469,32 +469,42 @@ func (s *userService) ResetPassword(ctx context.Context, req *v1.ResetPasswordRe
 	return nil
 }
 
-func (s *userService) UploadAvatar(ctx context.Context, uid uint, req *v1.UploadAvatarRequest) (*v1.UploadAvatarResponseData, error) {
-	if req.Filename == "" {
-		return nil, fmt.Errorf("avatar name is required")
+func (s *userService) UploadAvatar(ctx context.Context, uid uint, req *v1.AvatarRequest, reader io.Reader) error {
+	// 检查文件大小
+	if req.Size > 10*1024*1024 {
+		return v1.ErrAvatarSizeExceeded
 	}
-	if req.Size > 1024*1024*5 {
-		return nil, fmt.Errorf("avatar size exceeds the limit")
-	}
-	if req.Type != "image/jpeg" && req.Type != "image/png" {
-		return nil, fmt.Errorf("avatar type is invalid")
+	// 检查文件类型
+	if !strings.HasPrefix(req.Type, "image/") {
+		return v1.ErrAvatarTypeInvalid
 	}
 
-	url, err := s.avatarStorage.PresignedUploadURL(ctx, uid, req.Filename)
+	// 填入用户 ID
+	req.UserID = uid
+
+	// 优先上传到 MinIO
+	avatarURL, err := s.avatarStorage.SaveToMinIO(ctx, req, reader)
 	if err != nil {
-		return nil, err
+		s.logger.WithContext(ctx).Warn("upload avatar to minio error", zap.Error(err))
+
+		// 尝试降级存储到本地
+		s.logger.WithContext(ctx).Info("try to save avatar to local")
+		avatarURL, err = s.avatarStorage.SaveToLocal(ctx, req, reader)
+		if err != nil {
+			s.logger.WithContext(ctx).Error("save avatar to local error", zap.Error(err))
+			return err
+		}
 	}
 
-	return &v1.UploadAvatarResponseData{
-		PresignedURL: url,
-		ObjectName:   req.Filename,
-	}, nil
-}
+	// 更新用户头像 URL
+	if err = s.userRepository.Update(ctx, uid, map[string]interface{}{
+		"avatar": avatarURL,
+	}); err != nil {
+		s.logger.WithContext(ctx).Error("update user avatar error", zap.Error(err))
+		return err
+	}
 
-func (s *userService) UpdateAvatar(ctx context.Context, uid uint, req *v1.UpdateAvatarRequest) error {
-	return s.userRepository.Update(ctx, uid, map[string]interface{}{
-		"avatar": req.ObjectName,
-	})
+	return nil
 }
 
 // 生成指定长度的随机密码
