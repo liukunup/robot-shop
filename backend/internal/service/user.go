@@ -98,13 +98,17 @@ func (s *userService) List(ctx context.Context, req *v1.UserSearchRequest) (*v1.
 				})
 			}
 		}
+		avatarURL, err := s.avatarStorage.GetURL(ctx, user.Avatar)
+		if err != nil {
+			s.logger.Error("avatarStorage.GetURL error", zap.Error(err))
+		}
 		data.List = append(data.List, v1.UserDataItem{
 			ID:        user.ID,
 			CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
 			UpdatedAt: user.UpdatedAt.Format(constant.DateTimeLayout),
 			Email:     user.Email,
 			Username:  user.Username,
-			Avatar:    user.Avatar,
+			Avatar:    avatarURL,
 			Nickname:  user.Nickname,
 			Bio:       user.Bio,
 			Language:  user.Language,
@@ -233,6 +237,10 @@ func (s *userService) Get(ctx context.Context, uid uint) (*v1.UserDataItem, erro
 			})
 		}
 	}
+	avatarURL, err := s.avatarStorage.GetURL(ctx, user.Avatar)
+	if err != nil {
+		s.logger.Error("avatarStorage.GetURL error", zap.Error(err))
+	}
 	return &v1.UserDataItem{
 		ID:        user.ID,
 		CreatedAt: user.CreatedAt.Format(constant.DateTimeLayout),
@@ -240,7 +248,7 @@ func (s *userService) Get(ctx context.Context, uid uint) (*v1.UserDataItem, erro
 		Email:     user.Email,
 		Username:  user.Username,
 		Nickname:  user.Nickname,
-		Avatar:    "https://cravatar.cn/avatar/245467ef31b6f0addc72b039b94122a4?s=100&f=y&r=g",
+		Avatar:    avatarURL,
 		Bio:       user.Bio,
 		Language:  user.Language,
 		Timezone:  user.Timezone,

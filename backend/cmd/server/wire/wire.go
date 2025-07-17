@@ -15,7 +15,6 @@ import (
 	"backend/pkg/log"
 	"backend/pkg/server/http"
 	"backend/pkg/sid"
-	"backend/pkg/storage"
 
 	"github.com/google/wire"
 	"github.com/spf13/viper"
@@ -25,11 +24,13 @@ var repositorySet = wire.NewSet(
 	repository.NewDB,
 	repository.NewRedis,
 	repository.NewCache,
+	repository.NewMinIO,
 	repository.NewRepository,
 	repository.NewTransaction,
 	repository.NewTokenStore,
 	repository.NewCasbinEnforcer,
 	repository.NewUserRepository,
+	repository.NewAvatarStorage,
 	repository.NewRoleRepository,
 	repository.NewMenuRepository,
 	repository.NewApiRepository,
@@ -88,7 +89,6 @@ func NewWire(*viper.Viper, *log.Logger) (*app.App, func(), error) {
 		sid.NewSid,
 		jwt.NewJwt,
 		email.NewEmail,
-		storage.NewStorage,
 		newApp,
 	))
 }

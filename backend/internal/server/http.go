@@ -75,6 +75,7 @@ func NewHTTPServer(
 			// Base
 			strictAuthRouter.GET("/users/profile", userHandler.GetProfile)
 			strictAuthRouter.PUT("/users/profile", userHandler.UpdateProfile)
+			strictAuthRouter.PUT("/users/avatar", userHandler.UploadAvatar)
 			strictAuthRouter.GET("/users/menus", userHandler.GetMenus)
 			strictAuthRouter.PUT("/users/password", userHandler.UpdatePassword)
 

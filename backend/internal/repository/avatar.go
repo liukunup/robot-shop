@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/minio/minio-go/v7"
 )
@@ -15,11 +16,14 @@ const (
 	basePath    = "avatars"
 	minioPrefix = "minio://"
 	localPrefix = "local://"
+	httpPrefix  = "http://"
+	httpsPrefix = "https://"
 )
 
 type AvatarStorage interface {
 	SaveToMinIO(ctx context.Context, req *v1.AvatarRequest, reader io.Reader) (string, error)
 	SaveToLocal(ctx context.Context, req *v1.AvatarRequest, reader io.Reader) (string, error)
+	GetURL(ctx context.Context, avatar string) (string, error)
 }
 
 func NewAvatarStorage(
@@ -86,4 +90,26 @@ func (r *avatarStorage) SaveToLocal(ctx context.Context, req *v1.AvatarRequest, 
 	}
 
 	return fmt.Sprintf("%s%s", localPrefix, filePath), nil
+}
+
+func (r *avatarStorage) GetURL(ctx context.Context, avatar string) (string, error) {
+	// MinIO
+	if strings.HasPrefix(avatar, minioPrefix) {
+		noPrefix := strings.TrimPrefix(avatar, minioPrefix)
+		url := fmt.Sprintf("%s%s", r.m.client.EndpointURL(), noPrefix)
+		return url, nil
+	}
+
+	// Local
+	if strings.HasPrefix(avatar, localPrefix) {
+		noPrefix := strings.TrimPrefix(avatar, localPrefix)
+		return fmt.Sprintf("%s%s", "http://localhost:8000", noPrefix), nil
+	}
+
+	// Http & Https
+	if strings.HasPrefix(avatar, httpPrefix) || strings.HasPrefix(avatar, httpsPrefix) {
+		return avatar, nil
+	}
+
+	return avatar, fmt.Errorf("unknown avatar prefix")
 }

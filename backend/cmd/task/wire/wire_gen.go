@@ -24,7 +24,8 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	syncedEnforcer := repository.NewCasbinEnforcer(viperViper, logger, db)
 	cache := repository.NewCache()
 	universalClient := repository.NewRedis(viperViper, logger)
-	repositoryRepository := repository.NewRepository(db, syncedEnforcer, cache, universalClient, logger)
+	minIO := repository.NewMinIO(viperViper, logger)
+	repositoryRepository := repository.NewRepository(db, syncedEnforcer, cache, universalClient, minIO, logger)
 	transaction := repository.NewTransaction(repositoryRepository)
 	sidSid := sid.NewSid()
 	taskTask := task.NewTask(transaction, logger, sidSid)
@@ -38,7 +39,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewRedis, repository.NewCache, repository.NewRepository, repository.NewTransaction, repository.NewTokenStore, repository.NewCasbinEnforcer, repository.NewUserRepository, repository.NewRoleRepository, repository.NewMenuRepository, repository.NewApiRepository, repository.NewRobotRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewRedis, repository.NewCache, repository.NewMinIO, repository.NewRepository, repository.NewTransaction, repository.NewTokenStore, repository.NewCasbinEnforcer, repository.NewUserRepository, repository.NewAvatarStorage, repository.NewRoleRepository, repository.NewMenuRepository, repository.NewApiRepository, repository.NewRobotRepository)
 
 var taskSet = wire.NewSet(task.NewTask, task.NewUserTask)
 

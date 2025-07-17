@@ -18,7 +18,6 @@ import (
 	"backend/pkg/log"
 	"backend/pkg/server/http"
 	"backend/pkg/sid"
-	"backend/pkg/storage"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 )
@@ -30,19 +29,20 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	syncedEnforcer := repository.NewCasbinEnforcer(viperViper, logger, db)
 	cache := repository.NewCache()
 	universalClient := repository.NewRedis(viperViper, logger)
-	repositoryRepository := repository.NewRepository(db, syncedEnforcer, cache, universalClient, logger)
+	minIO := repository.NewMinIO(viperViper, logger)
+	repositoryRepository := repository.NewRepository(db, syncedEnforcer, cache, universalClient, minIO, logger)
 	tokenStore := repository.NewTokenStore(repositoryRepository)
 	jwtJWT := jwt.NewJwt(viperViper, tokenStore)
 	handlerHandler := handler.NewHandler(logger)
 	sidSid := sid.NewSid()
 	emailEmail := email.NewEmail(viperViper)
-	storageStorage := storage.NewStorage(viperViper)
 	transaction := repository.NewTransaction(repositoryRepository)
-	serviceService := service.NewService(logger, sidSid, jwtJWT, emailEmail, storageStorage, transaction)
+	serviceService := service.NewService(logger, sidSid, jwtJWT, emailEmail, transaction)
 	userRepository := repository.NewUserRepository(repositoryRepository)
 	roleRepository := repository.NewRoleRepository(repositoryRepository)
 	menuRepository := repository.NewMenuRepository(repositoryRepository)
-	userService := service.NewUserService(serviceService, userRepository, roleRepository, menuRepository)
+	avatarStorage := repository.NewAvatarStorage(repositoryRepository)
+	userService := service.NewUserService(serviceService, userRepository, roleRepository, menuRepository, avatarStorage)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
 	roleService := service.NewRoleService(serviceService, roleRepository)
 	roleHandler := handler.NewRoleHandler(handlerHandler, roleService)
@@ -65,7 +65,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewRedis, repository.NewCache, repository.NewRepository, repository.NewTransaction, repository.NewTokenStore, repository.NewCasbinEnforcer, repository.NewUserRepository, repository.NewRoleRepository, repository.NewMenuRepository, repository.NewApiRepository, repository.NewRobotRepository)
+var repositorySet = wire.NewSet(repository.NewDB, repository.NewRedis, repository.NewCache, repository.NewMinIO, repository.NewRepository, repository.NewTransaction, repository.NewTokenStore, repository.NewCasbinEnforcer, repository.NewUserRepository, repository.NewAvatarStorage, repository.NewRoleRepository, repository.NewMenuRepository, repository.NewApiRepository, repository.NewRobotRepository)
 
 var serviceSet = wire.NewSet(service.NewService, service.NewUserService, service.NewRoleService, service.NewMenuService, service.NewApiService, service.NewRobotService)
 

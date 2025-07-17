@@ -38,14 +38,11 @@ email:
   use_tls: true
   local_name: localhost
 storage:
-  type: local
-  local:
-    path: ./storage/avatars
   minio:
     endpoint: "http://minio.local:9000"
-    access_key: xxx
-    secret_key: xxx
-    bucket: robot-shop-avatars
+    access_key: ak
+    secret_key: sk
+    bucket: robotshop
     region: us-east-1
     secure: false
 

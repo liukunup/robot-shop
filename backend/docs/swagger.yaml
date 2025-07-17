@@ -1606,6 +1606,30 @@ paths:
       summary: 更新机器人
       tags:
       - Robot
+  /users/avatar:
+    put:
+      consumes:
+      - application/json
+      description: 上传用户头像
+      operationId: UploadAvatar
+      parameters:
+      - description: 头像文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 上传头像
+      tags:
+      - User
   /users/menu:
     get:
       consumes:

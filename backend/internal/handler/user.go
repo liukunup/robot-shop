@@ -222,7 +222,7 @@ func (h *UserHandler) UpdateProfile(ctx *gin.Context) {
 // @Security Bearer
 // @Param file formData file true "头像文件"
 // @Success 200 {object} v1.Response
-// @Router /users/avatar [post]
+// @Router /users/avatar [put]
 // @ID UploadAvatar
 func (h *UserHandler) UploadAvatar(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
