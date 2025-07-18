@@ -118,6 +118,18 @@ export async function resetPassword(
   });
 }
 
+/** 上传头像 上传用户头像 PUT /users/avatar */
+export async function uploadAvatar(body: {}, options?: { [key: string]: any }) {
+  return request<API.Response>(`/v1/users/avatar`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 获取用户菜单 获取当前用户的菜单列表 GET /users/menu */
 export async function fetchDynamicMenu(options?: { [key: string]: any }) {
   return request<API.DynamicMenuResponse>(`/v1/users/menu`, {

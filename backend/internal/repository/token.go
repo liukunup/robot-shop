@@ -85,13 +85,13 @@ func (s *tokenStore) StoreRefreshToken(ctx context.Context, tokenID string, fami
 
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		return fmt.Errorf("marshal token data failed: %w", err)
+		return fmt.Errorf("marshal refresh token data failed: %w", err)
 	}
 
 	key := s.key(nsRefresh, tokenID)
 
 	// 1. 写入 Ristretto
-	s.cache.SetWithTTL(key, jsonData, int64(len(jsonData)), expiry)
+	cacheOk := s.cache.SetWithTTL(key, jsonData, int64(len(jsonData)), expiry)
 
 	s.mu.RLock()
 	redisDown := s.isRedisDown
@@ -105,7 +105,10 @@ func (s *tokenStore) StoreRefreshToken(ctx context.Context, tokenID string, fami
 		s.pendingSync[key] = struct{}{} // 标记为待同步
 		s.pendingMu.Unlock()
 
-		return v1.ErrRedisUnavailable
+		if !cacheOk {
+			return fmt.Errorf("failed to store refresh token")
+		}
+		return nil
 	}
 
 	// 2. 写入 Redis
@@ -132,7 +135,9 @@ func (s *tokenStore) StoreRefreshToken(ctx context.Context, tokenID string, fami
 		s.isRedisDown = true
 		s.mu.Unlock()
 
-		return fmt.Errorf("%w: %v", v1.ErrRedisUnavailable, err)
+		if !cacheOk {
+			return fmt.Errorf("failed to store refresh token")
+		}
 	}
 	return nil
 }
@@ -334,23 +339,25 @@ func (s *tokenStore) RevokeAccessToken(ctx context.Context, tokenID string, expi
 	return nil
 }
 
-// 读操作：优先检查 Ristretto 缓存，再检查 Redis 缓存并回填
+// 读操作：优先检查 Ristretto 缓存，再检查 Redis 并回填数据
 func (s *tokenStore) IsAccessTokenRevoked(ctx context.Context, tokenID string) (bool, error) {
 	// KV
 	key := s.key(nsAccess, tokenID)
 	val := "1" // 标记为已撤销
 
 	// 1. 优先检查 Ristretto
-	if _, found := s.cache.Get(key); found {
-		return true, nil // 如果在内存缓存中找到，说明已撤销
+	_, found := s.cache.Get(key)
+	if found {
+		return true, nil // 如果在缓存中找到，说明已撤销
 	}
 
 	s.mu.RLock()
 	redisDown := s.isRedisDown
 	s.mu.RUnlock()
 
-	if redisDown {
-		return false, v1.ErrRedisUnavailable
+	// Redis 服务不可用 且 缓存也没找到
+	if redisDown && !found {
+		return false, nil
 	}
 
 	// 2. 继续检查 Redis
@@ -360,17 +367,21 @@ func (s *tokenStore) IsAccessTokenRevoked(ctx context.Context, tokenID string) (
 		s.isRedisDown = true
 		s.mu.Unlock()
 
-		return false, fmt.Errorf("%w: %v", v1.ErrRedisUnavailable, err)
+		// Redis 服务不可用 且 缓存也没找到
+		if !found {
+			return false, nil
+		}
 	}
 
-	// 回填 Ristretto
+	// 回填 Ristretto 缓存
 	expiry, err := s.rdb.TTL(ctx, key).Result()
 	if err != nil {
 		s.mu.Lock()
 		s.isRedisDown = true
 		s.mu.Unlock()
 
-		return false, fmt.Errorf("%w: %v", v1.ErrRedisUnavailable, err)
+		// 仅仅是查询 TTL 报错，并不影响业务
+		return exists > 0, err
 	}
 	s.cache.SetWithTTL(key, val, int64(len(val)), expiry) // 保持与 Redis 一致的过期时间
 

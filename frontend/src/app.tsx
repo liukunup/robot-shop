@@ -1,5 +1,5 @@
 import { AvatarDropdown, AvatarName, Footer, Question, SelectLang } from '@/components';
-import { getCurrentUser } from '@/services/backend/user';
+import { fetchCurrentUser } from '@/services/backend/user';
 import { LinkOutlined, SmileOutlined, CrownOutlined, RobotOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings, MenuDataItem } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
@@ -9,7 +9,7 @@ import React from 'react';
 import defaultSettings from '../config/defaultSettings';
 import { errorConfig } from './utils/request';
 import '@ant-design/v5-patch-for-react-19';
-import { getUserMenus } from '@/services/backend/user';
+import { fetchDynamicMenu } from '@/services/backend/user';
 
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
@@ -44,7 +44,7 @@ export async function getInitialState(): Promise<{
 }> {
   const fetchUserInfo = async () => {
     try {
-      const response = await getCurrentUser({
+      const response = await fetchCurrentUser({
         skipErrorHandler: true,
       });
       return response.data;
@@ -55,7 +55,7 @@ export async function getInitialState(): Promise<{
   };
   const fetchMenuData = async () => {
     try {
-      const response = await getUserMenus();
+      const response = await fetchDynamicMenu();
       if (response.success) {
         return loopMenuItem(response.data?.list || []);
       }

@@ -7,6 +7,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -14,15 +15,15 @@ import (
 )
 
 const (
-	BearerPrefix       = "Bearer " // 请勿删除空格
-	AccessTokenExpiry  = 15 * time.Minute
-	RefreshTokenExpiry = 7 * 24 * time.Hour
-	DefaultTokenExpiry = 1 * time.Hour
-	RandomBytes        = 32
+	bearerPrefix       = "Bearer " // 请勿删除空格
+	accessTokenExpiry  = 15 * time.Minute
+	refreshTokenExpiry = 7 * 24 * time.Hour
+	defaultTokenExpiry = 1 * time.Hour
+	randomBytes        = 32
 )
 
 type JWT struct {
-	secretKey                []byte
+	secretKey          []byte
 	signingMethod      jwt.SigningMethod
 	accessTokenExpiry  time.Duration
 	refreshTokenExpiry time.Duration
@@ -56,11 +57,11 @@ func NewJwt(conf *viper.Viper, tokenStore repository.TokenStore) *JWT {
 	}
 
 	return &JWT{
-		secretKey:                []byte(key),
+		secretKey:          []byte(key),
 		signingMethod:      jwt.SigningMethodHS256,
-		accessTokenExpiry:  AccessTokenExpiry,
-		refreshTokenExpiry: RefreshTokenExpiry,
-		defaultTokenExpiry: DefaultTokenExpiry,
+		accessTokenExpiry:  accessTokenExpiry,
+		refreshTokenExpiry: refreshTokenExpiry,
+		defaultTokenExpiry: defaultTokenExpiry,
 		tokenStore:         tokenStore,
 	}
 }
@@ -165,6 +166,7 @@ func (j *JWT) RefreshAccessToken(ctx context.Context, refreshToken string) (*v1.
 
 // 验证 AccessToken
 func (j *JWT) ValidateAccessToken(ctx context.Context, accessToken string) (*AccessClaims, error) {
+	accessToken = strings.TrimPrefix(accessToken, bearerPrefix)
 	token, err := jwt.ParseWithClaims(accessToken, &AccessClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, v1.ErrUnexpectedSigningMethod
@@ -227,7 +229,7 @@ func (j *JWT) GenerateResetPasswordToken(email string) (string, error) {
 	}
 
 	claims := ResetPasswordClaims{
-		Email: email,
+		Email:   email,
 		TokenID: tokenID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(j.defaultTokenExpiry)),
@@ -243,7 +245,7 @@ func (j *JWT) GenerateResetPasswordToken(email string) (string, error) {
 
 // 生成 Token ID
 func generateTokenID() (string, error) {
-	b := make([]byte, RandomBytes/2)
+	b := make([]byte, randomBytes/2)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
