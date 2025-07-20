@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -121,7 +122,7 @@ func (j *JWT) GenerateTokenPair(ctx context.Context, uid uint, familyID string) 
 	if j.tokenStore != nil {
 		err = j.tokenStore.StoreRefreshToken(ctx, refreshTokenID, familyID, uid, j.refreshTokenExpiry)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to store refresh token: %w", err)
 		}
 	}
 
@@ -134,6 +135,9 @@ func (j *JWT) GenerateTokenPair(ctx context.Context, uid uint, familyID string) 
 
 // 刷新 AccessToken
 func (j *JWT) RefreshAccessToken(ctx context.Context, refreshToken string) (*v1.TokenPair, error) {
+	// 移除 Bearer 前缀（理论上不会有）
+	refreshToken = strings.TrimPrefix(refreshToken, bearerPrefix)
+
 	// 验证 RefreshToken
 	refreshClaims, err := j.parseRefreshToken(refreshToken)
 	if err != nil {
@@ -142,11 +146,7 @@ func (j *JWT) RefreshAccessToken(ctx context.Context, refreshToken string) (*v1.
 
 	// 检查 RefreshToken 是否有效
 	if j.tokenStore != nil {
-		var valid bool
-		valid, err = j.tokenStore.IsRefreshTokenValid(ctx, refreshClaims.TokenID, refreshClaims.FamilyID)
-		if err != nil {
-			return nil, err
-		}
+		valid, _ := j.tokenStore.IsRefreshTokenValid(ctx, refreshClaims.TokenID, refreshClaims.FamilyID)
 		if !valid {
 			return nil, v1.ErrInvalidRefreshToken
 		}
@@ -155,8 +155,8 @@ func (j *JWT) RefreshAccessToken(ctx context.Context, refreshToken string) (*v1.
 	// 使旧 RefreshToken 失效
 	if j.tokenStore != nil {
 		err = j.tokenStore.InvalidateRefreshToken(ctx, refreshClaims.TokenID)
-		if err != nil {
-			return nil, err
+		if err != nil && !errors.Is(err, v1.ErrRedisUnavailable) {
+			return nil, fmt.Errorf("failed to invalidate refresh token: %w", err)
 		}
 	}
 
@@ -166,7 +166,9 @@ func (j *JWT) RefreshAccessToken(ctx context.Context, refreshToken string) (*v1.
 
 // 验证 AccessToken
 func (j *JWT) ValidateAccessToken(ctx context.Context, accessToken string) (*AccessClaims, error) {
+	// 移除 Bearer 前缀
 	accessToken = strings.TrimPrefix(accessToken, bearerPrefix)
+
 	token, err := jwt.ParseWithClaims(accessToken, &AccessClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, v1.ErrUnexpectedSigningMethod
@@ -183,10 +185,7 @@ func (j *JWT) ValidateAccessToken(ctx context.Context, accessToken string) (*Acc
 	}
 
 	if j.tokenStore != nil {
-		revoked, err := j.tokenStore.IsAccessTokenRevoked(ctx, claims.TokenID)
-		if err != nil {
-			return nil, err
-		}
+		revoked, _ := j.tokenStore.IsAccessTokenRevoked(ctx, claims.TokenID)
 		if revoked {
 			return nil, v1.ErrInvalidAccessToken
 		}

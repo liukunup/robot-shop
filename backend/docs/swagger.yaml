@@ -1606,28 +1606,28 @@ paths:
       summary: 更新机器人
       tags:
       - Robot
-  /users/avatar:
-    put:
+  /users/{id}:
+    get:
       consumes:
       - application/json
-      description: 上传用户头像
-      operationId: UploadAvatar
+      description: 获取指定ID的用户详情
+      operationId: GetUserByID
       parameters:
-      - description: 头像文件
-        in: formData
-        name: file
+      - description: 用户ID
+        in: path
+        name: id
         required: true
-        type: file
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/backend_api_v1.Response'
+            $ref: '#/definitions/backend_api_v1.UserResponse'
       security:
       - Bearer: []
-      summary: 上传头像
+      summary: 获取用户详情
       tags:
       - User
   /users/menu:
@@ -1713,6 +1713,30 @@ paths:
       security:
       - Bearer: []
       summary: 更新用户
+      tags:
+      - User
+  /users/profile/avatar:
+    put:
+      consumes:
+      - application/json
+      description: 上传用户头像
+      operationId: UploadAvatar
+      parameters:
+      - description: 头像文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 上传头像
       tags:
       - User
 securityDefinitions:

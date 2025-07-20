@@ -1227,44 +1227,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/avatar": {
-            "put": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "上传用户头像",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "User"
-                ],
-                "summary": "上传头像",
-                "operationId": "UploadAvatar",
-                "parameters": [
-                    {
-                        "type": "file",
-                        "description": "头像文件",
-                        "name": "file",
-                        "in": "formData",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/backend_api_v1.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/users/menu": {
             "get": {
                 "security": [
@@ -1396,6 +1358,82 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/backend_api_v1.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/profile/avatar": {
+            "put": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "上传用户头像",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "上传头像",
+                "operationId": "UploadAvatar",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "头像文件",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "获取指定ID的用户详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "User"
+                ],
+                "summary": "获取用户详情",
+                "operationId": "GetUserByID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/backend_api_v1.UserResponse"
                         }
                     }
                 }

@@ -4,6 +4,7 @@ import (
 	v1 "backend/api/v1"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -37,6 +38,7 @@ type TokenStore interface {
 	InvalidateRefreshToken(ctx context.Context, tokenID string) error
 	InvalidateRefreshTokenByFamilyID(ctx context.Context, familyID string) error
 	InvalidateRefreshTokenByUserID(ctx context.Context, userID uint) error
+
 	// AccessToken managed by blacklist
 	RevokeAccessToken(ctx context.Context, tokenID string, expiry time.Duration) error
 	IsAccessTokenRevoked(ctx context.Context, tokenID string) (bool, error)
@@ -91,7 +93,7 @@ func (s *tokenStore) StoreRefreshToken(ctx context.Context, tokenID string, fami
 	key := s.key(nsRefresh, tokenID)
 
 	// 1. 写入 Ristretto
-	cacheOk := s.cache.SetWithTTL(key, jsonData, int64(len(jsonData)), expiry)
+	cached := s.cache.SetWithTTL(key, jsonData, int64(len(jsonData)), expiry)
 
 	s.mu.RLock()
 	redisDown := s.isRedisDown
@@ -105,7 +107,7 @@ func (s *tokenStore) StoreRefreshToken(ctx context.Context, tokenID string, fami
 		s.pendingSync[key] = struct{}{} // 标记为待同步
 		s.pendingMu.Unlock()
 
-		if !cacheOk {
+		if !cached {
 			return fmt.Errorf("failed to store refresh token")
 		}
 		return nil
@@ -135,7 +137,7 @@ func (s *tokenStore) StoreRefreshToken(ctx context.Context, tokenID string, fami
 		s.isRedisDown = true
 		s.mu.Unlock()
 
-		if !cacheOk {
+		if !cached {
 			return fmt.Errorf("failed to store refresh token")
 		}
 	}
@@ -177,7 +179,7 @@ func (s *tokenStore) IsRefreshTokenValid(ctx context.Context, tokenID string, fa
 		s.isRedisDown = true
 		s.mu.Unlock()
 
-		return false, fmt.Errorf("%w: %v", v1.ErrRedisUnavailable, err)
+		return false, v1.ErrRedisUnavailable
 	}
 
 	var token refreshTokenEntry
@@ -253,6 +255,11 @@ func (s *tokenStore) InvalidateRefreshTokenByFamilyID(ctx context.Context, famil
 		// 批量失效
 		for _, tokenID := range tokenIDs {
 			if err := s.InvalidateRefreshToken(ctx, tokenID); err != nil {
+				if errors.Is(err, v1.ErrRedisUnavailable) {
+					// Redis 不可用时不报错（降级处理）
+					s.logger.Warn("redis unavailable, skip token invalidation: %v", zap.Error(err))
+					continue
+				}
 				return fmt.Errorf("invalidate token %s failed: %w", tokenID, err)
 			}
 		}
@@ -283,12 +290,17 @@ func (s *tokenStore) InvalidateRefreshTokenByUserID(ctx context.Context, userID 
 		var err error
 		familyIDs, cursor, err = s.rdb.SScan(ctx, userFamiliesKey, cursor, "", 100).Result()
 		if err != nil {
-			return fmt.Errorf("scan user-families failed: %w", err)
+			return fmt.Errorf("scan user families failed: %w", err)
 		}
 
 		// 批量失效
 		for _, familyID := range familyIDs {
 			if err := s.InvalidateRefreshTokenByFamilyID(ctx, familyID); err != nil {
+				if errors.Is(err, v1.ErrRedisUnavailable) {
+					// Redis 不可用时不报错（降级处理）
+					s.logger.Warn("redis unavailable, skip family invalidation: %v", zap.Error(err))
+					continue
+				}
 				return fmt.Errorf("invalidate family %s failed: %w", familyID, err)
 			}
 		}
@@ -306,7 +318,7 @@ func (s *tokenStore) RevokeAccessToken(ctx context.Context, tokenID string, expi
 	val := "1" // 标记为已撤销
 
 	// 1. 写入 Ristretto
-	s.cache.SetWithTTL(key, val, int64(len(val)), expiry)
+	cached := s.cache.SetWithTTL(key, val, int64(len(val)), expiry)
 
 	s.mu.RLock()
 	redisDown := s.isRedisDown
@@ -320,7 +332,10 @@ func (s *tokenStore) RevokeAccessToken(ctx context.Context, tokenID string, expi
 		s.pendingSync[key] = struct{}{} // 标记为待同步
 		s.pendingMu.Unlock()
 
-		return v1.ErrRedisUnavailable
+		if !cached {
+			return fmt.Errorf("failed to store access token")
+		}
+		return nil
 	}
 
 	// 2. 写入 Redis
@@ -331,7 +346,10 @@ func (s *tokenStore) RevokeAccessToken(ctx context.Context, tokenID string, expi
 		s.isRedisDown = true
 		s.mu.Unlock()
 
-		return fmt.Errorf("%w: %v", v1.ErrRedisUnavailable, err)
+		if !cached {
+			return fmt.Errorf("failed to store access token")
+		}
+		return nil
 	}
 	if !ok {
 		return v1.ErrTokenAlreadyRevoked
@@ -357,7 +375,7 @@ func (s *tokenStore) IsAccessTokenRevoked(ctx context.Context, tokenID string) (
 
 	// Redis 服务不可用 且 缓存也没找到
 	if redisDown && !found {
-		return false, nil
+		return false, v1.ErrRedisUnavailable
 	}
 
 	// 2. 继续检查 Redis
@@ -369,7 +387,7 @@ func (s *tokenStore) IsAccessTokenRevoked(ctx context.Context, tokenID string) (
 
 		// Redis 服务不可用 且 缓存也没找到
 		if !found {
-			return false, nil
+			return false, v1.ErrRedisUnavailable
 		}
 	}
 
@@ -447,7 +465,6 @@ func (s *tokenStore) syncPendingToRedis(ctx context.Context) error {
 
 				case strings.HasPrefix(key, s.key(nsAccess, "")):
 					pipe.SetEx(ctx, key, data, expiry) // 保持与 Ristretto 一致的过期时间
-
 				}
 			}
 			return nil
@@ -476,17 +493,17 @@ func (s *tokenStore) healthCheck() {
 			s.mu.Lock()
 			if err != nil {
 				if !s.isRedisDown {
-					s.logger.WithContext(ctx).Warn("Redis disconnected, entering fallback mode", zap.Error(err))
+					s.logger.WithContext(ctx).Warn("redis disconnected, entering fallback mode", zap.Error(err))
 				}
 				s.isRedisDown = true
 			} else {
 				if s.isRedisDown {
-					s.logger.WithContext(ctx).Info("Redis reconnected, resuming normal operations")
+					s.logger.WithContext(ctx).Info("redis reconnected, resuming normal operations")
 					s.isRedisDown = false
 
 					// 执行增量同步
 					if err := s.syncPendingToRedis(ctx); err != nil {
-						s.logger.WithContext(ctx).Error("Failed to sync pending data to redis", zap.Error(err))
+						s.logger.WithContext(ctx).Error("failed to sync pending data to redis", zap.Error(err))
 					}
 				}
 			}
