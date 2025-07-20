@@ -28,7 +28,7 @@ type UserService interface {
 	Delete(ctx context.Context, uid uint) error
 	Get(ctx context.Context, uid uint) (*v1.UserDataItem, error)
 
-	GetMenus(ctx context.Context, uid uint) (*v1.DynamicMenuResponseData, error)
+	GetMenu(ctx context.Context, uid uint) (*v1.DynamicMenuResponseData, error)
 
 	Register(ctx context.Context, req *v1.RegisterRequest) error
 	Login(ctx context.Context, req *v1.LoginRequest) (*v1.TokenPair, error)
@@ -258,7 +258,7 @@ func (s *userService) Get(ctx context.Context, uid uint) (*v1.UserDataItem, erro
 	}, nil
 }
 
-func (s *userService) GetMenus(ctx context.Context, uid uint) (*v1.DynamicMenuResponseData, error) {
+func (s *userService) GetMenu(ctx context.Context, uid uint) (*v1.DynamicMenuResponseData, error) {
 	// 获取菜单列表
 	menuList, err := s.menuRepository.ListAll(ctx)
 	if err != nil {

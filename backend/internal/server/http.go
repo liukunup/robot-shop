@@ -69,37 +69,45 @@ func NewHTTPServer(
 			noAuthRouter.POST("/refresh-token", userHandler.RefreshToken)
 		}
 
+		// Non-strict permission routing group
+		noStrictAuthRouter := v1.Group("/").Use(middleware.NoStrictAuth(jwt, logger))
+		{
+			// User
+			noStrictAuthRouter.GET("/users/:id", userHandler.GetUserByID)
+		}
+
 		// Strict permission routing group
 		strictAuthRouter := v1.Group("/").Use(middleware.StrictAuth(jwt, logger), middleware.AuthMiddleware(e))
 		{
-			// Base
+			// User
 			strictAuthRouter.GET("/users/profile", userHandler.GetProfile)
 			strictAuthRouter.PUT("/users/profile", userHandler.UpdateProfile)
-			strictAuthRouter.PUT("/users/avatar", userHandler.UploadAvatar)
-			strictAuthRouter.GET("/users/menus", userHandler.GetMenus)
+			strictAuthRouter.PUT("/users/profile/avatar", userHandler.UploadAvatar)
+			strictAuthRouter.GET("/users/menu", userHandler.GetMenu)
 			strictAuthRouter.PUT("/users/password", userHandler.UpdatePassword)
 
-			// User
+			// Admin User
 			strictAuthRouter.GET("/admin/users", userHandler.ListUsers)
 			strictAuthRouter.POST("/admin/users", userHandler.CreateUser)
 			strictAuthRouter.PUT("/admin/users/:id", userHandler.UpdateUser)
 			strictAuthRouter.DELETE("/admin/users/:id", userHandler.DeleteUser)
 
-			// Role
+			// Admin Role
 			strictAuthRouter.GET("/admin/roles", roleHandler.ListRoles)
 			strictAuthRouter.POST("/admin/roles", roleHandler.CreateRole)
 			strictAuthRouter.PUT("/admin/roles/:id", roleHandler.UpdateRole)
 			strictAuthRouter.DELETE("/admin/roles/:id", roleHandler.DeleteRole)
+			// Admin Role Permission
 			strictAuthRouter.GET("/admin/roles/permissions", roleHandler.GetRolePermissions)
 			strictAuthRouter.PUT("/admin/roles/permissions", roleHandler.UpdateRolePermissions)
 
-			// Menu
+			// Admin Menu
 			strictAuthRouter.GET("/admin/menus", menuHandler.ListMenus)
 			strictAuthRouter.POST("/admin/menus", menuHandler.CreateMenu)
 			strictAuthRouter.PUT("/admin/menus/:id", menuHandler.UpdateMenu)
 			strictAuthRouter.DELETE("/admin/menus/:id", menuHandler.DeleteMenu)
 
-			// API
+			// Admin API
 			strictAuthRouter.GET("/admin/apis", apiHandler.ListApis)
 			strictAuthRouter.POST("/admin/apis", apiHandler.CreateApi)
 			strictAuthRouter.PUT("/admin/apis/:id", apiHandler.UpdateApi)

@@ -149,6 +149,36 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, nil)
 }
 
+// GetUserByID godoc
+// @Summary 获取用户详情
+// @Schemes
+// @Description 获取指定ID的用户详情
+// @Tags User
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Param id path uint true "用户ID"
+// @Success 200 {object} v1.UserResponse
+// @Router /users/{id} [get]
+// @ID GetUserByID
+func (h *UserHandler) GetUserByID(ctx *gin.Context) {
+	idStr := ctx.Param("id")
+	uid, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		h.logger.WithContext(ctx).Error("GetUserByID parse id error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	data, err := h.userService.Get(ctx, uint(uid))
+	if err != nil {
+		h.logger.WithContext(ctx).Error("userService.Get error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, nil)
+		return
+	}
+	v1.HandleSuccess(ctx, data)
+}
+
 // GetProfile godoc
 // @Summary 获取当前用户
 // @Schemes
@@ -273,17 +303,17 @@ func (h *UserHandler) UploadAvatar(ctx *gin.Context) {
 // @Success 200 {object} v1.DynamicMenuResponse
 // @Router /users/menu [get]
 // @ID FetchDynamicMenu
-func (h *UserHandler) GetMenus(ctx *gin.Context) {
+func (h *UserHandler) GetMenu(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
-		h.logger.WithContext(ctx).Error("GetMenus get uid error")
+		h.logger.WithContext(ctx).Error("GetMenu get uid error")
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, nil)
 		return
 	}
 
-	data, err := h.userService.GetMenus(ctx, uid)
+	data, err := h.userService.GetMenu(ctx, uid)
 	if err != nil {
-		h.logger.WithContext(ctx).Error("userService.GetMenus error", zap.Error(err))
+		h.logger.WithContext(ctx).Error("userService.GetMenu error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": err.Error()})
 		return
 	}
