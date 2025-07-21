@@ -14,26 +14,41 @@ enum ErrorShowType {
 }
 
 // 与后端约定的响应数据格式
-interface IResponse {
+interface IResponse<T = any> {
   success: boolean;
-  data: any;
+  data: T;
   errorCode?: number;
   errorMessage?: string;
   errorShowType?: ErrorShowType;
 }
 
-// 新增：刷新token的API请求
-let isRefreshing = false;
-let failedQueue: any[] = [];
+// 请求队列项类型
+interface RequestQueueItem {
+  resolve: (value?: string | null) => void;
+  reject: (reason?: any) => void;
+}
 
-const handleTokenRefresh = async () => {
+// Token 刷新状态管理
+let isRefreshing = false;
+let failedQueue: RequestQueueItem[] = [];
+
+/**
+ * 处理 Token 刷新
+ * @returns 新的 access token
+ */
+const handleTokenRefresh = async (): Promise<string> => {
   try {
-    const response = await refreshToken({ refreshToken: getRefreshToken() });
+    const refreshTokenValue = getRefreshToken();
+    if (!refreshTokenValue) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await refreshToken({ refreshToken: refreshTokenValue });
     if (response.success) {
       setToken(response.data.accessToken, response.data.refreshToken);
       return response.data.accessToken;
     }
-    throw new Error('刷新token失败');
+    throw new Error(response.errorMessage || '刷新 token 失败');
   } catch (error) {
     removeToken();
     window.location.href = '/user/login';
@@ -41,8 +56,13 @@ const handleTokenRefresh = async () => {
   }
 };
 
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(prom => {
+/**
+ * 处理请求队列
+ * @param error 错误对象
+ * @param token 新的 token 或 null
+ */
+const processQueue = (error: any, token: string | null = null): void => {
+  failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
     } else {
@@ -53,46 +73,87 @@ const processQueue = (error: any, token: string | null = null) => {
 };
 
 /**
+ * 处理业务错误
+ * @param errorInfo 错误信息
+ */
+const handleBusinessError = (errorInfo: IResponse): void => {
+  const { errorCode, errorMessage, errorShowType } = errorInfo;
+
+  // 按错误码处理
+  const errorCodeHandlers: Record<number, () => void> = {
+    400: () => notification.error({ message: '请求错误', description: errorMessage }),
+    401: () => {}, // 401 在拦截器中特殊处理
+    403: () => notification.error({ message: '权限不足', description: '请联系管理员' }),
+    404: () => notification.error({ message: '资源不存在', description: '请联系管理员' }),
+    500: () => notification.error({ message: '服务器错误', description: '请联系管理员' }),
+  };
+
+  if (errorCode && errorCodeHandlers[errorCode]) {
+    errorCodeHandlers[errorCode]();
+    return;
+  }
+
+  // 按错误展示类型处理
+  switch (errorShowType) {
+    case ErrorShowType.SILENT:
+      break;
+    case ErrorShowType.WARN_MESSAGE:
+      message.warning(errorMessage);
+      break;
+    case ErrorShowType.ERROR_MESSAGE:
+      message.error(errorMessage);
+      break;
+    case ErrorShowType.NOTIFICATION:
+      notification.open({ description: errorMessage, message: errorCode?.toString() });
+      break;
+    case ErrorShowType.REDIRECT:
+      // TODO: 实现重定向逻辑
+      break;
+    default:
+      message.error(errorMessage || '未知错误');
+  }
+};
+
+/**
  * @name 错误处理
  * pro 自带的错误处理， 可以在这里做自己的改动
  * @doc https://umijs.org/docs/max/request#配置
  */
+/**
+ * 错误配置
+ */
 export const errorConfig: RequestConfig = {
-  // 错误处理： umi@3 的错误处理方案。
+  // 错误处理：umi@3 的错误处理方案
   errorConfig: {
     // 错误抛出
-    errorThrower: (response: any) => {
-      const { success, data, errorCode, errorMessage, errorShowType } =
-        response as unknown as IResponse;
+    errorThrower: (response: unknown) => {
+      const { success, errorCode, errorMessage, errorShowType, data } = response as IResponse;
       if (!success) {
-        const error: any = new Error(errorMessage);
+        const error = new Error(errorMessage);
         error.name = 'BizError';
         error.info = { errorCode, errorMessage, errorShowType, data };
-        throw error; // 抛出自制的错误
+        throw error;
       }
     },
+
     // 错误接收及处理
     errorHandler: async (error: any, opts: any) => {
       if (opts?.skipErrorHandler) throw error;
-      // 我们的 errorThrower 抛出的错误。
+
+      // 业务错误
       if (error.name === 'BizError') {
-        const errorInfo: IResponse | undefined = error.info;
+        const errorInfo = error.info as IResponse;
         if (errorInfo) {
-          const { errorCode, errorMessage, errorShowType } = errorInfo;
-          // 按响应码处理
-          if (errorCode === 400) {
-            notification.error({
-              message: '请求错误',
-              description: errorMessage,
-            });
-          } else if (errorCode === 401) {
-            // 处理token过期逻辑
+          // 401 特殊处理 - token 刷新逻辑
+          if (errorInfo.errorCode === 401) {
             const originalRequest = error.config;
+
             if (!isRefreshing) {
               isRefreshing = true;
               try {
                 const newToken = await handleTokenRefresh();
                 processQueue(null, newToken);
+
                 // 重试原始请求
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 return fetch(originalRequest);
@@ -103,69 +164,35 @@ export const errorConfig: RequestConfig = {
                 isRefreshing = false;
               }
             }
-            // 如果正在刷新token，则将请求加入队列
+
+            // 如果正在刷新 token，将请求加入队列
             return new Promise((resolve, reject) => {
               failedQueue.push({ resolve, reject });
             });
-          } else if (errorCode === 403) {
-            notification.error({
-              message: '权限不足',
-              description: '请联系管理员',
-            });
-          } else if (errorCode === 404) {
-            notification.error({
-              message: '资源不存在',
-              description: '请联系管理员',
-            });
-          } else if (errorCode === 500) {
-            notification.error({
-              message: '服务器错误',
-              description: '请联系管理员',
-            });
-          } else {
-            switch (errorShowType) {
-              case ErrorShowType.SILENT:
-                // do nothing
-                break;
-              case ErrorShowType.WARN_MESSAGE:
-                message.warning(errorMessage);
-                break;
-              case ErrorShowType.ERROR_MESSAGE:
-                message.error(errorMessage);
-                break;
-              case ErrorShowType.NOTIFICATION:
-                notification.open({
-                  description: errorMessage,
-                  message: errorCode,
-                });
-                break;
-              case ErrorShowType.REDIRECT:
-                // TODO: redirect
-                break;
-              default:
-                message.error(errorMessage);
-            }
           }
+
+          handleBusinessError(errorInfo);
         }
-      } else if (error.response) {
-        // Axios 的错误
-        // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
-        message.error(`Response status:${error.response.status}`);
+        return;
+      }
+
+      if (error.response) {
+        // 请求成功发出且服务器响应了状态码，但状态码超出 2xx 范围
+        message.error(`请求错误，状态码: ${error.response.status}`);
       } else if (error.request) {
-        // 请求已经成功发起，但没有收到响应
-        // \`error.request\` 在浏览器中是 XMLHttpRequest 的实例，
-        // 而在node.js中是 http.ClientRequest 的实例
-        message.error('None response! Please retry.');
+        // 请求已发出但没有收到响应
+        message.error('请求无响应，请重试');
       } else {
-        // 发送请求时出了点问题
-        message.error('Request error, please retry.');
+        // 请求设置出错
+        message.error('请求错误，请重试');
       }
     },
   },
 
-  // 请求拦截器 (在这里处理 Header 携带 Token 的问题)
+  // 请求拦截器
   requestInterceptors: [
     (config: RequestOptions) => {
+      // 在浏览器环境中添加 token
       if (typeof window !== 'undefined') {
         const token = getToken();
         if (token) {

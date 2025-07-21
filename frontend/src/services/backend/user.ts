@@ -118,14 +118,16 @@ export async function resetPassword(
   });
 }
 
-/** 上传头像 上传用户头像 PUT /users/avatar */
-export async function uploadAvatar(body: {}, options?: { [key: string]: any }) {
-  return request<API.Response>(`/v1/users/avatar`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    data: body,
+/** 获取用户详情 获取指定ID的用户详情 GET /users/${param0} */
+export async function getUserById(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.GetUserByIDParams,
+  options?: { [key: string]: any },
+) {
+  const { id: param0, ...queryParams } = params;
+  return request<API.UserResponse>(`/v1/users/${param0}`, {
+    method: 'GET',
+    params: { ...queryParams },
     ...(options || {}),
   });
 }
@@ -167,6 +169,18 @@ export async function updateProfile(body: API.UserRequest, options?: { [key: str
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
+    },
+    data: body,
+    ...(options || {}),
+  });
+}
+
+/** 上传头像 上传用户头像 PUT /users/profile/avatar */
+export async function uploadAvatar(body: {}, options?: { [key: string]: any }) {
+  return request<API.Response>(`/v1/users/profile/avatar`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     data: body,
     ...(options || {}),

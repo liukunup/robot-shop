@@ -40,6 +40,7 @@ export async function getInitialState(): Promise<{
   currentUser?: API.User;
   loading?: boolean;
   fetchUserInfo?: () => Promise<API.User | undefined>;
+  fetchMenuData?: () => Promise<MenuDataItem[]>;
   menuData?: MenuDataItem[];
 }> {
   const fetchUserInfo = async () => {
@@ -55,7 +56,9 @@ export async function getInitialState(): Promise<{
   };
   const fetchMenuData = async () => {
     try {
-      const response = await fetchDynamicMenu();
+      const response = await fetchDynamicMenu({
+        skipErrorHandler: true,
+      });
       if (response.success) {
         return loopMenuItem(response.data?.list || []);
       }
@@ -72,6 +75,7 @@ export async function getInitialState(): Promise<{
     const menuData = await fetchMenuData();
     return {
       fetchUserInfo,
+      fetchMenuData,
       currentUser,
       menuData,
       settings: defaultSettings as Partial<LayoutSettings>,

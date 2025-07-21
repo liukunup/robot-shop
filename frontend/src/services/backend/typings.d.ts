@@ -134,6 +134,11 @@ declare namespace API {
     role: string;
   };
 
+  type GetUserByIDParams = {
+    /** 用户ID */
+    id: number;
+  };
+
   type ListApisParams = {
     /** 页码 */
     page: number;

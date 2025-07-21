@@ -102,15 +102,22 @@ const Login: React.FC = () => {
       // 登录
       const resp = await login({ ...values });
       if (resp.success) {
-        if (resp.data?.accessToken) {
-          setToken(resp.data.accessToken);
-        }
+        setToken(resp.data.accessToken, resp.data.refreshToken);
         const defaultLoginSuccessMessage = intl.formatMessage({
           id: 'pages.login.success',
           defaultMessage: '登录成功！',
         });
         message.success(defaultLoginSuccessMessage);
         await fetchUserInfo();
+        const menuData = await initialState?.fetchMenuData?.();
+        if (menuData) {
+          flushSync(() => {
+            setInitialState((s) => ({
+              ...s,
+              menuData,
+            }));
+          });
+        }
         const urlParams = new URL(window.location.href).searchParams;
         history.push(urlParams.get('redirect') || '/');
         return;
