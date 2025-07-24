@@ -55,9 +55,16 @@ func (r *roleRepository) List(ctx context.Context, req *v1.RoleSearchRequest) ([
 	if err := scope.Count(&total).Error; err != nil {
 		return nil, total, err
 	}
-	if err := scope.Offset((req.Page - 1) * req.PageSize).Limit(req.PageSize).Find(&list).Error; err != nil {
-		return nil, total, err
+	if req.Page > 0 && req.PageSize > 0 {
+		if err := scope.Offset((req.Page - 1) * req.PageSize).Limit(req.PageSize).Find(&list).Error; err != nil {
+			return nil, total, err
+		}
+	} else {
+		if err := scope.Find(&list).Error; err != nil {
+			return nil, total, err
+		}
 	}
+
 	return list, total, nil
 }
 

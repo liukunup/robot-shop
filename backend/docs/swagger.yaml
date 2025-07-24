@@ -1103,12 +1103,10 @@ paths:
       - description: 页码
         in: query
         name: page
-        required: true
         type: integer
       - description: 分页大小
         in: query
         name: pageSize
-        required: true
         type: integer
       - description: 角色名
         in: query

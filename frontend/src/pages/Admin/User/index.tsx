@@ -20,7 +20,7 @@ const User: React.FC = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await listRoles({ page: 1, pageSize: 1000 });
+        const response = await listRoles({});
         if (response.success) {
           setRoleOptions(response.data?.list || []);
         }

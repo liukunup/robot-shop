@@ -24,10 +24,7 @@ const UpdateForm = ({ visible, onCancel, onSuccess, initialValues }: UpdateFormP
     const fetchRoles = async () => {
       setRoleLoading(true);
       try {
-        const response = await listRoles({
-          page: 1,
-          pageSize: 100, // 正常情况下，不应该超过100个角色
-        } as API.ListRolesParams);
+        const response = await listRoles({});
         if (response.success) {
           setRoles(response.data?.list || []);
         }

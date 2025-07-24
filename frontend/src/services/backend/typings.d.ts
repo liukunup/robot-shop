@@ -182,9 +182,9 @@ declare namespace API {
 
   type ListRolesParams = {
     /** 页码 */
-    page: number;
+    page?: number;
     /** 分页大小 */
-    pageSize: number;
+    pageSize?: number;
     /** 角色名 */
     name?: string;
     /** Casbin Role */

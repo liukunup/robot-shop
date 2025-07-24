@@ -33,8 +33,8 @@ func NewRoleHandler(
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param page query int true "页码"
-// @Param pageSize query int true "分页大小"
+// @Param page query int false "页码"
+// @Param pageSize query int false "分页大小"
 // @Param name query string false "角色名"
 // @Param casbinRole query string false "Casbin Role"
 // @Success 200 {object} v1.RoleSearchResponse

@@ -453,15 +453,13 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "页码",
                         "name": "page",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "integer",
                         "description": "分页大小",
                         "name": "pageSize",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     },
                     {
                         "type": "string",

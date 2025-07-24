@@ -2,10 +2,10 @@ package v1
 
 // CRUD
 type RoleSearchRequest struct {
-	Page       int    `form:"page" binding:"required,min=1" example:"1"`              // 页码
-	PageSize   int    `form:"pageSize" binding:"required,min=1,max=100" example:"10"` // 分页大小
-	Name       string `form:"name" example:"Admin"`                                   // 筛选项: 角色名 模糊匹配
-	CasbinRole string `form:"casbinRole" example:"admin"`                             // 筛选项: Casbin-Role 精确匹配
+	Page       int    `form:"page" binding:"omitempty,min=1" example:"1"`              // 页码
+	PageSize   int    `form:"pageSize" binding:"omitempty,min=1,max=100" example:"10"` // 分页大小
+	Name       string `form:"name" example:"Admin"`                                    // 筛选项: 角色名 模糊匹配
+	CasbinRole string `form:"casbinRole" example:"admin"`                              // 筛选项: Casbin-Role 精确匹配
 }
 type RoleDataItem struct {
 	ID         uint   `json:"id,omitempty"`                                       // ID
