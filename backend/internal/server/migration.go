@@ -195,9 +195,16 @@ func (m *MigrateServer) initialApisData(ctx context.Context) error {
 		// 基础API
 		{Group: "基础API", Name: "登录", Path: "/v1/login", Method: http.MethodPost},
 		{Group: "基础API", Name: "注册", Path: "/v1/register", Method: http.MethodPost},
-		{Group: "基础API", Name: "获取当前用户信息", Path: "/v1/users/me", Method: http.MethodGet},
-		{Group: "基础API", Name: "获取当前用户菜单", Path: "/v1/users/me/menus", Method: http.MethodGet},
-		{Group: "基础API", Name: "获取当前用户权限", Path: "/v1/users/me/permissions", Method: http.MethodGet},
+		{Group: "基础API", Name: "重置密码", Path: "/v1/reset-password", Method: http.MethodPost},
+		{Group: "基础API", Name: "刷新token", Path: "/v1/refresh-token", Method: http.MethodPost},
+
+		{Group: "基础API", Name: "获取当前用户信息", Path: "/v1/users/:id", Method: http.MethodGet},
+
+		{Group: "用户", Name: "获取profile", Path: "/v1/users/profile", Method: http.MethodGet},
+		{Group: "用户", Name: "更新profile", Path: "/v1/users/profile", Method: http.MethodPut},
+		{Group: "用户", Name: "更新头像", Path: "/v1/users/profile/avatar", Method: http.MethodPut},
+		{Group: "用户", Name: "获取菜单", Path: "/v1/users/menu", Method: http.MethodGet},
+		{Group: "用户", Name: "更新密码", Path: "/v1/users/password", Method: http.MethodPut},
 
 		// 用户管理
 		{Group: "用户管理", Name: "获取用户列表", Path: "/v1/admin/users", Method: http.MethodGet},
@@ -289,6 +296,14 @@ var menuData = `[
     "name": "robot",
     "icon": "robot",
 	"component": "@/pages/Robot",
+	"access": "canUser"
+  },
+  {
+    "id": 999,
+    "path": "/user/profile",
+    "name": "profile",
+    "icon": "user",
+	"component": "@/pages/User/Profile",
 	"access": "canUser"
   },
   {
