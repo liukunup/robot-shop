@@ -23,7 +23,7 @@ const CreateForm = ({ visible, onCancel, onSuccess }: CreateFormProps) => {
     try {
       const response = await listRoles({
         page: 1,
-        pageSize: 1000, // 正常情况下，不应该超过1000个角色
+        pageSize: 100, // 正常情况下，不应该超过100个角色
       } as API.ListRolesParams);
       if (response.success) {
         setRoles(response.data?.list || []);
