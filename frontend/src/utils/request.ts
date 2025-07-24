@@ -1,16 +1,15 @@
-﻿import type { RequestOptions } from '@@/plugin-request/request';
-import type { RequestConfig } from '@umijs/max';
+﻿import type { RequestConfig, RequestOptions } from '@@/plugin-request/request';
 import { message, notification } from 'antd';
 import { getToken, setToken, getRefreshToken, removeToken } from './auth';
 import { refreshToken } from '@/services/backend/user';
 
 // 错误处理方案： 错误类型
 enum ErrorShowType {
-  SILENT = 0,
-  WARN_MESSAGE = 1,
-  ERROR_MESSAGE = 2,
-  NOTIFICATION = 3,
-  REDIRECT = 9,
+  SILENT = 0,        // 静默处理
+  WARN_MESSAGE = 1,  // 警告提示
+  ERROR_MESSAGE = 2, // 错误提示
+  NOTIFICATION = 3,  // 通知用户
+  REDIRECT = 9,      // 重定向跳转
 }
 
 // 与后端约定的响应数据格式
@@ -33,22 +32,24 @@ let isRefreshing = false;
 let failedQueue: RequestQueueItem[] = [];
 
 /**
- * 处理 Token 刷新
- * @returns 新的 access token
+ * 处理 accessToken 刷新逻辑
+ * @returns 新的 accessToken 值
  */
 const handleTokenRefresh = async (): Promise<string> => {
   try {
+    // 从浏览器获取 refreshToken 值
     const refreshTokenValue = getRefreshToken();
     if (!refreshTokenValue) {
-      throw new Error('No refresh token available');
+      throw new Error('No refreshToken available');
     }
-
+    // 调用 accessToken 刷新接口
     const response = await refreshToken({ refreshToken: refreshTokenValue });
     if (response.success) {
       setToken(response.data.accessToken, response.data.refreshToken);
       return response.data.accessToken;
     }
-    throw new Error(response.errorMessage || '刷新 token 失败');
+    // 刷新失败
+    throw new Error(response.errorMessage || '刷新 accessToken 失败');
   } catch (error) {
     removeToken();
     window.location.href = '/user/login';
@@ -59,7 +60,7 @@ const handleTokenRefresh = async (): Promise<string> => {
 /**
  * 处理请求队列
  * @param error 错误对象
- * @param token 新的 token 或 null
+ * @param token 新的 accessToken 值 或 null
  */
 const processQueue = (error: any, token: string | null = null): void => {
   failedQueue.forEach((prom) => {
@@ -76,7 +77,7 @@ const processQueue = (error: any, token: string | null = null): void => {
  * 处理业务错误
  * @param errorInfo 错误信息
  */
-const handleBusinessError = (errorInfo: IResponse): void => {
+const handleBizError = (errorInfo: IResponse): void => {
   const { errorCode, errorMessage, errorShowType } = errorInfo;
 
   // 按错误码处理
@@ -115,24 +116,49 @@ const handleBusinessError = (errorInfo: IResponse): void => {
 };
 
 /**
+ * 处理 401 未授权错误
+ * @param originalRequest 原始请求对象
+ */
+const handleUnauthorizedError = async (originalRequest: any): Promise<any> => {
+  if (!isRefreshing) {
+    isRefreshing = true;
+    try {
+      // 刷新 accessToken
+      const newAccessToken = await handleTokenRefresh();
+      processQueue(null, newAccessToken);
+      // 重试原始请求
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+      return fetch(originalRequest);
+    } catch (err) {
+      processQueue(err, null);
+      return Promise.reject(err);
+    } finally {
+      isRefreshing = false;
+    }
+  }
+  // 如果正在刷新 accessToken 则先将请求加入队列
+  return new Promise((resolve, reject) => {
+    failedQueue.push({ resolve, reject });
+  });
+};
+
+/**
  * @name 错误处理
  * pro 自带的错误处理， 可以在这里做自己的改动
  * @doc https://umijs.org/docs/max/request#配置
  */
-/**
- * 错误配置
- */
 export const errorConfig: RequestConfig = {
+
   // 错误处理：umi@3 的错误处理方案
   errorConfig: {
     // 错误抛出
-    errorThrower: (response: unknown) => {
-      const { success, errorCode, errorMessage, errorShowType, data } = response as IResponse;
+    errorThrower: (response: IResponse) => {
+      const { success, data, errorCode, errorMessage, errorShowType } = response;
       if (!success) {
-        const error = new Error(errorMessage);
+        const error: any = new Error(errorMessage);
         error.name = 'BizError';
         error.info = { errorCode, errorMessage, errorShowType, data };
-        throw error;
+        throw error; // 抛出自定义错误
       }
     },
 
@@ -140,50 +166,32 @@ export const errorConfig: RequestConfig = {
     errorHandler: async (error: any, opts: any) => {
       if (opts?.skipErrorHandler) throw error;
 
-      // 业务错误
-      if (error.name === 'BizError') {
-        const errorInfo = error.info as IResponse;
+      if (error.name === 'BizError') { // 业务错误
+        const errorInfo: IResponse | undefined = error.info;
         if (errorInfo) {
-          // 401 特殊处理 - token 刷新逻辑
           if (errorInfo.errorCode === 401) {
             const originalRequest = error.config;
-
-            if (!isRefreshing) {
-              isRefreshing = true;
-              try {
-                const newToken = await handleTokenRefresh();
-                processQueue(null, newToken);
-
-                // 重试原始请求
-                originalRequest.headers.Authorization = `Bearer ${newToken}`;
-                return fetch(originalRequest);
-              } catch (err) {
-                processQueue(err, null);
-                return Promise.reject(err);
-              } finally {
-                isRefreshing = false;
-              }
-            }
-
-            // 如果正在刷新 token，将请求加入队列
-            return new Promise((resolve, reject) => {
-              failedQueue.push({ resolve, reject });
-            });
+            handleUnauthorizedError(originalRequest);
+          } else {
+            handleBizError(errorInfo);
           }
-
-          handleBusinessError(errorInfo);
         }
-        return;
-      }
-
-      if (error.response) {
-        // 请求成功发出且服务器响应了状态码，但状态码超出 2xx 范围
-        message.error(`请求错误，状态码: ${error.response.status}`);
-      } else if (error.request) {
-        // 请求已发出但没有收到响应
-        message.error('请求无响应，请重试');
-      } else {
-        // 请求设置出错
+      } else if (error.response) { // 响应错误
+        // Axios 的错误
+        // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
+        if (error.response.status === 401) {
+          const originalRequest = error.config;
+          handleUnauthorizedError(originalRequest);
+        } else {
+          message.error(`响应错误码: ${error.response.status}`);
+        }
+      } else if (error.request) { // 请求错误
+        // 请求已经成功发起，但没有收到响应
+        // \`error.request\` 在浏览器中是 XMLHttpRequest 的实例，
+        // 而在node.js中是 http.ClientRequest 的实例
+        message.error('无响应，请重试');
+      } else { // 未知错误
+        // 发送请求时出了点问题
         message.error('请求错误，请重试');
       }
     },
@@ -205,4 +213,8 @@ export const errorConfig: RequestConfig = {
       return config;
     },
   ],
+
+  // 响应拦截器
+  responseInterceptors: [
+  ]
 };
