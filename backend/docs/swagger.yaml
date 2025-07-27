@@ -1,0 +1,1745 @@
+definitions:
+  Api:
+    properties:
+      createdAt:
+        description: 创建时间
+        example: "2006-01-02 15:04:05"
+        type: string
+      group:
+        description: 分组
+        example: User
+        type: string
+      id:
+        description: ID
+        example: 1
+        type: integer
+      method:
+        description: 方法
+        example: GET
+        type: string
+      name:
+        description: 名称
+        example: ListUsers
+        type: string
+      path:
+        description: 路径
+        example: /v1/admin/users
+        type: string
+      updatedAt:
+        description: 更新时间
+        example: "2006-01-02 15:04:05"
+        type: string
+    type: object
+  ApiList:
+    properties:
+      list:
+        description: 列表
+        items:
+          $ref: '#/definitions/Api'
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  Menu:
+    properties:
+      access:
+        description: 可见性
+        example: canAdmin
+        type: string
+      component:
+        description: 组件
+        example: '@/pages/Admin/User'
+        type: string
+      createdAt:
+        description: 创建时间
+        example: "2006-01-02 15:04:05"
+        type: string
+      disabled:
+        type: boolean
+      disabledTooltip:
+        type: boolean
+      flatMenu:
+        description: 隐藏自身+子节点提升并打平
+        type: boolean
+      hideChildrenInMenu:
+        description: 隐藏子节点
+        type: boolean
+      hideInMenu:
+        description: 隐藏自身和子节点
+        type: boolean
+      icon:
+        description: 图标
+        example: crown
+        type: string
+      id:
+        description: ID
+        example: 1
+        type: integer
+      key:
+        type: string
+      locale:
+        description: 国际化
+        type: string
+      name:
+        description: 名称
+        example: User
+        type: string
+      parentId:
+        description: 父级菜单
+        example: 0
+        type: integer
+      parentKeys:
+        type: string
+      path:
+        description: 路径
+        example: /admin/user
+        type: string
+      redirect:
+        description: 重定向
+        type: string
+      target:
+        description: 指定外链打开形式
+        type: string
+      tooltip:
+        type: string
+      updatedAt:
+        description: 更新时间
+        example: "2006-01-02 15:04:05"
+        type: string
+    type: object
+  MenuList:
+    properties:
+      list:
+        description: 列表
+        items:
+          $ref: '#/definitions/Menu'
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  Robot:
+    properties:
+      callback:
+        description: 回调地址
+        example: https://example.com/callback
+        type: string
+      createdAt:
+        description: 创建时间
+        example: "2006-01-02 15:04:05"
+        type: string
+      desc:
+        description: 描述
+        example: it's a chatbot
+        type: string
+      enabled:
+        description: 是否启用
+        example: true
+        type: boolean
+      id:
+        description: ID
+        example: 1
+        type: integer
+      name:
+        description: 名称
+        example: robot
+        type: string
+      owner:
+        description: 所有者
+        example: Zhangsan
+        type: string
+      updatedAt:
+        description: 更新时间
+        example: "2006-01-02 15:04:05"
+        type: string
+      webhook:
+        description: 通知地址
+        example: https://example.com/webhook
+        type: string
+    type: object
+  RobotList:
+    properties:
+      list:
+        description: 列表
+        items:
+          $ref: '#/definitions/Robot'
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  Role:
+    properties:
+      casbinRole:
+        description: Casbin-Role
+        example: admin
+        type: string
+      createdAt:
+        description: 创建时间
+        example: "2006-01-02 15:04:05"
+        type: string
+      id:
+        description: ID
+        type: integer
+      name:
+        description: 角色名
+        example: Admin
+        type: string
+      updatedAt:
+        description: 更新时间
+        example: "2006-01-02 15:04:05"
+        type: string
+    type: object
+  RoleList:
+    properties:
+      list:
+        description: 列表
+        items:
+          $ref: '#/definitions/Role'
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  User:
+    properties:
+      avatar:
+        description: 头像
+        example: https://example.com/avatar.jpg
+        type: string
+      bio:
+        description: 个人简介
+        example: The Jackal
+        type: string
+      createdAt:
+        description: 创建时间
+        example: "2006-01-02 15:04:05"
+        type: string
+      email:
+        description: 邮箱
+        example: zhangsan@example.com
+        type: string
+      language:
+        description: 语言
+        example: zh-CN
+        type: string
+      nickname:
+        description: 昵称
+        example: Jackal
+        type: string
+      roles:
+        description: 角色
+        items:
+          $ref: '#/definitions/Role'
+        type: array
+      status:
+        description: 状态 0:待激活 1:正常 2:禁用
+        example: 1
+        type: integer
+      theme:
+        description: 主题
+        example: light
+        type: string
+      timezone:
+        description: 时区
+        example: Asia/Shanghai
+        type: string
+      updatedAt:
+        description: 更新时间
+        example: "2006-01-02 15:04:05"
+        type: string
+      userid:
+        description: ID
+        example: 1
+        type: integer
+      username:
+        description: 用户名
+        example: zhangsan
+        type: string
+    type: object
+  UserList:
+    properties:
+      list:
+        description: 列表
+        items:
+          $ref: '#/definitions/User'
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  backend_api_v1.ApiRequest:
+    properties:
+      group:
+        description: 分组
+        example: User
+        type: string
+      method:
+        description: 方法
+        example: GET
+        type: string
+      name:
+        description: 名称
+        example: ListUsers
+        type: string
+      path:
+        description: 路径
+        example: /v1/admin/users
+        type: string
+    type: object
+  backend_api_v1.ApiResponse:
+    properties:
+      data:
+        $ref: '#/definitions/Api'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.ApiSearchResponse:
+    properties:
+      data:
+        $ref: '#/definitions/ApiList'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.DynamicMenuResponse:
+    properties:
+      data:
+        $ref: '#/definitions/backend_api_v1.DynamicMenuResponseData'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.DynamicMenuResponseData:
+    properties:
+      list:
+        description: 顶级菜单
+        items:
+          $ref: '#/definitions/backend_api_v1.MenuNode'
+        type: array
+    type: object
+  backend_api_v1.GetRolePermissionResponse:
+    properties:
+      data:
+        $ref: '#/definitions/backend_api_v1.GetRolePermissionResponseData'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.GetRolePermissionResponseData:
+    properties:
+      list:
+        description: 列表
+        items:
+          type: string
+        type: array
+      total:
+        description: 总数
+        type: integer
+    type: object
+  backend_api_v1.LoginRequest:
+    properties:
+      password:
+        description: 密码
+        example: "123456"
+        type: string
+      username:
+        description: 用户名
+        example: zhangsan
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  backend_api_v1.LoginResponse:
+    properties:
+      data:
+        $ref: '#/definitions/backend_api_v1.TokenPair'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.MenuNode:
+    properties:
+      access:
+        description: 可见性
+        example: canAdmin
+        type: string
+      children:
+        description: 子菜单
+        items:
+          $ref: '#/definitions/backend_api_v1.MenuNode'
+        type: array
+      component:
+        description: 组件
+        example: '@/pages/Admin/User'
+        type: string
+      createdAt:
+        description: 创建时间
+        example: "2006-01-02 15:04:05"
+        type: string
+      disabled:
+        type: boolean
+      disabledTooltip:
+        type: boolean
+      flatMenu:
+        description: 隐藏自身+子节点提升并打平
+        type: boolean
+      hideChildrenInMenu:
+        description: 隐藏子节点
+        type: boolean
+      hideInMenu:
+        description: 隐藏自身和子节点
+        type: boolean
+      icon:
+        description: 图标
+        example: crown
+        type: string
+      id:
+        description: ID
+        example: 1
+        type: integer
+      key:
+        type: string
+      locale:
+        description: 国际化
+        type: string
+      name:
+        description: 名称
+        example: User
+        type: string
+      parentId:
+        description: 父级菜单
+        example: 0
+        type: integer
+      parentKeys:
+        type: string
+      path:
+        description: 路径
+        example: /admin/user
+        type: string
+      redirect:
+        description: 重定向
+        type: string
+      target:
+        description: 指定外链打开形式
+        type: string
+      tooltip:
+        type: string
+      updatedAt:
+        description: 更新时间
+        example: "2006-01-02 15:04:05"
+        type: string
+    type: object
+  backend_api_v1.MenuRequest:
+    properties:
+      access:
+        description: 可见性
+        example: canAdmin
+        type: string
+      component:
+        description: 组件
+        example: '@/pages/Admin/User'
+        type: string
+      disabled:
+        type: boolean
+      disabledTooltip:
+        type: boolean
+      flatMenu:
+        description: 隐藏自身+子节点提升并打平
+        type: boolean
+      hideChildrenInMenu:
+        description: 隐藏子节点
+        type: boolean
+      hideInMenu:
+        description: 隐藏自身和子节点
+        type: boolean
+      icon:
+        description: 图标
+        example: crown
+        type: string
+      key:
+        type: string
+      locale:
+        description: 国际化
+        type: string
+      name:
+        description: 名称
+        example: User
+        type: string
+      parentId:
+        description: 父级菜单
+        example: 0
+        type: integer
+      parentKeys:
+        type: string
+      path:
+        description: 路径
+        example: /admin/user
+        type: string
+      redirect:
+        description: 重定向
+        type: string
+      target:
+        description: 指定外链打开形式
+        type: string
+      tooltip:
+        type: string
+    type: object
+  backend_api_v1.MenuSearchResponse:
+    properties:
+      data:
+        $ref: '#/definitions/MenuList'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.RefreshTokenRequest:
+    properties:
+      refreshToken:
+        description: 刷新令牌
+        example: "123456"
+        type: string
+    required:
+    - refreshToken
+    type: object
+  backend_api_v1.RegisterRequest:
+    properties:
+      email:
+        description: 邮箱
+        example: zhangsan@example.com
+        type: string
+      password:
+        description: 密码
+        example: "123456"
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  backend_api_v1.ResetPasswordRequest:
+    properties:
+      email:
+        description: 邮箱
+        example: zhangsan@example.com
+        type: string
+    required:
+    - email
+    type: object
+  backend_api_v1.Response:
+    properties:
+      data:
+        description: 返回数据
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.RobotRequest:
+    properties:
+      callback:
+        description: 回调地址
+        example: https://example.com/callback
+        type: string
+      desc:
+        description: 描述
+        example: it's a chatbot
+        type: string
+      enabled:
+        description: 是否启用
+        example: true
+        type: boolean
+      name:
+        description: 名称
+        example: robot
+        type: string
+      owner:
+        description: 所有者
+        example: Zhangsan
+        type: string
+      webhook:
+        description: 通知地址
+        example: https://example.com/webhook
+        type: string
+    type: object
+  backend_api_v1.RobotResponse:
+    properties:
+      data:
+        $ref: '#/definitions/Robot'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.RobotSearchResponse:
+    properties:
+      data:
+        $ref: '#/definitions/RobotList'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.RoleRequest:
+    properties:
+      casbinRole:
+        description: Casbin-Role
+        example: admin
+        type: string
+      name:
+        description: 角色名
+        example: Admin
+        type: string
+    required:
+    - casbinRole
+    - name
+    type: object
+  backend_api_v1.RoleSearchResponse:
+    properties:
+      data:
+        $ref: '#/definitions/RoleList'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.TokenPair:
+    properties:
+      accessToken:
+        description: 访问令牌
+        type: string
+      expiresIn:
+        description: 过期时间(单位:秒)
+        type: integer
+      refreshToken:
+        description: 刷新令牌
+        type: string
+    type: object
+  backend_api_v1.UpdatePasswordRequest:
+    properties:
+      newPassword:
+        description: 新密码
+        example: "123456"
+        type: string
+      oldPassword:
+        description: 旧密码
+        example: "123456"
+        type: string
+    required:
+    - newPassword
+    - oldPassword
+    type: object
+  backend_api_v1.UpdateRolePermissionRequest:
+    properties:
+      casbinRole:
+        description: Casbin-Role
+        example: admin
+        type: string
+      list:
+        description: 权限列表
+        items:
+          type: string
+        type: array
+    required:
+    - casbinRole
+    - list
+    type: object
+  backend_api_v1.UserRequest:
+    properties:
+      bio:
+        description: 个人简介
+        example: The Jackal
+        type: string
+      email:
+        description: 邮箱
+        example: zhangsan@example.com
+        type: string
+      language:
+        description: 语言
+        example: zh-CN
+        type: string
+      nickname:
+        description: 昵称
+        example: Jackal
+        type: string
+      roles:
+        description: 角色
+        items:
+          type: string
+        type: array
+      status:
+        description: 状态 0:待激活 1:正常 2:禁用
+        example: 1
+        type: integer
+      theme:
+        description: 主题
+        example: light
+        type: string
+      timezone:
+        description: 时区
+        example: Asia/Shanghai
+        type: string
+      username:
+        description: 用户名
+        example: zhangsan
+        type: string
+    type: object
+  backend_api_v1.UserResponse:
+    properties:
+      data:
+        $ref: '#/definitions/User'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+  backend_api_v1.UserSearchResponse:
+    properties:
+      data:
+        $ref: '#/definitions/UserList'
+      errorCode:
+        description: 错误码
+        type: integer
+      errorMessage:
+        description: 报错信息
+        type: string
+      errorShowType:
+        description: 前端展示方式
+        type: integer
+      success:
+        description: 是否成功
+        example: true
+        type: boolean
+    type: object
+host: localhost:8000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Robot Shop
+  version: 1.0.0
+paths:
+  /admin/apis:
+    get:
+      consumes:
+      - application/json
+      description: 搜索时支持分组名、名称、路径和方法筛选
+      operationId: ListApis
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      - description: 分组
+        in: query
+        name: group
+        type: string
+      - description: 名称
+        in: query
+        name: name
+        type: string
+      - description: 路径
+        in: query
+        name: path
+        type: string
+      - description: 方法
+        in: query
+        name: method
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.ApiSearchResponse'
+      security:
+      - Bearer: []
+      summary: 获取接口列表
+      tags:
+      - API
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的接口
+      operationId: CreateApi
+      parameters:
+      - description: 接口数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.ApiRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 创建接口
+      tags:
+      - API
+  /admin/apis/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定ID的接口
+      operationId: DeleteApi
+      parameters:
+      - description: 接口ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 删除接口
+      tags:
+      - API
+    get:
+      consumes:
+      - application/json
+      description: 获取指定ID的接口信息
+      operationId: GetApi
+      parameters:
+      - description: 接口ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.ApiResponse'
+      summary: 获取接口
+      tags:
+      - API
+    put:
+      consumes:
+      - application/json
+      description: 更新接口数据
+      operationId: UpdateApi
+      parameters:
+      - description: 接口ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 接口数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.ApiRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新接口
+      tags:
+      - API
+  /admin/menus:
+    get:
+      consumes:
+      - application/json
+      description: 获取所有菜单
+      operationId: ListMenus
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      - description: 名称
+        in: query
+        name: name
+        type: string
+      - description: 路径
+        in: query
+        name: path
+        type: string
+      - description: 可见性
+        in: query
+        name: access
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.MenuSearchResponse'
+      security:
+      - Bearer: []
+      summary: 获取菜单列表
+      tags:
+      - Menu
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的菜单
+      operationId: CreateMenu
+      parameters:
+      - description: 菜单数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.MenuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 创建菜单
+      tags:
+      - Menu
+  /admin/menus/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定ID的菜单
+      operationId: DeleteMenu
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 删除菜单
+      tags:
+      - Menu
+    put:
+      consumes:
+      - application/json
+      description: 更新菜单数据
+      operationId: UpdateMenu
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 菜单数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.MenuRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新菜单
+      tags:
+      - Menu
+  /admin/roles:
+    get:
+      consumes:
+      - application/json
+      description: 搜索时支持角色名和 Casbin Role 筛选
+      operationId: ListRoles
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 分页大小
+        in: query
+        name: pageSize
+        type: integer
+      - description: 角色名
+        in: query
+        name: name
+        type: string
+      - description: Casbin Role
+        in: query
+        name: casbinRole
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.RoleSearchResponse'
+      security:
+      - Bearer: []
+      summary: 获取角色列表
+      tags:
+      - Role
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的角色
+      operationId: CreateRole
+      parameters:
+      - description: 角色数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 创建角色
+      tags:
+      - Role
+  /admin/roles/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定ID的角色
+      operationId: DeleteRole
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 删除角色
+      tags:
+      - Role
+    put:
+      consumes:
+      - application/json
+      description: 目前只允许更新角色名称
+      operationId: UpdateRole
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 角色数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RoleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新角色
+      tags:
+      - Role
+  /admin/roles/permissions:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定角色的权限列表
+      operationId: GetRolePermissions
+      parameters:
+      - description: 角色名
+        in: query
+        name: role
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.GetRolePermissionResponse'
+      security:
+      - Bearer: []
+      summary: 获取角色权限
+      tags:
+      - Role
+    put:
+      consumes:
+      - application/json
+      description: 更新指定角色的权限列表
+      operationId: UpdateRolePermissions
+      parameters:
+      - description: 更新参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.UpdateRolePermissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新角色权限
+      tags:
+      - Role
+  /admin/users:
+    get:
+      consumes:
+      - application/json
+      description: 搜索时支持用户名、昵称、手机和邮箱筛选
+      operationId: ListUsers
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      - description: 邮箱
+        in: query
+        name: email
+        type: string
+      - description: 用户名
+        in: query
+        name: username
+        type: string
+      - description: 昵称
+        in: query
+        name: nickname
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.UserSearchResponse'
+      security:
+      - Bearer: []
+      summary: 获取用户列表
+      tags:
+      - User
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的用户
+      operationId: CreateUser
+      parameters:
+      - description: 用户信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 创建用户
+      tags:
+      - User
+  /admin/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定ID的用户
+      operationId: DeleteUser
+      parameters:
+      - description: 用户ID
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 删除用户
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: 更新用户信息
+      operationId: UpdateUser
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新用户
+      tags:
+      - User
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: 支持用户名或邮箱登录
+      operationId: Login
+      parameters:
+      - description: 登录凭证
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.LoginResponse'
+      summary: 登录
+      tags:
+      - User
+  /refresh-token:
+    post:
+      consumes:
+      - application/json
+      description: 刷新访问令牌和刷新令牌
+      operationId: RefreshToken
+      parameters:
+      - description: 刷新令牌信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.LoginResponse'
+      summary: 刷新令牌
+      tags:
+      - User
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: 目前只支持通过邮箱进行注册
+      operationId: Register
+      parameters:
+      - description: 注册信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      summary: 注册
+      tags:
+      - User
+  /reset-password:
+    post:
+      consumes:
+      - application/json
+      description: 重置用户密码
+      operationId: ResetPassword
+      parameters:
+      - description: 重置密码信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      summary: 重置密码
+      tags:
+      - User
+  /robots:
+    get:
+      consumes:
+      - application/json
+      description: 搜索时支持名称、描述和所有者筛选
+      operationId: ListRobots
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 分页大小
+        in: query
+        name: pageSize
+        required: true
+        type: integer
+      - description: 名称
+        in: query
+        name: name
+        type: string
+      - description: 描述
+        in: query
+        name: desc
+        type: string
+      - description: 所有者
+        in: query
+        name: owner
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.RobotSearchResponse'
+      security:
+      - Bearer: []
+      summary: 获取机器人列表
+      tags:
+      - Robot
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的机器人
+      operationId: CreateRobot
+      parameters:
+      - description: 机器人数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RobotRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 创建机器人
+      tags:
+      - Robot
+  /robots/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定ID的机器人
+      operationId: DeleteRobot
+      parameters:
+      - description: 机器人ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 删除机器人
+      tags:
+      - Robot
+    get:
+      consumes:
+      - application/json
+      description: 获取指定ID的机器人信息
+      operationId: GetRobot
+      parameters:
+      - description: 机器人ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.RobotResponse'
+      security:
+      - Bearer: []
+      summary: 获取机器人
+      tags:
+      - Robot
+    put:
+      consumes:
+      - application/json
+      description: 更新机器人数据
+      operationId: UpdateRobot
+      parameters:
+      - description: 机器人ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 机器人数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.RobotRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新机器人
+      tags:
+      - Robot
+  /users/{id}:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定ID的用户详情
+      operationId: GetUserByID
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.UserResponse'
+      security:
+      - Bearer: []
+      summary: 获取用户详情
+      tags:
+      - User
+  /users/menu:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的菜单列表
+      operationId: FetchDynamicMenu
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.DynamicMenuResponse'
+      security:
+      - Bearer: []
+      summary: 获取用户菜单
+      tags:
+      - User
+  /users/password:
+    put:
+      consumes:
+      - application/json
+      description: 更新用户密码
+      operationId: UpdatePassword
+      parameters:
+      - description: 更新密码信息
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.UpdatePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新密码
+      tags:
+      - User
+  /users/profile:
+    get:
+      consumes:
+      - application/json
+      description: 获取当前用户的详细信息
+      operationId: FetchCurrentUser
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.UserResponse'
+      security:
+      - Bearer: []
+      summary: 获取当前用户
+      tags:
+      - User
+    put:
+      consumes:
+      - application/json
+      description: 更新用户信息
+      operationId: UpdateProfile
+      parameters:
+      - description: 参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/backend_api_v1.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 更新用户
+      tags:
+      - User
+  /users/profile/avatar:
+    put:
+      consumes:
+      - application/json
+      description: 上传用户头像
+      operationId: UploadAvatar
+      parameters:
+      - description: 头像文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/backend_api_v1.Response'
+      security:
+      - Bearer: []
+      summary: 上传头像
+      tags:
+      - User
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

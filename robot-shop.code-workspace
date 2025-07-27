@@ -1,0 +1,100 @@
+{
+    "folders": [
+      {
+        "path": "backend",
+        "name": "backend"
+      },
+      {
+        "path": "frontend",
+        "name": "frontend"
+      },
+      {
+        "path": ".",
+        "name": "root"
+      }
+    ],
+    "settings": {
+      "go.toolsEnvVars": {
+        "GO111MODULE": "on",
+        "GOPROXY": "https://goproxy.cn,direct",
+        "GONOPROXY": "none;"
+      }
+    },
+    "extensions": {
+      "recommendations": [
+        "mhutchie.git-graph",
+        "donjayamanne.githistory",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "aaron-bond.better-comments",
+        "pranaygp.vscode-css-peek",
+        "humao.rest-client",
+        "vscode-icons-team.vscode-icons",
+        "ms-azuretools.vscode-containers",
+        "ms-azuretools.vscode-docker",
+        "Vue.volar",
+        "dsznajder.es7-react-js-snippets",
+        "redhat.vscode-yaml",
+        "golang.go",
+        "msjsdiag.vscode-react-native",
+      ]
+    },
+    "launch": {
+      "version": "0.2.0",
+      "configurations": [
+        {
+          "type": "go",
+          "request": "launch",
+          "name": "Server",
+          "mode": "auto",
+          "cwd": "${workspaceFolder:backend}",
+          "program": "${workspaceFolder:backend}/cmd/server/main.go",
+          "env": {},
+          "args": [],
+        },
+        {
+          "type": "go",
+          "request": "launch",
+          "name": "Migrate",
+          "mode": "auto",
+          "cwd": "${workspaceFolder:backend}",
+          "program": "${workspaceFolder:backend}/cmd/migration/main.go",
+          "env": {},
+          "args": [],
+        },
+        {
+          "type": "go",
+          "request": "launch",
+          "name": "Task",
+          "mode": "auto",
+          "cwd": "${workspaceFolder:backend}",
+          "program": "${workspaceFolder:backend}/cmd/task/main.go",
+          "env": {},
+          "args": [],
+        },
+        {
+          "type": "node",
+          "request": "launch",
+          "cwd": "${workspaceFolder:frontend}",
+          "name": "WebUI",
+          "runtimeExecutable": "npm",
+          "runtimeArgs": ["start"]
+        },
+        {
+          "type": "node",
+          "request": "launch",
+          "cwd": "${workspaceFolder:frontend}",
+          "name": "OpenAPI",
+          "runtimeExecutable": "npm",
+          "runtimeArgs": ["openapi"]
+        }
+      ],
+      "compounds": [
+        {
+          "name": "Both (Server & WebUI)",
+          "configurations": ["Server", "WebUI"],
+          "stopAll": true
+        }
+      ]
+    }
+}
