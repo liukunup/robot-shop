@@ -147,6 +147,8 @@ export default {
   'pages.admin.api.form.path.placeholder': '请输入路径',
   'pages.admin.api.form.method.required': '请输入方法',
   'pages.admin.api.form.method.placeholder': '请输入方法',
+  'pages.profile.tab.profile': '个人资料',
+  'pages.profile.tab.settings': '设置',
   'pages.profile.username': '用户名',
   'pages.profile.nickname': '昵称',
   'pages.profile.email': '邮箱',

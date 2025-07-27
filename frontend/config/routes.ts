@@ -61,26 +61,22 @@ export default [
     ],
   },
   {
-    path: '/user',
-    layout: false,
-    routes: [
-      {
-        name: 'login',
-        path: '/user/login',
-        component: '@/pages/User/Login',
-      },
-      {
-        name: 'register',
-        path: '/user/register',
-        component: '@/pages/User/Register',
-      },
-    ],
-  },
-  {
-    path: '/user/profile',
+    path: '/profile',
     name: 'profile',
     icon: 'user',
-    component: '@/pages/User/Profile',
+    component: '@/pages/Profile',
+  },
+  {
+    name: 'login',
+    path: '/login',
+    component: '@/pages/Login',
+    layout: false,
+  },
+  {
+    name: 'register',
+    path: '/register',
+    component: '@/pages/Register',
+    layout: false,
   },
   {
     path: '*',

@@ -14,8 +14,8 @@ import { Alert, message, Tabs } from 'antd';
 import { createStyles } from 'antd-style';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
-import Settings from '../../../../config/defaultSettings';
-import { setToken } from '../../../utils/auth';
+import Settings from '../../../config/defaultSettings';
+import { setToken } from '@/utils/auth';
 
 const useStyles = createStyles(({ token }) => {
   return {

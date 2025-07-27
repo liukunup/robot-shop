@@ -300,10 +300,10 @@ var menuData = `[
   },
   {
     "id": 999,
-    "path": "/user/profile",
+    "path": "/profile",
     "name": "profile",
-    "icon": "user",
-	"component": "@/pages/User/Profile",
+    "icon": "profile",
+	"component": "@/pages/Profile",
 	"access": "canUser"
   },
   {

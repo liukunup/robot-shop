@@ -1,6 +1,6 @@
 import { AvatarDropdown, AvatarName, Footer, Question, SelectLang } from '@/components';
 import { fetchCurrentUser } from '@/services/backend/user';
-import { LinkOutlined, SmileOutlined, CrownOutlined, RobotOutlined } from '@ant-design/icons';
+import { LinkOutlined, SmileOutlined, CrownOutlined, RobotOutlined, ProfileOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings, MenuDataItem } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
@@ -12,7 +12,7 @@ import '@ant-design/v5-patch-for-react-19';
 import { fetchDynamicMenu } from '@/services/backend/user';
 
 const isDev = process.env.NODE_ENV === 'development';
-const loginPath = '/user/login';
+const loginPath = '/login';
 
 // 解决动态菜单图标问题
 interface IconMapType {
@@ -22,6 +22,7 @@ const IconMap: IconMapType = {
   smile: <SmileOutlined />,
   crown: <CrownOutlined />,
   robot: <RobotOutlined />,
+  profile: <ProfileOutlined />,
 };
 const loopMenuItem = (menus: API.MenuNode[]): MenuDataItem[] =>
   menus.map(({ icon, children, parentKeys, ...item }) => ({
