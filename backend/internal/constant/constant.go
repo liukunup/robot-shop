@@ -22,4 +22,9 @@ const (
 
 		Robot Shop 团队
 		`
+
+	// 用户状态
+	UserStatusPending = 0
+	UserStatusActive  = 1
+	UserStatusBanned  = 2
 )
