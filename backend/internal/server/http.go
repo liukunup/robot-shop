@@ -97,7 +97,7 @@ func NewHTTPServer(
 			strictAuthRouter.POST("/admin/roles", roleHandler.CreateRole)
 			strictAuthRouter.PUT("/admin/roles/:id", roleHandler.UpdateRole)
 			strictAuthRouter.DELETE("/admin/roles/:id", roleHandler.DeleteRole)
-			strictAuthRouter.GET("/roles", roleHandler.GetAllRoles)
+			strictAuthRouter.GET("/roles", roleHandler.ListAllRoles)
 			// Admin Role Permission
 			strictAuthRouter.GET("/admin/roles/permissions", roleHandler.GetRolePermissions)
 			strictAuthRouter.PUT("/admin/roles/permissions", roleHandler.UpdateRolePermissions)

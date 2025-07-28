@@ -28,15 +28,15 @@ func NewRoleHandler(
 // ListRoles godoc
 // @Summary 获取角色列表
 // @Schemes
-// @Description 搜索时支持角色名和角色标识筛选
+// @Description 搜索时支持角色名称和角色标识筛选
 // @Tags Role
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param page query int false "页码"
-// @Param pageSize query int false "分页大小"
-// @Param name query string false "角色名"
-// @Param casbinRole query string false "Casbin Role"
+// @Param page query int true "页码"
+// @Param pageSize query int true "分页大小"
+// @Param name query string false "角色名称"
+// @Param casbinRole query string false "角色标识"
 // @Success 200 {object} v1.RoleSearchResponse
 // @Router /admin/roles [get]
 // @ID ListRoles
@@ -151,36 +151,36 @@ func (h *RoleHandler) DeleteRole(ctx *gin.Context) {
 	v1.HandleSuccess(ctx, nil)
 }
 
-// GetAllRoles godoc
-// @Summary 获取角色列表
+// ListAllRoles godoc
+// @Summary 列举所有角色
 // @Schemes
-// @Description 获取所有角色
+// @Description 列举所有角色
 // @Tags Role
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} v1.Response
 // @Router /roles [get]
-// @ID GetAllRoles
-func (h *RoleHandler) GetAllRoles(ctx *gin.Context) {
+// @ID ListAllRoles
+func (h *RoleHandler) ListAllRoles(ctx *gin.Context) {
 	data, err := h.roleService.ListAll(ctx)
 	if err != nil {
 		h.logger.WithContext(ctx).Error("roleService.ListAll error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	v1.HandleSuccess(ctx, data.List)
+	v1.HandleSuccess(ctx, data)
 }
 
 // GetRolePermissions godoc
-// @Summary 获取角色权限
+// @Summary 获取角色的权限
 // @Schemes
 // @Description 获取指定角色的权限列表
 // @Tags Role
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param role query string true "角色名"
+// @Param role query string true "角色标识"
 // @Success 200 {object} v1.GetRolePermissionResponse
 // @Router /admin/roles/permissions [get]
 // @ID GetRolePermissions
@@ -202,7 +202,7 @@ func (h *RoleHandler) GetRolePermissions(ctx *gin.Context) {
 }
 
 // UpdateRolePermissions godoc
-// @Summary 更新角色权限
+// @Summary 更新角色的权限
 // @Schemes
 // @Description 更新指定角色的权限列表
 // @Tags Role
