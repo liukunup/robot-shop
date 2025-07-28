@@ -2,11 +2,11 @@ package v1
 
 // CRUD
 type UserSearchRequest struct {
-	Page     int    `form:"page" binding:"required,min=1" example:"1"`              // 页码
-	PageSize int    `form:"pageSize" binding:"required,min=1,max=100" example:"10"` // 分页大小
-	Email    string `form:"email" example:"zhangsan@example.com"`                   // 邮箱
-	Username string `form:"username" example:"zhangsan"`                            // 用户名
-	Nickname string `form:"nickname" example:"Jackal"`                              // 昵称
+	Page     int    `form:"page" binding:"required,min=1" example:"1"`               // 页码
+	PageSize int    `form:"pageSize" binding:"required,min=1,max=1000" example:"10"` // 分页大小
+	Email    string `form:"email" example:"zhangsan@example.com"`                    // 邮箱
+	Username string `form:"username" example:"zhangsan"`                             // 用户名
+	Nickname string `form:"nickname" example:"Jackal"`                               // 昵称
 }
 type UserDataItem struct {
 	ID        uint           `json:"userid,omitempty" example:"1"`                              // ID

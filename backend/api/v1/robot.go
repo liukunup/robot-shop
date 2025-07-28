@@ -2,11 +2,11 @@ package v1
 
 // CRUD
 type RobotSearchRequest struct {
-	Page     int    `form:"page" binding:"required,min=1" example:"1"`              // 页码
-	PageSize int    `form:"pageSize" binding:"required,min=1,max=100" example:"10"` // 分页大小
-	Name     string `form:"name" example:"bot"`                                     // 筛选项: 名称 模糊匹配
-	Desc     string `form:"desc" example:"robot"`                                   // 筛选项: 描述 模糊匹配
-	Owner    string `form:"owner" example:"Zhangsan"`                               // 筛选项: 所有者 精确匹配
+	Page     int    `form:"page" binding:"required,min=1" example:"1"`               // 页码
+	PageSize int    `form:"pageSize" binding:"required,min=1,max=1000" example:"10"` // 分页大小
+	Name     string `form:"name" example:"bot"`                                      // 筛选项: 名称 模糊匹配
+	Desc     string `form:"desc" example:"robot"`                                    // 筛选项: 描述 模糊匹配
+	Owner    string `form:"owner" example:"Zhangsan"`                                // 筛选项: 所有者 精确匹配
 }
 type RobotDataItem struct {
 	Id        uint   `json:"id,omitempty" example:"1"`                                  // ID
