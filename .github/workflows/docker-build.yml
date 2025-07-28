@@ -4,15 +4,22 @@ on:
   push:
     branches:
       - main
+      - release/*
+    paths-ignore:
+      - '**.md'
   pull_request:
     branches:
-      - beta
+      - main
       - dev
+      - feature/*
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 env:
+  GO_VERSION: stable
+  GOLANGCI_LINT_VERSION: v2.1
   DOCKER_HUB_REPO: ${{ secrets.DOCKER_HUB_USERNAME }}/robot-shop
 
 jobs:
@@ -27,12 +34,13 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: ${{ env.GO_VERSION }}
 
       - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.60
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          working-directory: backend
 
   build:
     name: Build Project
