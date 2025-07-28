@@ -28,7 +28,7 @@ func NewRoleHandler(
 // ListRoles godoc
 // @Summary 获取角色列表
 // @Schemes
-// @Description 搜索时支持角色名和 Casbin Role 筛选
+// @Description 搜索时支持角色名和角色标识筛选
 // @Tags Role
 // @Accept json
 // @Produce json
@@ -149,6 +149,27 @@ func (h *RoleHandler) DeleteRole(ctx *gin.Context) {
 		return
 	}
 	v1.HandleSuccess(ctx, nil)
+}
+
+// GetAllRoles godoc
+// @Summary 获取角色列表
+// @Schemes
+// @Description 获取所有角色
+// @Tags Role
+// @Accept json
+// @Produce json
+// @Security Bearer
+// @Success 200 {object} v1.Response
+// @Router /roles [get]
+// @ID GetAllRoles
+func (h *RoleHandler) GetAllRoles(ctx *gin.Context) {
+	data, err := h.roleService.ListAll(ctx)
+	if err != nil {
+		h.logger.WithContext(ctx).Error("roleService.ListAll error", zap.Error(err))
+		v1.HandleError(ctx, http.StatusInternalServerError, v1.ErrInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	v1.HandleSuccess(ctx, data.List)
 }
 
 // GetRolePermissions godoc
