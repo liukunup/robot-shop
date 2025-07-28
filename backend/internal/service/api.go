@@ -41,8 +41,8 @@ func (s *apiService) List(ctx context.Context, req *v1.ApiSearchRequest) (*v1.Ap
 		return nil, err
 	}
 	data := &v1.ApiSearchResponseData{
-		List:   make([]v1.ApiDataItem, 0),
-		Total:  total,
+		List:  make([]v1.ApiDataItem, 0),
+		Total: total,
 	}
 	for _, api := range list {
 		data.List = append(data.List, v1.ApiDataItem{

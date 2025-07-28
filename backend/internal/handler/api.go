@@ -27,9 +27,9 @@ func NewApiHandler(
 }
 
 // ListApis godoc
-// @Summary 获取接口列表
+// @Summary 获取 API 列表
 // @Schemes
-// @Description 搜索时支持分组名、名称、路径和方法筛选
+// @Description 搜索时支持分组、名称、路径和方法筛选
 // @Tags API
 // @Accept json
 // @Produce json
@@ -61,14 +61,14 @@ func (h *ApiHandler) ListApis(ctx *gin.Context) {
 }
 
 // CreateApi godoc
-// @Summary 创建接口
+// @Summary 创建 API
 // @Schemes
-// @Description 创建一个新的接口
+// @Description 录入一个新的 API
 // @Tags API
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body v1.ApiRequest true "接口数据"
+// @Param request body v1.ApiRequest true "API 数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/apis [post]
 // @ID CreateApi
@@ -89,15 +89,15 @@ func (h *ApiHandler) CreateApi(ctx *gin.Context) {
 }
 
 // UpdateApi godoc
-// @Summary 更新接口
+// @Summary 更新 API
 // @Schemes
-// @Description 更新接口数据
+// @Description 更新 API 数据
 // @Tags API
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path int true "接口ID"
-// @Param request body v1.ApiRequest true "接口数据"
+// @Param id path int true "API ID"
+// @Param request body v1.ApiRequest true "API 数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/apis/{id} [put]
 // @ID UpdateApi
@@ -126,14 +126,14 @@ func (h *ApiHandler) UpdateApi(ctx *gin.Context) {
 }
 
 // DeleteApi godoc
-// @Summary 删除接口
+// @Summary 删除 API
 // @Schemes
-// @Description 删除指定ID的接口
+// @Description 删除指定 ID 的 API
 // @Tags API
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id query uint true "接口ID"
+// @Param id query uint true "API ID"
 // @Success 200 {object} v1.Response
 // @Router /admin/apis/{id} [delete]
 // @ID DeleteApi
@@ -155,13 +155,13 @@ func (h *ApiHandler) DeleteApi(ctx *gin.Context) {
 }
 
 // GetApi godoc
-// @Summary 获取接口
+// @Summary 获取 API 详情
 // @Schemes
-// @Description 获取指定ID的接口信息
+// @Description 获取指定 ID 的 API 信息
 // @Tags API
 // @Accept json
 // @Produce json
-// @Param id path int true "接口ID"
+// @Param id path int true "API ID"
 // @Success 200 {object} v1.ApiResponse
 // @Router /admin/apis/{id} [get]
 // @ID GetApi

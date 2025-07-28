@@ -38,7 +38,7 @@ func (r *apiRepository) List(ctx context.Context, req *v1.ApiSearchRequest) ([]m
 	var total int64
 	scope := r.DB(ctx).Model(&model.Api{})
 	if req.Group != "" {
-		scope = scope.Where("`group` LIKE ?", "%"+req.Group+"%")
+		scope = scope.Where("group LIKE ?", "%"+req.Group+"%")
 	}
 	if req.Name != "" {
 		scope = scope.Where("name LIKE ?", "%"+req.Name+"%")
@@ -52,7 +52,7 @@ func (r *apiRepository) List(ctx context.Context, req *v1.ApiSearchRequest) ([]m
 	if err := scope.Count(&total).Error; err != nil {
 		return nil, total, err
 	}
-	if err := scope.Offset((req.Page - 1) * req.PageSize).Limit(req.PageSize).Order("`group` ASC").Find(&list).Error; err != nil {
+	if err := scope.Offset((req.Page - 1) * req.PageSize).Limit(req.PageSize).Order("group ASC").Find(&list).Error; err != nil {
 		return nil, total, err
 	}
 	return list, total, nil
@@ -72,7 +72,7 @@ func (r *apiRepository) Delete(ctx context.Context, id uint) error {
 
 func (r *apiRepository) ListAllGroups(ctx context.Context) ([]string, error) {
 	groups := make([]string, 0)
-	if err := r.DB(ctx).Model(&model.Api{}).Group("`group`").Pluck("`group`", &groups).Error; err != nil {
+	if err := r.DB(ctx).Model(&model.Api{}).Group("group").Pluck("group", &groups).Error; err != nil {
 		return nil, err
 	}
 	return groups, nil
