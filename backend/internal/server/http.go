@@ -3,11 +3,13 @@ package server
 import (
 	apiV1 "backend/api/v1"
 	"backend/docs"
+	"backend/internal/constant"
 	"backend/internal/handler"
 	"backend/internal/middleware"
 	"backend/pkg/jwt"
 	"backend/pkg/log"
 	"backend/pkg/server/http"
+	"time"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
@@ -55,6 +57,15 @@ func NewHTTPServer(
 		logger.WithContext(ctx).Info("hello")
 		apiV1.HandleSuccess(ctx, map[string]interface{}{
 			":)": "Thank you for using nunu!",
+		})
+	})
+
+	// Health Check
+	s.GET("/healthz", func(ctx *gin.Context) {
+		logger.WithContext(ctx).Info("alive")
+		apiV1.HandleSuccess(ctx, map[string]interface{}{
+			"status":    "healthy",
+			"timestamp": time.Now().Format(constant.DateTimeLayout),
 		})
 	})
 

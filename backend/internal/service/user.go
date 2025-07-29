@@ -469,7 +469,7 @@ func (s *userService) ResetPassword(ctx context.Context, req *v1.ResetPasswordRe
 	if err = s.email.Send(&email.Message{
 		To:      []string{user.Email},
 		Subject: constant.ResetPasswordSubject,
-		Text:    fmt.Sprintf(constant.ResetPasswordTextTemplate, user.Nickname, resetLink),
+		Text:    fmt.Sprintf(constant.ResetPasswordTextTemplate, user.Nickname, resetLink, constant.DisplayName),
 	}); err != nil {
 		return err
 	}
