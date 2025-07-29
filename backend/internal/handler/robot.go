@@ -91,12 +91,12 @@ func (h *RobotHandler) CreateRobot(ctx *gin.Context) {
 // UpdateRobot godoc
 // @Summary 更新机器人
 // @Schemes
-// @Description 更新机器人数据
+// @Description 更新指定`ID`的机器人数据
 // @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path uint true "机器人ID"
+// @Param id path uint true "ID"
 // @Param request body v1.RobotRequest true "机器人数据"
 // @Success 200 {object} v1.Response
 // @Router /robots/{id} [put]
@@ -128,12 +128,12 @@ func (h *RobotHandler) UpdateRobot(ctx *gin.Context) {
 // DeleteRobot godoc
 // @Summary 删除机器人
 // @Schemes
-// @Description 删除指定ID的机器人
+// @Description 删除指定`ID`的机器人
 // @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path uint true "机器人ID"
+// @Param id path uint true "ID"
 // @Success 200 {object} v1.Response
 // @Router /robots/{id} [delete]
 // @ID DeleteRobot
@@ -155,14 +155,14 @@ func (h *RobotHandler) DeleteRobot(ctx *gin.Context) {
 }
 
 // GetRobot godoc
-// @Summary 获取机器人
+// @Summary 获取机器人详情
 // @Schemes
-// @Description 获取指定ID的机器人信息
+// @Description 获取指定`ID`的机器人数据
 // @Tags Robot
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path uint true "机器人ID"
+// @Param id path uint true "ID"
 // @Success 200 {object} v1.RobotResponse
 // @Router /robots/{id} [get]
 // @ID GetRobot

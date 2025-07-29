@@ -28,7 +28,7 @@ func NewRoleHandler(
 // ListRoles godoc
 // @Summary 获取角色列表
 // @Schemes
-// @Description 搜索时支持角色名称和角色标识筛选
+// @Description 搜索时支持角色名称和角色标识字段的筛选
 // @Tags Role
 // @Accept json
 // @Produce json
@@ -93,7 +93,7 @@ func (h *RoleHandler) CreateRole(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path uint true "角色ID"
+// @Param id path uint true "ID"
 // @Param request body v1.RoleRequest true "角色数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/roles/{id} [put]
@@ -125,12 +125,12 @@ func (h *RoleHandler) UpdateRole(ctx *gin.Context) {
 // DeleteRole godoc
 // @Summary 删除角色
 // @Schemes
-// @Description 删除指定ID的角色
+// @Description 删除指定`ID`的角色
 // @Tags Role
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path uint true "角色ID"
+// @Param id path uint true "ID"
 // @Success 200 {object} v1.Response
 // @Router /admin/roles/{id} [delete]
 // @ID DeleteRole
@@ -154,13 +154,13 @@ func (h *RoleHandler) DeleteRole(ctx *gin.Context) {
 // ListAllRoles godoc
 // @Summary 列举所有角色
 // @Schemes
-// @Description 列举所有角色
+// @Description 返回全部角色的列表和数量
 // @Tags Role
 // @Accept json
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} v1.Response
-// @Router /roles [get]
+// @Router /admin/roles/all [get]
 // @ID ListAllRoles
 func (h *RoleHandler) ListAllRoles(ctx *gin.Context) {
 	data, err := h.roleService.ListAll(ctx)
@@ -209,7 +209,7 @@ func (h *RoleHandler) GetRolePermissions(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body v1.UpdateRolePermissionRequest true "更新参数"
+// @Param request body v1.UpdateRolePermissionRequest true "角色标识+权限列表"
 // @Success 200 {object} v1.Response
 // @Router /admin/roles/permissions [put]
 // @ID UpdateRolePermissions
