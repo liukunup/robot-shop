@@ -25,7 +25,7 @@ func NewUserHandler(handler *Handler, userService service.UserService) *UserHand
 // ListUsers godoc
 // @Summary 获取用户列表
 // @Schemes
-// @Description 搜索时支持用户名、昵称、手机和邮箱筛选
+// @Description 搜索时支持邮箱、用户名、昵称字段的筛选
 // @Tags User
 // @Accept json
 // @Produce json
@@ -63,7 +63,7 @@ func (h *UserHandler) ListUsers(ctx *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body v1.UserRequest true "用户信息"
+// @Param request body v1.UserRequest true "用户数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/users [post]
 // @ID CreateUser
@@ -86,13 +86,13 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 // UpdateUser godoc
 // @Summary 更新用户
 // @Schemes
-// @Description 更新用户信息
+// @Description 更新指定`ID`的用户
 // @Tags User
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path uint true "用户ID"
-// @Param request body v1.UserRequest true "参数"
+// @Param id path uint true "UID"
+// @Param request body v1.UserRequest true "用户数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/users/{id} [put]
 // @ID UpdateUser
@@ -123,12 +123,12 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 // DeleteUser godoc
 // @Summary 删除用户
 // @Schemes
-// @Description 删除指定ID的用户
+// @Description 删除指定`ID`的用户
 // @Tags User
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id query uint true "用户ID"
+// @Param id query uint true "UID"
 // @Success 200 {object} v1.Response
 // @Router /admin/users/{id} [delete]
 // @ID DeleteUser
@@ -150,14 +150,14 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 }
 
 // GetUserByID godoc
-// @Summary 获取用户详情
+// @Summary 获取指定用户
 // @Schemes
-// @Description 获取指定ID的用户详情
+// @Description 获取指定用户的详细信息
 // @Tags User
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path uint true "用户ID"
+// @Param id path uint true "UID"
 // @Success 200 {object} v1.UserResponse
 // @Router /users/{id} [get]
 // @ID GetUserByID
@@ -208,14 +208,14 @@ func (h *UserHandler) GetProfile(ctx *gin.Context) {
 }
 
 // UpdateProfile godoc
-// @Summary 更新用户
+// @Summary 更新当前用户
 // @Schemes
-// @Description 更新用户信息
+// @Description 更新当前用户的详细信息
 // @Tags User
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param request body v1.UserRequest true "参数"
+// @Param request body v1.UserRequest true "用户数据"
 // @Success 200 {object} v1.Response
 // @Router /users/profile [put]
 // @ID UpdateProfile
@@ -245,7 +245,7 @@ func (h *UserHandler) UpdateProfile(ctx *gin.Context) {
 // UploadAvatar godoc
 // @Summary 上传头像
 // @Schemes
-// @Description 上传用户头像
+// @Description 上传图片来设置或更新当前用户的头像
 // @Tags User
 // @Accept json
 // @Produce json
@@ -301,9 +301,9 @@ func (h *UserHandler) UploadAvatar(ctx *gin.Context) {
 // @Produce json
 // @Security Bearer
 // @Success 200 {object} v1.DynamicMenuResponse
-// @Router /users/menu [get]
-// @ID FetchDynamicMenu
-func (h *UserHandler) GetMenu(ctx *gin.Context) {
+// @Router /users/menus [get]
+// @ID FetchCurrentMenus
+func (h *UserHandler) GetMenus(ctx *gin.Context) {
 	uid := GetUserIdFromCtx(ctx)
 	if uid == 0 {
 		h.logger.WithContext(ctx).Error("GetMenu get uid error")
@@ -311,7 +311,7 @@ func (h *UserHandler) GetMenu(ctx *gin.Context) {
 		return
 	}
 
-	data, err := h.userService.GetMenu(ctx, uid)
+	data, err := h.userService.GetMenuTree(ctx, uid)
 	if err != nil {
 		h.logger.WithContext(ctx).Error("userService.GetMenu error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, gin.H{"error": err.Error()})
@@ -321,7 +321,7 @@ func (h *UserHandler) GetMenu(ctx *gin.Context) {
 }
 
 // Register godoc
-// @Summary 注册
+// @Summary 用户注册
 // @Schemes
 // @Description 目前只支持通过邮箱进行注册
 // @Tags User
@@ -348,9 +348,9 @@ func (h *UserHandler) Register(ctx *gin.Context) {
 }
 
 // Login godoc
-// @Summary 登录
+// @Summary 用户登录
 // @Schemes
-// @Description 支持用户名或邮箱登录
+// @Description 支持 用户名或邮箱 + 密码 进行登录
 // @Tags User
 // @Accept json
 // @Produce json
@@ -372,18 +372,17 @@ func (h *UserHandler) Login(ctx *gin.Context) {
 		v1.HandleError(ctx, http.StatusUnauthorized, v1.ErrUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-
 	v1.HandleSuccess(ctx, tokenPair)
 }
 
 // RefreshToken godoc
 // @Summary 刷新令牌
 // @Schemes
-// @Description 刷新访问令牌和刷新令牌
+// @Description 刷新访问令牌和刷新令牌，采用双Token窗口刷新机制进行滚动
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param request body v1.RefreshTokenRequest true "刷新令牌信息"
+// @Param request body v1.RefreshTokenRequest true "令牌信息"
 // @Success 200 {object} v1.LoginResponse
 // @Router /refresh-token [post]
 // @ID RefreshToken
@@ -407,11 +406,11 @@ func (h *UserHandler) RefreshToken(ctx *gin.Context) {
 // UpdatePassword godoc
 // @Summary 更新密码
 // @Schemes
-// @Description 更新用户密码
+// @Description 使用旧密码来更新密码
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param request body v1.UpdatePasswordRequest true "更新密码信息"
+// @Param request body v1.UpdatePasswordRequest true "密码信息"
 // @Security Bearer
 // @Success 200 {object} v1.Response
 // @Router /users/password [put]
@@ -442,11 +441,11 @@ func (h *UserHandler) UpdatePassword(ctx *gin.Context) {
 // ResetPassword godoc
 // @Summary 重置密码
 // @Schemes
-// @Description 重置用户密码
+// @Description 通过邮箱来进行密码重置
 // @Tags User
 // @Accept json
 // @Produce json
-// @Param request body v1.ResetPasswordRequest true "重置密码信息"
+// @Param request body v1.ResetPasswordRequest true "重置请求的验证信息"
 // @Success 200 {object} v1.Response
 // @Router /reset-password [post]
 // @ID ResetPassword

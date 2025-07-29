@@ -28,7 +28,7 @@ func NewMenuHandler(
 // ListMenus godoc
 // @Summary 获取菜单列表
 // @Schemes
-// @Description 获取所有菜单
+// @Description 搜索时支持名称、路径和可见性字段的筛选
 // @Tags Menu
 // @Accept json
 // @Produce json
@@ -89,12 +89,12 @@ func (h *MenuHandler) CreateMenu(ctx *gin.Context) {
 // UpdateMenu godoc
 // @Summary 更新菜单
 // @Schemes
-// @Description 更新菜单数据
+// @Description 更新指定`ID`的菜单数据
 // @Tags Menu
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path uint true "菜单ID"
+// @Param id path uint true "ID"
 // @Param request body v1.MenuRequest true "菜单数据"
 // @Success 200 {object} v1.Response
 // @Router /admin/menus/{id} [put]
@@ -126,12 +126,12 @@ func (h *MenuHandler) UpdateMenu(ctx *gin.Context) {
 // DeleteMenu godoc
 // @Summary 删除菜单
 // @Schemes
-// @Description 删除指定ID的菜单
+// @Description 删除指定`ID`的菜单
 // @Tags Menu
 // @Accept json
 // @Produce json
 // @Security Bearer
-// @Param id path uint true "菜单ID"
+// @Param id path uint true "ID"
 // @Success 200 {object} v1.Response
 // @Router /admin/menus/{id} [delete]
 // @ID DeleteMenu
