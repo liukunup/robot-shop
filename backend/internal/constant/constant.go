@@ -1,15 +1,27 @@
 package constant
 
 const (
-	AdminRole          = "admin"
-	AdminUserID        = "1"
+	// 展示名称
+	DisplayName = "Robot Shop"
+
+	// 超级管理员
+	AdminRole   = "admin"
+	AdminUserID = "1"
+
+	// 角色标识
+	OperatorRole = "operator"
+	GuestRole    = "guest"
+
+	// 前缀和分隔符
+	RoleResourcePrefix = "role:"
 	MenuResourcePrefix = "menu:"
 	ApiResourcePrefix  = "api:"
 	PermSep            = ","
-	OperatorRole       = "operator"
-	GuestRole          = "guest"
-	DateTimeLayout     = "2006-01-02 15:04:05"
 
+	// 默认的日期时间展示格式
+	DateTimeLayout = "2006-01-02 15:04:05"
+
+	// 重置密码
 	ResetPasswordSubject      = "重置密码"
 	ResetPasswordTextTemplate = `尊敬的%s：
 
@@ -20,11 +32,11 @@ const (
 
 		此链接将在24小时后失效。
 
-		Robot Shop 团队
+		%s 团队
 		`
 
-	// 用户状态
-	UserStatusPending = 0
-	UserStatusActive  = 1
-	UserStatusBanned  = 2
+	// 账号状态
+	UserStatusPending = 0 // 待激活
+	UserStatusActive  = 1 // 正常
+	UserStatusBanned  = 2 // 禁用
 )
