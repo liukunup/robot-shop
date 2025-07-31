@@ -1,0 +1,19 @@
+{{- if .Values.mysql.enabled -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "robotshop.fullname" . }}-mysql
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "robotshop.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.mysql.port }}
+      targetPort: {{ .Values.mysql.port }}
+      protocol: TCP
+      name: mysql
+  selector:
+    {{- include "robotshop.selectorLabels" . | nindent 4 }}
+    component: mysql
+{{- end }}

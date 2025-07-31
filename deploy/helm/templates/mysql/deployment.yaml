@@ -1,0 +1,79 @@
+{{- if .Values.mysql.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "robotshop.fullname" . }}-mysql
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "robotshop.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "robotshop.selectorLabels" . | nindent 6 }}
+      component: mysql
+  template:
+    metadata:
+      labels:
+        {{- include "robotshop.selectorLabels" . | nindent 8 }}
+        component: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
+        imagePullPolicy: {{ .Values.mysql.image.pullPolicy }}
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "robotshop.fullname" . }}-mysql-secrets
+              key: rootPassword
+        - name: MYSQL_DATABASE
+          value: {{ .Values.mysql.database | quote }}
+        - name: MYSQL_USER
+          value: {{ .Values.mysql.user | quote }}
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "robotshop.fullname" . }}-mysql-secrets
+              key: password
+        - name: TZ
+          value: {{ .Values.global.timezone | quote }}
+        ports:
+        - containerPort: {{ .Values.mysql.port }}
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+        - name: mysql-config
+          mountPath: /etc/mysql/conf.d
+        - name: mysql-init
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          {{- toYaml .Values.mysql.resources | nindent 10 }}
+        livenessProbe:
+          exec:
+            command: ["mysqladmin", "ping", "-p$(MYSQL_ROOT_PASSWORD)"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command: ["mysqladmin", "ping", "-p$(MYSQL_ROOT_PASSWORD)"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3
+      {{- if .Values.mysql.persistence.enabled }}
+      volumes:
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: {{ include "robotshop.fullname" . }}-mysql-pvc
+      - name: mysql-config
+        configMap:
+          name: {{ include "robotshop.fullname" . }}-mysql-config
+      - name: mysql-init
+        configMap:
+          name: {{ include "robotshop.fullname" . }}-mysql-init
+      {{- end }}
+{{- end }}

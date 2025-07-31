@@ -1,0 +1,68 @@
+{{- if .Values.redis.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "robotshop.fullname" . }}-redis
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "robotshop.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "robotshop.selectorLabels" . | nindent 6 }}
+      component: redis
+  template:
+    metadata:
+      labels:
+        {{- include "robotshop.selectorLabels" . | nindent 8 }}
+        component: redis
+    spec:
+      containers:
+      - name: redis
+        image: "{{ .Values.redis.image.repository }}:{{ .Values.redis.image.tag }}"
+        imagePullPolicy: {{ .Values.redis.image.pullPolicy }}
+        command: ["redis-server"]
+        args: ["/usr/local/etc/redis/redis.conf", "--requirepass", "$(REDIS_PASSWORD)"]
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "robotshop.fullname" . }}-redis-secrets
+              key: password
+        - name: TZ
+          value: {{ .Values.global.timezone | quote }}
+        ports:
+        - containerPort: {{ .Values.redis.port }}
+        volumeMounts:
+        - name: redis-data
+          mountPath: /data
+        - name: redis-config
+          mountPath: /usr/local/etc/redis/redis.conf
+          subPath: redis.conf
+        resources:
+          {{- toYaml .Values.redis.resources | nindent 10 }}
+        livenessProbe:
+          exec:
+            command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command: ["redis-cli", "-a", "$(REDIS_PASSWORD)", "ping"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 1
+          failureThreshold: 3
+      {{- if .Values.redis.persistence.enabled }}
+      volumes:
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: {{ include "robotshop.fullname" . }}-redis-pvc
+      - name: redis-config
+        configMap:
+          name: {{ include "robotshop.fullname" . }}-redis-config
+      {{- end }}
+{{- end }}

@@ -1,0 +1,57 @@
+# Global settings
+global:
+  namespace: robotshop
+  projectName: robotshop
+  timezone: Asia/Shanghai
+
+# MySQL configuration
+mysql:
+  enabled: true
+  image:
+    repository: mysql
+    tag: 8
+    pullPolicy: IfNotPresent
+  rootPassword: ChangeMe123!
+  database: robotshop
+  user: robotshop
+  password: ChangeMe123!
+  port: 3306
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1"
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: standard
+  configFiles:
+    conf.d: |
+      # MySQL custom configuration
+    initdb: |
+      # Initialization scripts
+
+# Redis configuration
+redis:
+  enabled: true
+  image:
+    repository: redis
+    tag: 7
+    pullPolicy: IfNotPresent
+  password: ChangeMe123!
+  port: 6379
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClass: standard
+  configFile: |
+    # Redis configuration file content

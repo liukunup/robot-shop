@@ -1,0 +1,24 @@
+{{- if .Values.mysql.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "robotshop.fullname" . }}-mysql-config
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "robotshop.labels" . | nindent 4 }}
+data:
+  my.cnf: |
+    {{- .Values.mysql.configFiles.conf.d | nindent 4 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "robotshop.fullname" . }}-mysql-init
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    {{- include "robotshop.labels" . | nindent 4 }}
+data:
+  init.sql: |
+    {{- .Values.mysql.configFiles.initdb | nindent 4 }}
+{{- end }}
