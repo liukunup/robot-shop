@@ -4,6 +4,7 @@ init:
 	go install github.com/golang/mock/mockgen@latest
 	go install github.com/swaggo/swag/cmd/swag@latest
 	go install github.com/go-delve/delve/cmd/dlv@latest
+	go install github.com/go-nunu/nunu@latest
 
 .PHONY: bootstrap
 bootstrap:
