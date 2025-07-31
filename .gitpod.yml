@@ -1,0 +1,44 @@
+image:
+  file: .gitpod.Dockerfile
+
+tasks:
+  - name: Backend (Go)
+    before: |
+      cd ./backend
+    init: |
+      go mod download
+      make init
+
+  - name: Frontend (Ant Design Pro)
+    before: |
+      cd ./frontend
+    init: |
+      npm install
+
+ports:
+  - port: 8000
+    onOpen: ignore
+    name: Backend API
+    description: Backend service running on port 8000
+    visibility: public
+
+  - port: 8001
+    onOpen: open-browser
+    name: Frontend App
+    description: Frontend application running on port 8001
+    visibility: public
+
+vscode:
+  extensions:
+    - golang.go
+    - dbaeumer.vscode-eslint
+    - esbenp.prettier-vscode
+    - mhutchie.git-graph
+    - donjayamanne.githistory
+    - aaron-bond.better-comments
+    - pranaygp.vscode-css-peek
+    - humao.rest-client
+    - vscode-icons-team.vscode-icons
+    - ms-azuretools.vscode-docker
+    - redhat.vscode-yaml
+    - msjsdiag.vscode-react-native
