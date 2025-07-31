@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Tabs, Spin, Form, Input, Button, Upload, message } from "antd";
+import { Tabs, Spin, Form, Input, Button, Upload, Divider, Select, message } from "antd";
 import type { UploadProps, UploadChangeParam, RcFile } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { useModel, useNavigate, useIntl } from '@umijs/max';
@@ -157,6 +157,14 @@ const Profile: React.FC = () => {
       </Form.Item>
 
       <Form.Item
+        label="邮箱"
+        name="email"
+        rules={[{ type: 'email', message: '请输入有效的邮箱地址' }]}
+      >
+        <Input />
+      </Form.Item>
+
+      <Form.Item
         label="手机号"
         name="phone"
         rules={[
@@ -168,11 +176,44 @@ const Profile: React.FC = () => {
       </Form.Item>
 
       <Form.Item
-        label="邮箱"
-        name="email"
-        rules={[{ type: 'email', message: '请输入有效的邮箱地址' }]}
+        label="个人简介"
+        name="bio"
       >
-        <Input />
+        <Input.TextArea rows={4} />
+      </Form.Item>
+
+      <Divider orientation="left" plain>偏好设置</Divider>
+
+      <Form.Item
+        label="语言"
+        name="language"
+      >
+        <Select>
+          <Select.Option value="zh-CN">中文</Select.Option>
+          <Select.Option value="en-US">English</Select.Option>
+        </Select>
+      </Form.Item>
+
+      <Form.Item
+        label="时区"
+        name="timezone"
+      >
+        <Select>
+          <Select.Option value="UTC+8">UTC+8 (中国标准时间)</Select.Option>
+          <Select.Option value="UTC+0">UTC+0 (格林尼治标准时间)</Select.Option>
+          <Select.Option value="UTC-5">UTC-5 (东部标准时间)</Select.Option>
+        </Select>
+      </Form.Item>
+
+      <Form.Item
+        label="主题"
+        name="theme"
+      >
+        <Select>
+          <Select.Option value="light">浅色主题</Select.Option>
+          <Select.Option value="dark">深色主题</Select.Option>
+          <Select.Option value="system">跟随系统</Select.Option>
+        </Select>
       </Form.Item>
 
       <Form.Item>
