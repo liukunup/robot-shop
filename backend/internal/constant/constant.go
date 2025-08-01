@@ -10,13 +10,14 @@ const (
 
 	// 角色标识
 	OperatorRole = "operator"
+	UserRole     = "user"
 	GuestRole    = "guest"
 
-	// 前缀和分隔符
-	RoleResourcePrefix = "role:"
+	// 资源前缀、分隔符、权限
 	MenuResourcePrefix = "menu:"
 	ApiResourcePrefix  = "api:"
 	PermSep            = ","
+	PermRead           = "read"
 
 	// 默认的日期时间展示格式
 	DateTimeLayout = "2006-01-02 15:04:05"
