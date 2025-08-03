@@ -1,14 +1,16 @@
 package repository
 
 import (
-	"context"
 	"backend/pkg/log"
+	"context"
 	"testing"
 	"time"
 
-	"github.com/DATA-DOG/go-sqlmock"
+	"backend/internal/constant"
 	"backend/internal/model"
 	"backend/internal/repository"
+
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -30,9 +32,7 @@ func setupRepository(t *testing.T) (repository.UserRepository, sqlmock.Sqlmock) 
 		t.Fatalf("failed to open gorm connection: %v", err)
 	}
 
-	//rdb, _ := redismock.NewClientMock()
-
-	repo := repository.NewRepository(logger, db)
+	repo := repository.NewRepository(db, nil, nil, nil, nil, logger)
 	userRepo := repository.NewUserRepository(repo)
 
 	return userRepo, mock
@@ -43,18 +43,28 @@ func TestUserRepository_Create(t *testing.T) {
 
 	ctx := context.Background()
 	user := &model.User{
-		Id:        1,
-		UserId:    "123",
-		Nickname:  "Test",
-		Password:  "password",
-		Email:     "test@example.com",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Model: gorm.Model{
+			ID:        10000,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
+		Email:    "test@local.lan",
+		Username: "test",
+		Password: "123456",
+		Avatar:   "https://cravatar.cn/avatar/hash?s=100&d=robohash",
+		Nickname: "Test",
+		Bio:      "It's a test user",
+		Language: "zh-CN",
+		Timezone: "Asia/Shanghai",
+		Theme:    "light",
+		Status:   constant.UserStatusActive,
 	}
 
 	mock.ExpectBegin()
 	mock.ExpectExec("INSERT INTO `users`").
-		WithArgs(user.UserId, user.Nickname, user.Password, user.Email, user.CreatedAt, user.UpdatedAt, user.DeletedAt, user.Id).
+		WithArgs(user.ID, user.Email, user.Username, user.Password, user.Avatar,
+			user.Nickname, user.Bio, user.Language, user.Timezone, user.Theme, user.Status,
+			user.CreatedAt, user.UpdatedAt).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit()
 
@@ -69,13 +79,21 @@ func TestUserRepository_Update(t *testing.T) {
 
 	ctx := context.Background()
 	user := &model.User{
-		Id:        1,
-		UserId:    "123",
-		Nickname:  "Test",
-		Password:  "password",
-		Email:     "test@example.com",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		Model: gorm.Model{
+			ID:        10000,
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
+		Email:    "test@local.lan",
+		Username: "test",
+		Password: "123456",
+		Avatar:   "https://cravatar.cn/avatar/hash?s=100&d=robohash",
+		Nickname: "Test",
+		Bio:      "It's a test user",
+		Language: "zh-CN",
+		Timezone: "Asia/Shanghai",
+		Theme:    "light",
+		Status:   constant.UserStatusActive,
 	}
 
 	mock.ExpectBegin()

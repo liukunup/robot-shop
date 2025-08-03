@@ -14,9 +14,22 @@ bootstrap:
 
 .PHONY: mock
 mock:
-	mockgen -source=internal/service/user.go -destination test/mocks/service/user.go
-	mockgen -source=internal/repository/user.go -destination test/mocks/repository/user.go
-	mockgen -source=internal/repository/repository.go -destination test/mocks/repository/repository.go
+	@# 生成 repository 的 mock
+	@mkdir -p test/mocks/repository
+	@for file in internal/repository/*.go; do \
+		if [ -f "$$file" ]; then \
+			mockgen -source=$$file -destination=test/mocks/repository/$$(basename $$file) || exit 1; \
+			echo "Generated mock repository for $$file"; \
+		fi \
+	done
+	@# 生成 service 的 mock
+	@mkdir -p test/mocks/service
+	@for file in internal/service/*.go; do \
+		if [ -f "$$file" ] && [ "$$file" != "internal/service/service.go" ]; then \
+			mockgen -source=$$file -destination=test/mocks/service/$$(basename $$file) || exit 1; \
+			echo "Generated mock service for $$file"; \
+		fi \
+	done
 
 .PHONY: test
 test:

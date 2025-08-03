@@ -9,7 +9,7 @@ import (
 type RobotRepository interface {
 	Get(ctx context.Context, id uint) (model.Robot, error)
 	List(ctx context.Context, req *v1.RobotSearchRequest) ([]model.Robot, int64, error)
-	Create(ctx context.Context, robot *model.Robot) error
+	Create(ctx context.Context, v *model.Robot) error
 	Update(ctx context.Context, id uint, data map[string]interface{}) error
 	Delete(ctx context.Context, id uint) error
 }
@@ -53,8 +53,8 @@ func (r *robotRepository) List(ctx context.Context, req *v1.RobotSearchRequest) 
 	return list, total, nil
 }
 
-func (r *robotRepository) Create(ctx context.Context, m *model.Robot) error {
-	return r.DB(ctx).Create(m).Error
+func (r *robotRepository) Create(ctx context.Context, v *model.Robot) error {
+	return r.DB(ctx).Create(v).Error
 }
 
 func (r *robotRepository) Update(ctx context.Context, id uint, data map[string]interface{}) error {

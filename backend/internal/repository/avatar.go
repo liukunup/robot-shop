@@ -44,7 +44,7 @@ func (r *avatarStorage) objectName(uid uint, filename string) string {
 
 func (r *avatarStorage) SaveToMinIO(ctx context.Context, req *v1.AvatarRequest, reader io.Reader) (string, error) {
 	// 检查 Bucket 是否存在
-	exists, err := r.m.client.BucketExists(ctx, r.m.bucket)
+	exists, err := r.minio.client.BucketExists(ctx, r.minio.bucket)
 	if err != nil {
 		return "", fmt.Errorf("failed to check bucket existence: %w", err)
 	}
@@ -56,7 +56,7 @@ func (r *avatarStorage) SaveToMinIO(ctx context.Context, req *v1.AvatarRequest, 
 	objectName := r.objectName(req.UserID, req.Filename)
 
 	// 上传文件到 MinIO
-	_, err = r.m.client.PutObject(ctx, r.m.bucket, objectName, reader, req.Size,
+	_, err = r.minio.client.PutObject(ctx, r.minio.bucket, objectName, reader, req.Size,
 		minio.PutObjectOptions{
 			ContentType: req.Type,
 		})
@@ -64,7 +64,7 @@ func (r *avatarStorage) SaveToMinIO(ctx context.Context, req *v1.AvatarRequest, 
 		return "", fmt.Errorf("failed to upload file to MinIO: %w", err)
 	}
 
-	return fmt.Sprintf("%s%s/%s", minioPrefix, r.m.bucket, objectName), nil
+	return fmt.Sprintf("%s%s/%s", minioPrefix, r.minio.bucket, objectName), nil
 }
 
 func (r *avatarStorage) SaveToLocal(ctx context.Context, req *v1.AvatarRequest, reader io.Reader) (string, error) {
@@ -96,7 +96,7 @@ func (r *avatarStorage) GetURL(ctx context.Context, avatar string) (string, erro
 	// MinIO
 	if strings.HasPrefix(avatar, minioPrefix) {
 		noPrefix := strings.TrimPrefix(avatar, minioPrefix)
-		url := fmt.Sprintf("%s%s", r.m.client.EndpointURL(), noPrefix)
+		url := fmt.Sprintf("%s%s", r.minio.client.EndpointURL(), noPrefix)
 		return url, nil
 	}
 

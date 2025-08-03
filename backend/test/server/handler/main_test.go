@@ -1,30 +1,32 @@
 package handler
 
 import (
-	"bytes"
-	"flag"
-	"fmt"
-	"github.com/gavv/httpexpect/v2"
-	"github.com/gin-gonic/gin"
 	"backend/internal/handler"
 	"backend/internal/middleware"
 	"backend/pkg/config"
-	jwt2 "backend/pkg/jwt"
+	jwt_ "backend/pkg/jwt"
 	"backend/pkg/log"
+	"bytes"
+	"context"
+	"flag"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
+
+	"github.com/gavv/httpexpect/v2"
+	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 )
 
 var (
-	userId = "xxx"
+	adminUserID uint = 1
 )
 var logger *log.Logger
 var hdl *handler.Handler
-var jwt *jwt2.JWT
+var jwt *jwt_.JWT
 var router *gin.Engine
 
 func TestMain(m *testing.M) {
@@ -44,7 +46,13 @@ func TestMain(m *testing.M) {
 	logger = log.NewLog(conf)
 	hdl = handler.NewHandler(logger)
 
-	jwt = jwt2.NewJwt(conf)
+	// 创建一个mock的TokenStore
+	ctrl := gomock.NewController(nil)
+	defer ctrl.Finish()
+	mockTokenStore := mock_repository.NewMockTokenStore(ctrl)
+
+	// 正确初始化JWT
+	jwt = jwt_.NewJwt(conf, mockTokenStore)
 	gin.SetMode(gin.TestMode)
 	router = gin.Default()
 	router.Use(
@@ -67,13 +75,14 @@ func performRequest(r http.Handler, method, path string, body *bytes.Buffer) *ht
 	return resp
 }
 
-func genToken(t *testing.T) string {
-	token, err := jwt.GenToken(userId, time.Now().Add(time.Hour*24*90))
+func generateAccessToken(t *testing.T) string {
+	ctx := context.Background()
+	tokenPair, err := jwt.GenerateTokenPair(ctx, adminUserID, "")
 	if err != nil {
 		t.Error(err)
-		return token
+		return ""
 	}
-	return token
+	return tokenPair.AccessToken
 }
 
 func newHttpExcept(t *testing.T, router *gin.Engine) *httpexpect.Expect {

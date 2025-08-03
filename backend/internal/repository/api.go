@@ -9,7 +9,7 @@ import (
 type ApiRepository interface {
 	Get(ctx context.Context, id uint) (model.Api, error)
 	List(ctx context.Context, req *v1.ApiSearchRequest) ([]model.Api, int64, error)
-	Create(ctx context.Context, m *model.Api) error
+	Create(ctx context.Context, v *model.Api) error
 	Update(ctx context.Context, id uint, data map[string]interface{}) error
 	Delete(ctx context.Context, id uint) error
 
@@ -58,10 +58,10 @@ func (r *apiRepository) List(ctx context.Context, req *v1.ApiSearchRequest) ([]m
 	return list, total, nil
 }
 
-func (r *apiRepository) Create(ctx context.Context, m *model.Api) error {
-	return r.DB(ctx).Create(m).Error
+func (r *apiRepository) Create(ctx context.Context, v *model.Api) error {
+	return r.DB(ctx).Create(v).Error
 }
-
+ 
 func (r *apiRepository) Update(ctx context.Context, id uint, data map[string]interface{}) error {
 	return r.DB(ctx).Model(&model.Api{}).Where("id = ?", id).Updates(data).Error
 }

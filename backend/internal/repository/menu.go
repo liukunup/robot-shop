@@ -9,7 +9,7 @@ import (
 type MenuRepository interface {
 	Get(ctx context.Context, id uint) (model.Menu, error)
 	List(ctx context.Context, req *v1.MenuSearchRequest) ([]model.Menu, int64, error)
-	Create(ctx context.Context, m *model.Menu) error
+	Create(ctx context.Context, v *model.Menu) error
 	Update(ctx context.Context, id uint, data map[string]interface{}) error
 	Delete(ctx context.Context, id uint) error
 
@@ -58,8 +58,8 @@ func (r *menuRepository) List(ctx context.Context, req *v1.MenuSearchRequest) ([
 	return list, total, nil
 }
 
-func (r *menuRepository) Create(ctx context.Context, m *model.Menu) error {
-	return r.DB(ctx).Save(m).Error
+func (r *menuRepository) Create(ctx context.Context, v *model.Menu) error {
+	return r.DB(ctx).Save(v).Error
 }
 
 func (r *menuRepository) Update(ctx context.Context, id uint, data map[string]interface{}) error {

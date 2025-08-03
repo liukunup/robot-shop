@@ -12,8 +12,8 @@ import (
 type RoleRepository interface {
 	Get(ctx context.Context, id uint) (model.Role, error)
 	List(ctx context.Context, req *v1.RoleSearchRequest) ([]model.Role, int64, error)
-	Create(ctx context.Context, m *model.Role) error
-	Update(ctx context.Context, m *model.Role) error
+	Create(ctx context.Context, v *model.Role) error
+	Update(ctx context.Context, v *model.Role) error
 	Delete(ctx context.Context, id uint) error
 
 	ListAll(ctx context.Context) ([]model.Role, error)
@@ -62,12 +62,12 @@ func (r *roleRepository) List(ctx context.Context, req *v1.RoleSearchRequest) ([
 	return list, total, nil
 }
 
-func (r *roleRepository) Create(ctx context.Context, m *model.Role) error {
-	return r.DB(ctx).Create(m).Error
+func (r *roleRepository) Create(ctx context.Context, v *model.Role) error {
+	return r.DB(ctx).Create(v).Error
 }
 
-func (r *roleRepository) Update(ctx context.Context, m *model.Role) error {
-	return r.DB(ctx).Model(&model.Role{}).Where("id = ?", m.ID).UpdateColumn("name", m.Name).Error
+func (r *roleRepository) Update(ctx context.Context, v *model.Role) error {
+	return r.DB(ctx).Model(&model.Role{}).Where("id = ?", v.ID).UpdateColumn("name", v.Name).Error
 }
 
 func (r *roleRepository) Delete(ctx context.Context, id uint) error {

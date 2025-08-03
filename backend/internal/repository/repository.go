@@ -29,7 +29,7 @@ type Repository struct {
 	e      *casbin.SyncedEnforcer
 	cache  *ristretto.Cache[string, interface{}]
 	rdb    redis.UniversalClient
-	m      *MinIO
+	minio  *MinIO
 	logger *log.Logger
 }
 
@@ -38,7 +38,7 @@ func NewRepository(
 	e *casbin.SyncedEnforcer,
 	cache *ristretto.Cache[string, interface{}],
 	rdb redis.UniversalClient,
-	m *MinIO,
+	minio *MinIO,
 	logger *log.Logger,
 ) *Repository {
 	return &Repository{
@@ -46,7 +46,7 @@ func NewRepository(
 		e:      e,
 		cache:  cache,
 		rdb:    rdb,
-		m:      m,
+		minio:  minio,
 		logger: logger,
 	}
 }
