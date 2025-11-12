@@ -1,22 +1,23 @@
 package handler
 
 import (
-	"bytes"
-	"flag"
-	"fmt"
-	"github.com/gavv/httpexpect/v2"
-	"github.com/gin-gonic/gin"
 	"backend/internal/handler"
 	"backend/internal/middleware"
 	"backend/pkg/config"
 	jwt2 "backend/pkg/jwt"
 	"backend/pkg/log"
+	"bytes"
+	"context"
+	"flag"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
+
+	"github.com/gavv/httpexpect/v2"
+	"github.com/gin-gonic/gin"
 )
 
 var (
@@ -44,7 +45,7 @@ func TestMain(m *testing.M) {
 	logger = log.NewLog(conf)
 	hdl = handler.NewHandler(logger)
 
-	jwt = jwt2.NewJwt(conf)
+	jwt = jwt2.NewJwt(conf, nil) // 传nil作为TokenStore
 	gin.SetMode(gin.TestMode)
 	router = gin.Default()
 	router.Use(
@@ -68,12 +69,12 @@ func performRequest(r http.Handler, method, path string, body *bytes.Buffer) *ht
 }
 
 func genToken(t *testing.T) string {
-	token, err := jwt.GenToken(userId, time.Now().Add(time.Hour*24*90))
+	tokenPair, err := jwt.GenerateTokenPair(context.Background(), 1, "test-family")
 	if err != nil {
 		t.Error(err)
-		return token
+		return ""
 	}
-	return token
+	return tokenPair.AccessToken
 }
 
 func newHttpExcept(t *testing.T, router *gin.Engine) *httpexpect.Expect {
