@@ -333,7 +333,7 @@ func (h *UserHandler) GetMenu(ctx *gin.Context) {
 // @ID Register
 func (h *UserHandler) Register(ctx *gin.Context) {
 	var req v1.RegisterRequest
-	if err := ctx.ShouldBindJSON(req); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		h.logger.WithContext(ctx).Error("Register bind error", zap.Error(err))
 		v1.HandleError(ctx, http.StatusBadRequest, v1.ErrBadRequest, nil)
 		return
