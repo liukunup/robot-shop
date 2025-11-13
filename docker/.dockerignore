@@ -1,0 +1,52 @@
+# Git 相关
+.git
+.gitignore
+.github
+
+# IDE 相关
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# 文档
+*.md
+LICENSE
+DESIGN.zh-CN.md
+DEV.zh-CN.md
+LLMs.zh-CN.md
+
+# 前端开发文件
+frontend/node_modules
+frontend/.umi
+frontend/.umi-production
+frontend/.umi-test
+frontend/dist
+frontend/coverage
+frontend/.DS_Store
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# 后端开发文件
+backend/bin
+backend/storage/logs
+backend/coverage.out
+backend/coverage.html
+backend/TEST_REPORT*.md
+backend/tmp
+backend/*.db
+
+# 测试文件
+backend/test
+frontend/tests
+
+# 构建和部署相关（除了当前使用的）
+backend/deploy
+deploy/docker-compose
+
+# 临时文件
+*.log
+*.tmp
+.DS_Store

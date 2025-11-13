@@ -1,0 +1,131 @@
+volumes:
+  mysql-data:
+  redis-data:
+  minio-data:
+  robotshop-data:
+
+networks:
+  robotshop:
+    name: ${NETWORK_NAME}
+    driver: bridge
+
+services:
+
+  app:
+    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_NAMESPACE:-robotshop}/robot-shop:${DOCKER_IMAGE_TAG:-latest}
+    container_name: ${COMPOSE_PROJECT_NAME:-robotshop}-app
+    environment:
+      # 应用配置
+      APP_ENV: ${APP_ENV:-prod}
+      ENV: ${APP_ENV:-prod}
+      
+      # 服务配置
+      HTTP_HOST: ${HTTP_HOST:-0.0.0.0}
+      HTTP_PORT: ${HTTP_PORT:-8000}
+      
+      # 时区
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${HTTP_PORT:-8000}:8000"
+    volumes:
+      - app_data:/app/storage
+      # 可选：挂载配置文件
+      # - ../../backend/config/prod.yml:/app/config/prod.yml:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # MySQL 数据库
+  mysql:
+    image: ${DOCKER_REGISTRY:-docker.io}/mysql:${MYSQL_VERSION:-8}
+    container_name: ${COMPOSE_PROJECT_NAME:-robotshop}-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-ChangeMe123!}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-robotshop}
+      MYSQL_USER: ${MYSQL_USER:-robotshop}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-ChangeMe123!}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${MYSQL_HOST_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # 可选：自定义配置
+      # - ./mysql/conf.d:/etc/mysql/conf.d
+      # - ./mysql/initdb:/docker-entrypoint-initdb.d:ro
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max_connections=1000
+      --innodb_buffer_pool_size=512M
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:-ChangeMe123!}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Redis 缓存
+  redis:
+    image: ${DOCKER_REGISTRY:-docker.io}/redis:${REDIS_VERSION:-7-alpine}
+    container_name: ${COMPOSE_PROJECT_NAME:-robotshop}-redis
+    environment:
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    command: >
+      redis-server
+      --requirepass "${REDIS_PASSWORD:-}"
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+      --appendfsync everysec
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
