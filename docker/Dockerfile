@@ -7,7 +7,7 @@ ARG USE_CHINA_MIRROR=true
 # 构建镜像的版本
 ARG NODE_VERSION=22-alpine
 ARG GO_VERSION=1.23-alpine
-ARG ALPINE_VERSION=3.22
+ARG NGINX_VERSION=alpine
 
 
 # 第一阶段：构建前端
@@ -43,7 +43,6 @@ RUN if [ "$USE_CHINA_MIRROR" = "true" ]; then \
 # 构建代码
 WORKDIR /app/backend
 COPY backend/ ./
-COPY --from=frontend-builder /app/frontend/dist ./web/dist
 RUN export CGO_ENABLED=0 && \
     export GOOS=linux && \
     export GOARCH=${TARGETARCH:-amd64} && \
@@ -55,29 +54,26 @@ RUN export CGO_ENABLED=0 && \
 
 
 # 第三阶段：构建运行镜像
-FROM ${REGISTRY}/alpine:${ALPINE_VERSION}
+FROM ${REGISTRY}/nginx:${NGINX_VERSION}
 
-# 安装时区数据和必要的依赖
+# 安装时区数据和必要的依赖（alpine 版本）
 RUN apk add --no-cache tzdata ca-certificates && \
     cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
     echo "Asia/Shanghai" > /etc/timezone && \
     apk del tzdata
 
 WORKDIR /app
-RUN mkdir -p storage/logs config
+RUN mkdir -p storage/logs config /run/nginx /usr/share/nginx/html
 COPY --from=backend-builder /app/backend/bin/server ./server
 COPY --from=backend-builder /app/backend/bin/migration ./migration
+COPY --from=backend-builder /app/backend/bin/task ./task
 COPY --from=backend-builder /app/backend/config/prod.yml ./config/prod.yml
+COPY --from=frontend-builder /app/frontend/dist /usr/share/nginx/html
+COPY docker/nginxconfig/ /etc/nginx/
 COPY docker/scripts/entrypoint.sh ./entrypoint.sh
 
-# 以非root用户运行应用
-RUN addgroup -g 1000 robotshop && \
-    adduser -D -u 1000 -G robotshop robotshop && \
-    chmod +x ./entrypoint.sh && \
-    chown -R robotshop:robotshop /app
+RUN chmod +x ./entrypoint.sh
 
-USER robotshop
-
-EXPOSE 8000
+EXPOSE 80
 
 ENTRYPOINT [ "./entrypoint.sh" ]
