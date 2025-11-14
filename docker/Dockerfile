@@ -7,7 +7,7 @@ ARG USE_CHINA_MIRROR=true
 # 构建镜像的版本
 ARG NODE_VERSION=22-alpine
 ARG GO_VERSION=1.23-alpine
-ARG NGINX_VERSION=alpine
+ARG NGINX_VERSION=1.29-alpine
 
 
 # 第一阶段：构建前端
@@ -46,34 +46,42 @@ COPY backend/ ./
 RUN export CGO_ENABLED=0 && \
     export GOOS=linux && \
     export GOARCH=${TARGETARCH:-amd64} && \
-    mkdir -p bin && \
+    mkdir -p output/bin output/config && \
     go mod download && \
-    go build -ldflags="-s -w" -o ./bin/server ./cmd/server && \
-    go build -ldflags="-s -w" -o ./bin/migration ./cmd/migration && \
-    go build -ldflags="-s -w" -o ./bin/task ./cmd/task
+    go build -ldflags="-s -w" -o ./output/bin/server ./cmd/server && \
+    go build -ldflags="-s -w" -o ./output/bin/migration ./cmd/migration && \
+    go build -ldflags="-s -w" -o ./output/bin/task ./cmd/task && \
+    cp ./config/prod.yml ./output/config/prod.yml
 
 
-# 第三阶段：构建运行镜像
+# 第三阶段:构建运行镜像
 FROM ${REGISTRY}/nginx:${NGINX_VERSION}
 
-# 安装时区数据和必要的依赖（alpine 版本）
-RUN apk add --no-cache tzdata ca-certificates && \
-    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
-    echo "Asia/Shanghai" > /etc/timezone && \
-    apk del tzdata
+RUN apk add --no-cache ca-certificates openssl && \
+    mkdir -p /etc/nginx/ssl && \
+    openssl req -x509 -nodes -newkey rsa:2048 \
+        -keyout /etc/nginx/ssl/server.key \
+        -out /etc/nginx/ssl/server.crt \
+        -days 3650 \
+        -subj "/C=CN/ST=Beijing/L=Beijing/O=/OU=/CN=RobotShop" \
+        -addext "subjectAltName=DNS:localhost" && \
+    openssl dhparam -out /etc/nginx/dhparam.pem 2048 && \
+    cp /etc/nginx/ssl/server.crt /etc/nginx/ssl/fe.local.crt && \
+    cp /etc/nginx/ssl/server.key /etc/nginx/ssl/fe.local.key && \
+    apk del openssl
 
 WORKDIR /app
-RUN mkdir -p storage/logs config /run/nginx /usr/share/nginx/html
-COPY --from=backend-builder /app/backend/bin/server ./server
-COPY --from=backend-builder /app/backend/bin/migration ./migration
-COPY --from=backend-builder /app/backend/bin/task ./task
-COPY --from=backend-builder /app/backend/config/prod.yml ./config/prod.yml
-COPY --from=frontend-builder /app/frontend/dist /usr/share/nginx/html
+RUN mkdir -p storage/logs config /var/www/fe.local/public
+COPY --from=frontend-builder /app/frontend/dist /var/www/fe.local/public
+COPY --from=backend-builder /app/backend/output/ ./
 COPY docker/nginxconfig/ /etc/nginx/
+
+RUN rm -f /etc/nginx/conf.d/default.conf
+
 COPY docker/scripts/entrypoint.sh ./entrypoint.sh
 
 RUN chmod +x ./entrypoint.sh
 
-EXPOSE 80
+EXPOSE 80 443
 
 ENTRYPOINT [ "./entrypoint.sh" ]
