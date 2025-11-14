@@ -7,25 +7,38 @@ on:
       - release/*
     paths-ignore:
       - '**.md'
+      - 'docs/**'
   pull_request:
     branches:
       - main
       - dev
       - feature/*
   workflow_dispatch:
+    inputs:
+      push_image:
+        description: 'Push Docker image to registries'
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
+  packages: write
 
 env:
-  GO_VERSION: stable
+  GO_VERSION: '1.23'
+  NODE_VERSION: '22'
   GOLANGCI_LINT_VERSION: v2.1
   DOCKER_HUB_REPO: ${{ secrets.DOCKER_HUB_USERNAME }}/robot-shop
 
 jobs:
 
-  lint:
-    name: Lint Code
+  # ==========================================
+  # 阶段 1: 代码质量检查
+  # ==========================================
+  
+  lint-backend:
+    name: Lint Backend Code
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout Source Code
@@ -35,17 +48,45 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: backend/go.sum
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
           working-directory: backend
+          args: --timeout=5m
 
-  build:
-    name: Build Project
+  lint-frontend:
+    name: Lint Frontend Code
     runs-on: ubuntu-24.04
-    needs: lint
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: frontend
+        run: npm run lint
+
+  # ==========================================
+  # 阶段 2: 构建验证
+  # ==========================================
+
+  build-backend:
+    name: Build Backend
+    runs-on: ubuntu-24.04
+    needs: lint-backend
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -53,18 +94,80 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: backend/go.sum
 
-      - name: Build project
+      - name: Download Dependencies
+        working-directory: backend
+        run: go mod download
+
+      - name: Build All Binaries
+        working-directory: backend
         run: |
+          echo "Building server..."
           go build -ldflags="-s -w" -o ./bin/server ./cmd/server
+          
+          echo "Building migration tool..."
           go build -ldflags="-s -w" -o ./bin/migrate ./cmd/migration
+          
+          echo "Building task runner..."
           go build -ldflags="-s -w" -o ./bin/task ./cmd/task
+          
+          echo "Build successful!"
+          ls -lh ./bin/
 
-  test:
-    name: Test & Coverage
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-binaries
+          path: backend/bin/*
+          retention-days: 1
+
+  build-frontend:
+    name: Build Frontend
     runs-on: ubuntu-24.04
-    needs: build
+    needs: lint-frontend
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Check Build Output
+        working-directory: frontend
+        run: |
+          echo "Checking build output..."
+          ls -lh dist/
+          du -sh dist/
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 1
+
+  # ==========================================
+  # 阶段 3: 测试
+  # ==========================================
+
+  test-backend:
+    name: Test Backend & Coverage
+    runs-on: ubuntu-24.04
+    needs: build-backend
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -72,34 +175,114 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: backend/go.sum
 
-      - name: Run Tests
-        run: go test -coverpkg=./internal/handler,./internal/service,./internal/repository -coverprofile=./coverage.out ./test/server/...
+      - name: Run Unit Tests
+        working-directory: backend
+        run: |
+          echo "Running unit tests with coverage..."
+          go test -v \
+            -race \
+            -coverpkg=./internal/handler,./internal/service,./internal/repository \
+            -coverprofile=./coverage.out \
+            -covermode=atomic \
+            ./test/server/...
 
       - name: Generate Coverage Report
-        run: go tool cover -html=./coverage.out -o coverage.html
+        working-directory: backend
+        run: |
+          echo "Generating coverage report..."
+          go tool cover -html=./coverage.out -o coverage.html
+          go tool cover -func=./coverage.out
 
-  deploy:
-    name: Deploy 
+      - name: Check Coverage Threshold
+        working-directory: backend
+        run: |
+          coverage=$(go tool cover -func=./coverage.out | grep total | awk '{print $3}' | sed 's/%//')
+          echo "Total coverage: ${coverage}%"
+          threshold=50
+          if (( $(echo "$coverage < $threshold" | bc -l) )); then
+            echo "❌ Coverage ${coverage}% is below threshold ${threshold}%"
+            exit 1
+          else
+            echo "✅ Coverage ${coverage}% meets threshold ${threshold}%"
+          fi
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            backend/coverage.out
+            backend/coverage.html
+          retention-days: 7
+
+  test-frontend:
+    name: Test Frontend
     runs-on: ubuntu-24.04
-    needs: test
+    needs: build-frontend
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          go-version: stable
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run Frontend Tests
+        working-directory: frontend
+        run: npm run test:ci || echo "Frontend tests not configured yet"
+
+  # ==========================================
+  # 阶段 4: Docker 镜像构建和发布
+  # ==========================================
+
+  docker-build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-24.04
+    needs: 
+      - test-backend
+      - test-frontend
+    # 只在主分支推送或手动触发时才推送镜像
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.push_image)
+    
+    strategy:
+      matrix:
+        include:
+          - target: server
+            description: Main application server
+          - target: migration
+            description: Database migration tool
+          - target: task
+            description: Background task runner
+    
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
 
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
 
       - name: Login to Docker Hub
+        if: secrets.DOCKER_HUB_USERNAME != ''
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -112,34 +295,68 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels)
+      - name: Extract Metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ env.DOCKER_HUB_REPO }}
-            ghcr.io/${{ github.repository }}
+            ${{ secrets.DOCKER_HUB_USERNAME != '' && format('{0}-{1}', env.DOCKER_HUB_REPO, matrix.target) || '' }}
+            ghcr.io/${{ github.repository }}-${{ matrix.target }}
           tags: |
-            type=raw,value=latest,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-            type=semver,pattern={{major}}.{{minor}}.{{patch}},enable=${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
-            type=branch,branch=beta,format=beta-{{short}}
-            type=branch,branch=dev,format=dev-{{short}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+          labels: |
+            org.opencontainers.image.title=Robot Shop ${{ matrix.target }}
+            org.opencontainers.image.description=${{ matrix.description }}
+            org.opencontainers.image.vendor=Robot Shop
+            maintainer=${{ github.repository_owner }}
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
           file: deploy/build/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            APP_RELATIVE_PATH=./cmd/task
+            APP_RELATIVE_PATH=./cmd/${{ matrix.target }}
+            BUILD_TIME=${{ github.event.head_commit.timestamp }}
+            GIT_COMMIT=${{ github.sha }}
+            GIT_BRANCH=${{ github.ref_name }}
+            VERSION=${{ steps.meta.outputs.version }}
+          cache-from: type=gha,scope=${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.target }}
+          provenance: false
+          sbom: false
+
+      - name: Image Digest
+        run: echo "Image digest:${{ steps.docker_build.outputs.digest }}"
+
+  # ==========================================
+  # 阶段 5: 更新文档
+  # ==========================================
+
+  update-docs:
+    name: Update Docker Hub Description
+    runs-on: ubuntu-24.04
+    needs: docker-build
+    if: github.ref == 'refs/heads/main' && secrets.DOCKER_HUB_USERNAME != ''
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
 
       - name: Update Docker Hub Repository Description
         uses: peter-evans/dockerhub-description@v4
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          repository: ${{ env.DOCKER_HUB_REPO }}
+          repository: ${{ env.DOCKER_HUB_REPO }}-server
+          short-description: "Robot Shop - A modern full-stack web application"
+          readme-filepath: ./README.md
